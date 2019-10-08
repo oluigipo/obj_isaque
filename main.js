@@ -3,12 +3,11 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const isEvalEnabled = false;
-const specialInvite = 'MbFMYVJ';
-let prefix = '+';
-const roleToAdd = "630917234826543105";
-const roleToAddAnyway = "630936042224222229";
-
-const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051"];
+const specialInvite = 'p9WN6Rx';
+let prefix = "!!";
+const roleToAdd = "585871344718184458";
+const cursoLink = "https://www.udemy.com/course/torne-se-um-desenvolvedor-de-jogos-2d/?couponCode=GM_STUDIO2";
+const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840"];
 
 function isAdmin(_user) {
 	return admins.indexOf(_user.id) !== -1;
@@ -28,6 +27,9 @@ client.on('ready', () => {
 	});
 
 	console.log("Online");
+	client.user.setPresence({ game: { name: "o curso do NoNe!", url: cursoLink, type: 3 }, status: "online" })
+		.then(console.log)
+		.catch(console.error);
 });
 
 client.on('guildMemberAdd', member => {
@@ -37,7 +39,7 @@ client.on('guildMemberAdd', member => {
 		const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
 		//const inviter = invite.inviter.id;
 
-		if (invite.code === specialInvite) {
+		if (invite !== null && invite.code === specialInvite) {
 			member.addRole(roleToAdd);
 		}
 	});
@@ -45,19 +47,36 @@ client.on('guildMemberAdd', member => {
 
 // Comandos
 client.on('message', async msg => {
-	if (msg.content[0] !== prefix) return;
-	const args = msg.content.slice(1, msg.content.length).split(' ');
+	let justMentioned = false;
+	msg.mentions.members.forEach(m => {
+		if (m.id === client.user.id && msg.content.split(' ').length === 1) justMentioned = true;
+	});
+
+	if (justMentioned) {
+		msg.channel.send(`O prefixo atual é \`${prefix}\``);
+		return;
+	}
+
+	// Antes
+	//if (msg.content[0] !== prefix) return;
+
+	// Depois
+	if (msg.content.slice(0, prefix.length) !== prefix) return;
+
+	const args = msg.content.slice(prefix.length, msg.content.length).split(' ');
 	switch (args[0]) {
+		case "curso":
+			msg.channel.send(`${msg.author} Aqui está o link do curso: ${cursoLink}`);
+			break;
 		case "ping":
 			const m = await msg.channel.send("...");
-			m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${client.ping}ms`);
+			m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${Math.round(client.ping)}ms`);
 			break;
-		case "online": msg.channel.send(`${msg.author}, Online!`); break;
-		case "teste": msg.channel.send("Teste"); break;
 		case "setprefix":
 			if (!isAdmin(msg.author)) break;
 			if (args.length < 2) {
 				msg.channel.send(`${msg.author} Essa sintaxe para este comando é inválida.`);
+				break;
 			}
 
 			prefix = args[1];
@@ -74,26 +93,36 @@ client.on('message', async msg => {
 			}
 			break;
 		case "kick":
+			if (args.length < 2) {
+				msg.channel.send(`Uso correto: \`${prefix}kick @user...\``);
+				break;
+			}
+
 			msg.mentions.members.forEach(m => {
 				if (m.kickable) {
 					m.kick();
-					msg.channel.send(`The user ${m.user.username}#${m.user.tag} has been kicked.`).catch(console.error);
+					msg.channel.send(`O usuário ${m.user.tag} foi kickado.`).catch(console.error);
 				} else {
-					msg.channel.send(`Cannot kick ${m.user.username}#${m.user.tag}.`).catch(console.error);
+					msg.channel.send(`Não é possível kickar o usuário ${m.user.tag}.`).catch(console.error);
 				}
 			});
 			break;
 		case "ban":
+			if (args.length < 2) {
+				msg.channel.send(`Uso correto: \`${prefix}ban @user...\``);
+				break;
+			}
+
 			msg.mentions.members.forEach(m => {
 				if (m.kickable) {
 					m.ban();
-					msg.channel.send(`The user ${m.user.username} has been banned.`).catch(console.error);
+					msg.channel.send(`O usuário ${m.user.tag} foi banido.`).catch(console.error);
 				} else {
-					msg.channel.send(`Cannot ban the user ${m.user.username}.`).catch(console.error);
+					msg.channel.send(`Não é possível banir o usuário ${m.user.tag}.`).catch(console.error);
 				}
 			});
 			break;
-		default: msg.channel.send(`${msg.author} Comando desconhecido.`); break;
+		default: msg.channel.send(`${msg.author} Comando desconhecido.`); console.log(args); break;
 	}
 
 });
