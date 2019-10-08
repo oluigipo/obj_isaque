@@ -8,6 +8,7 @@ let prefix = "!!";
 const roleToAdd = "585871344718184458";
 const cursoLink = "https://www.udemy.com/course/torne-se-um-desenvolvedor-de-jogos-2d/?couponCode=GM_STUDIO2";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840"];
+const shitpostChannel = "playground";
 
 function isAdmin(_user) {
 	return admins.indexOf(_user.id) !== -1;
@@ -69,6 +70,7 @@ client.on('message', async msg => {
 			msg.channel.send(`${msg.author} Aqui está o link do curso: ${cursoLink}`);
 			break;
 		case "ping":
+			if (msg.channel.name !== shitpostChannel) break;
 			const m = await msg.channel.send("...");
 			m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${Math.round(client.ping)}ms`);
 			break;
@@ -121,6 +123,12 @@ client.on('message', async msg => {
 					msg.channel.send(`Não é possível banir o usuário ${m.user.tag}.`).catch(console.error);
 				}
 			});
+			break;
+		case "ulon":
+			if (msg.channel.name !== shitpostChannel) break;
+			const qnt = Math.floor(Math.random() * 200 + 2);
+			msg.channel.send("UL" + "O".repeat(qnt) + "N")
+				.catch(console.error); 
 			break;
 		default: msg.channel.send(`${msg.author} Comando desconhecido.`); console.log(args); break;
 	}
