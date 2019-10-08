@@ -13,6 +13,7 @@
         "prism-media": "0.0.3",
         "snekfetch": "3.6.4",
         "tweetnacl": "1.0.1",
+        "util": "^0.12.1",
         "ws": "6.2.1"
     }
 }
