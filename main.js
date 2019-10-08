@@ -16,10 +16,10 @@ function isAdmin(_user) {
 
 const invites = {};
 
-const wait = require('util').promisify(setTimeout);
+//const wait = require('util').promisify(setTimeout);
 
 client.on('ready', () => {
-	wait(1000);
+	//wait(1000);
 
 	client.guilds.forEach(g => {
 		g.fetchInvites().then(guildInvites => {
@@ -95,6 +95,7 @@ client.on('message', async msg => {
 			}
 			break;
 		case "kick":
+			if (!isAdmin(msg.author)) break;
 			if (args.length < 2) {
 				msg.channel.send(`Uso correto: \`${prefix}kick @user...\``);
 				break;
@@ -110,6 +111,7 @@ client.on('message', async msg => {
 			});
 			break;
 		case "ban":
+			if (!isAdmin(msg.author)) break;
 			if (args.length < 2) {
 				msg.channel.send(`Uso correto: \`${prefix}ban @user...\``);
 				break;
@@ -128,7 +130,7 @@ client.on('message', async msg => {
 			if (msg.channel.name !== shitpostChannel) break;
 			const qnt = Math.floor(Math.random() * 200 + 2);
 			msg.channel.send("UL" + "O".repeat(qnt) + "N")
-				.catch(console.error); 
+				.catch(console.error);
 			break;
 		default: msg.channel.send(`${msg.author} Comando desconhecido.`); console.log(args); break;
 	}
