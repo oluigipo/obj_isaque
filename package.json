@@ -2,6 +2,7 @@
   "name": "obj_isaque",
   "description": "Um Bot",
   "version": "1.0.0",
+  "main": "main.js",
   "engines": {
     "node": "10.3.0"
   },
