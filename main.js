@@ -178,7 +178,7 @@ client.on('ready', () => {
 	});
 
 	console.log("Online");
-	client.user.setPresence({ game: { name: "o curso do NoNe!", url: cursoLink, type: 3 }, status: "online" })
+	client.user.setPresence({ game: { name: "o curso do NoNe!", url: discordServer.cursoLink, type: 3 }, status: "online" })
 		.then(console.log)
 		.catch(console.error);
 });
