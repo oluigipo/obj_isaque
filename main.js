@@ -9,14 +9,8 @@ const isEvalEnabled = false;
 const specialInvite = 'p9WN6Rx';
 let prefix = "!!";
 const roleToAdd = "585871344718184458";
-const roleMuted = "568171976556937226";
 const shitpostChannel = "playground";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
-const maxMuteTime = 60 * 60 * 24 * 7 * 2;
-
-function isAdmin(_user) {
-	return admins.indexOf(_user.id) !== -1;
-}
 
 const invites = {};
 
@@ -26,38 +20,8 @@ const wait = require('util').promisify(setTimeout);
 const Commands = {
 	mute: Moderation.mute,
 	unmute: Moderation.unmute,
-	ban: function (msg, args) {
-		if (!isAdmin(msg.author)) return;
-		if (args.length < 2) {
-			msg.channel.send(`Uso correto: \`${prefix}ban @user...\``);
-			return;
-		}
-
-		msg.mentions.members.forEach(m => {
-			if (m.bannable) {
-				m.ban();
-				msg.channel.send(`O usuário ${m.user.tag} foi banido.`).catch(console.error);
-			} else {
-				msg.channel.send(`Não é possível banir o usuário ${m.user.tag}.`).catch(console.error);
-			}
-		});
-	},
-	kick: function (msg, args) {
-		if (!isAdmin(msg.author)) return;
-		if (args.length < 2) {
-			msg.channel.send(`Uso correto: \`${prefix}kick @user...\``);
-			return;
-		}
-
-		msg.mentions.members.forEach(m => {
-			if (m.kickable) {
-				m.kick();
-				msg.channel.send(`O usuário ${m.user.tag} foi kickado.`).catch(console.error);
-			} else {
-				msg.channel.send(`Não é possível kickar o usuário ${m.user.tag}.`).catch(console.error);
-			}
-		});
-	},
+	ban: Moderation.ban,
+	kick: Moderation.kick,
 	/*setprefix: function (msg, args) {
 		if (!isAdmin(msg.author)) return;
 		if (args.length < 2) {
@@ -79,16 +43,16 @@ const Commands = {
 		msg.channel.send("UL" + "O".repeat(qnt) + "N")
 			.catch(console.error);
 	},
-	eval: function (msg, args) {
-		if (!isEvalEnabled || !isAdmin(msg.author)) break;
-		const toEval = args.slice(1, args.length).join(' ');
-		try {
-			const evl = eval(toEval);
-			msg.channel.send(`${msg.author} \`${evl}\``);
-		} catch (e) {
-			msg.channel.send("" + e);
-		}
-	},
+	// eval: function (msg, args) {
+	// 	if (!isEvalEnabled || !isAdmin(msg.author)) break;
+	// 	const toEval = args.slice(1, args.length).join(' ');
+	// 	try {
+	// 		const evl = eval(toEval);
+	// 		msg.channel.send(`${msg.author} \`${evl}\``);
+	// 	} catch (e) {
+	// 		msg.channel.send("" + e);
+	// 	}
+	// },
 	curso: function (msg) {
 		msg.channel.send(`${msg.author} Aqui está o link do curso: ${discordServer.cursoLink}`);
 	}

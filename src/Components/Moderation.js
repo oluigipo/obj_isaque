@@ -83,7 +83,43 @@ function unmute (msg, args) {
     });
 }
 
+function kick (msg, args) {
+    if (!isAdmin(msg.author)) return;
+    if (args.length < 2) {
+        msg.channel.send(`Uso correto: \`${prefix}kick @user...\``);
+        return;
+    }
+
+    msg.mentions.members.forEach(m => {
+        if (m.kickable) {
+            m.kick();
+            msg.channel.send(`O usuário ${m.user.tag} foi kickado.`).catch(console.error);
+        } else {
+            msg.channel.send(`Não é possível kickar o usuário ${m.user.tag}.`).catch(console.error);
+        }
+    });
+}
+
+function ban (msg, args) {
+    if (!isAdmin(msg.author)) return;
+    if (args.length < 2) {
+        msg.channel.send(`Uso correto: \`${prefix}ban @user...\``);
+        return;
+    }
+
+    msg.mentions.members.forEach(m => {
+        if (m.bannable) {
+            m.ban();
+            msg.channel.send(`O usuário ${m.user.tag} foi banido.`).catch(console.error);
+        } else {
+            msg.channel.send(`Não é possível banir o usuário ${m.user.tag}.`).catch(console.error);
+        }
+    });
+}
+
 module.exports = {
     mute,
     unmute,
+    kick,
+    ban
 }
