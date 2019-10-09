@@ -12,7 +12,6 @@ const roleToAdd = "585871344718184458";
 const roleMuted = "568171976556937226";
 const shitpostChannel = "playground";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
-const maxMuteTime = 60 * 60 * 24 * 7 * 2;
 
 function isAdmin(_user) {
 	return admins.indexOf(_user.id) !== -1;
