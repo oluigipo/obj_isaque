@@ -7,7 +7,6 @@ const Moderation = require('./src/Components/Moderation');
 
 const isEvalEnabled = false;
 const specialInvite = 'p9WN6Rx';
-let prefix = "!!";
 const roleToAdd = "585871344718184458";
 const shitpostChannel = "playground";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
@@ -94,13 +93,13 @@ client.on('message', async msg => {
 	});
 
 	if (justMentioned) {
-		msg.channel.send(`O prefixo atual é \`${prefix}\``);
+		msg.channel.send(`O prefixo atual é \`${discordServer.prefix}\``);
 		return;
 	}
 
-	if (msg.content.slice(0, prefix.length) !== prefix) return;
+	if (msg.content.slice(0, discordServer.prefix.length) !== discordServer.prefix) return;
 
-	const args = msg.content.slice(prefix.length, msg.content.length).split(' ');
+	const args = msg.content.slice(discordServer.prefix.length, msg.content.length).split(' ');
 
 	if (Commands[args[0]] === undefined) {
 		msg.channel.send(`${msg.author} Comando desconhecido.`);
