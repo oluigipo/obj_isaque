@@ -1,15 +1,16 @@
 const roleMuted = "568171976556937226";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
 const maxMuteTime = 60 * 60 * 24 * 7 * 2;
+const discordServer = require('./../constants');
 
 function isAdmin(_user) {
     return admins.indexOf(_user.id) !== -1;
 }
 
-function mute (msg, args) {
+function mute(msg, args) {
     if (!isAdmin(msg.author)) return;
-    if (args.length < 2) {
-        msg.channel.send(`Uso correto: \`\`\`\n${prefix}mute @user\n${prefix}mute 30m @user\n${prefix}mute @user1 @user2...\n${prefix}mute 1h @user1 @user2...\n\`\`\``);
+    if (args.length < 2 || msg.mentions.members.array().length === 0) {
+        msg.channel.send(`Uso correto: \`\`\`\n${discordServer.prefix}mute @user\n${discordServer.prefix}mute 30m @user\n${discordServer.prefix}mute @user1 @user2...\n${discordServer.prefix}mute 1h @user1 @user2...\n\`\`\``);
         return;
     }
 
@@ -68,10 +69,10 @@ function mute (msg, args) {
         return s;
     }
 }
-function unmute (msg, args) {
+function unmute(msg, args) {
     if (!isAdmin(msg.author)) return;
     if (args.length < 2) {
-        msg.channel.send(`Uso correto: \`${prefix}unmute @user...\``);
+        msg.channel.send(`Uso correto: \`${discordServer.prefix}unmute @user...\``);
         return;
     }
 
@@ -83,10 +84,10 @@ function unmute (msg, args) {
     });
 }
 
-function kick (msg, args) {
+function kick(msg, args) {
     if (!isAdmin(msg.author)) return;
     if (args.length < 2) {
-        msg.channel.send(`Uso correto: \`${prefix}kick @user...\``);
+        msg.channel.send(`Uso correto: \`${discordServer.prefix}kick @user...\``);
         return;
     }
 
@@ -100,10 +101,10 @@ function kick (msg, args) {
     });
 }
 
-function ban (msg, args) {
+function ban(msg, args) {
     if (!isAdmin(msg.author)) return;
     if (args.length < 2) {
-        msg.channel.send(`Uso correto: \`${prefix}ban @user...\``);
+        msg.channel.send(`Uso correto: \`${discordServer.prefix}ban @user...\``);
         return;
     }
 
