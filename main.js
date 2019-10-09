@@ -2,7 +2,9 @@ const Discord = require('discord.js');
 
 const client = new Discord.Client();
 
-const mainServer = '630891905852506123';
+const discordServer = require('./src/constants');
+
+// const mainServer = '630891905852506123';
 const specialInvite = 'MbFMYVJ';
 const prefix = '+';
 const roleToAdd = "630917234826543105";
@@ -12,7 +14,7 @@ let oldMembersCounter;
 let inviteToCount;
 
 function fiP() {
-	return client.guilds.find(g => g.id === mainServer);
+	return client.guilds.find(g => g.id === discordServer.id/*mainServer*/);
 }
 
 function findInvite(guild) {
