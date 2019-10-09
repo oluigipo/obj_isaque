@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "engines": {
-    "node": "10.3.0"
+    "node": "12.3.1"
   },
   "dependencies": {
         "async-limiter": "1.0.1",
