@@ -1,5 +1,9 @@
 const roleMuted = "568171976556937226";
 
+function isAdmin(_user) {
+    return admins.indexOf(_user.id) !== -1;
+}
+
 function mute (msg, args) {
     if (!isAdmin(msg.author)) return;
     if (args.length < 2) {
@@ -62,7 +66,22 @@ function mute (msg, args) {
         return s;
     }
 }
+function unmute (msg, args) {
+    if (!isAdmin(msg.author)) return;
+    if (args.length < 2) {
+        msg.channel.send(`Uso correto: \`${prefix}unmute @user...\``);
+        return;
+    }
+
+    msg.mentions.members.forEach(m => {
+        if (m.roles.some(a => a.id === roleMuted)) {
+            m.removeRole(roleMuted);
+            msg.channel.send(`O usuário ${m.user.tag} foi desmutado com sucesso.`);
+        }
+    });
+}
 
 module.exports = {
     mute,
+    unmute,
 }

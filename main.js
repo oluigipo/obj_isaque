@@ -25,20 +25,7 @@ const wait = require('util').promisify(setTimeout);
 // Argumentos padrões: (Message, Arguments)
 const Commands = {
 	mute: Moderation.mute,
-	unmute: function (msg, args) {
-		if (!isAdmin(msg.author)) return;
-		if (args.length < 2) {
-			msg.channel.send(`Uso correto: \`${prefix}unmute @user...\``);
-			return;
-		}
-
-		msg.mentions.members.forEach(m => {
-			if (m.roles.some(a => a.id === roleMuted)) {
-				m.removeRole(roleMuted);
-				msg.channel.send(`O usuário ${m.user.tag} foi desmutado com sucesso.`);
-			}
-		});
-	},
+	unmute: Moderation.unmute,
 	ban: function (msg, args) {
 		if (!isAdmin(msg.author)) return;
 		if (args.length < 2) {
