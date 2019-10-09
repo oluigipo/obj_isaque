@@ -11,6 +11,13 @@ let prefix = "!!";
 const roleToAdd = "585871344718184458";
 const shitpostChannel = "playground";
 const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
+<<<<<<< HEAD
+=======
+
+function isAdmin(_user) {
+	return admins.indexOf(_user.id) !== -1;
+}
+>>>>>>> d62dc28d22eefc5e8c726e1521f4c8177bbc217c
 
 const invites = {};
 
