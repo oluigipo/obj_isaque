@@ -4,12 +4,10 @@ const client = new Discord.Client();
 
 const discordServer = require('./src/constants');
 const Moderation = require('./src/Components/Moderation');
+const Utils = require('./src/Components/Utils');
 
-const isEvalEnabled = false;
 const specialInvite = 'p9WN6Rx';
 const roleToAdd = "585871344718184458";
-const shitpostChannel = "playground";
-const admins = ["373670846792990720", "330403904992837632", "412797158622756864", "457020706857943051", "290130764853411840", "141958545397645312"];
 
 const invites = {};
 
@@ -21,40 +19,9 @@ const Commands = {
 	unmute: Moderation.unmute,
 	ban: Moderation.ban,
 	kick: Moderation.kick,
-	/*setprefix: function (msg, args) {
-		if (!isAdmin(msg.author)) return;
-		if (args.length < 2) {
-			msg.channel.send(`${msg.author} Essa sintaxe para este comando é inválida.`);
-			return;
-		}
-
-		prefix = args[1];
-		channel.send(`Prefixo alterado para \`${args[1]}\``);
-	},*/
-	ping: async msg => {
-		if (msg.channel.name !== shitpostChannel) return;
-		const m = await msg.channel.send("...");
-		m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${Math.round(client.ping)}ms`);
-	},
-	ulon: function (msg) {
-		if (msg.channel.name !== shitpostChannel) return;
-		const qnt = Math.floor(Math.random() * 200 + 2);
-		msg.channel.send("UL" + "O".repeat(qnt) + "N")
-			.catch(console.error);
-	},
-	// eval: function (msg, args) {
-	// 	if (!isEvalEnabled || !isAdmin(msg.author)) break;
-	// 	const toEval = args.slice(1, args.length).join(' ');
-	// 	try {
-	// 		const evl = eval(toEval);
-	// 		msg.channel.send(`${msg.author} \`${evl}\``);
-	// 	} catch (e) {
-	// 		msg.channel.send("" + e);
-	// 	}
-	// },
-	curso: function (msg) {
-		msg.channel.send(`${msg.author} Aqui está o link do curso: ${discordServer.cursoLink}`);
-	}
+	ping: Utils.ping,
+	ulon: Micellanious.ulon,
+	curso: Utils.curso,
 };
 
 client.on('ready', () => {
