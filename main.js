@@ -5,6 +5,7 @@ const client = new Discord.Client();
 const discordServer = require('./src/constants');
 const Moderation = require('./src/Components/Moderation');
 const Utils = require('./src/Components/Utils');
+const Micellanious = require('./src/Components/Micellaneous');
 
 const specialInvite = 'p9WN6Rx';
 const roleToAdd = "585871344718184458";
