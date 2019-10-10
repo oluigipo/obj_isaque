@@ -70,6 +70,10 @@ client.on('ready', () => {
 	client.user.setPresence({ game: { name: "o curso do NoNe!", url: discordServer.cursoLink, type: 3 }, status: "online" })
 		.then(console.log)
 		.catch(console.error);
+
+	const minute = 1000 * 60;
+	const curr = Date.now();
+	setTimeout(Moderation.autoUnmute, minute - (curr - Math.floor(curr / minute) * minute), client);
 });
 
 client.on('guildMemberAdd', member => {
