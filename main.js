@@ -23,6 +23,9 @@ const Commands = {
 	ping: Utils.ping,
 	ulon: Micellanious.ulon,
 	curso: Utils.curso,
+	help: Utils.help,
+	emoji: Micellanious.emoji,
+	nonetube: Utils.nonetube
 };
 
 client.on('ready', () => {
