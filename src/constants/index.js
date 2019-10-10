@@ -7,7 +7,6 @@ const shitpostChannel = "playground";
 const cursoLink = "http://bit.ly/35iBP6O";
 
 module.exports = {
-    id,
     specialInvite,
     prefix,
     roleToAdd,

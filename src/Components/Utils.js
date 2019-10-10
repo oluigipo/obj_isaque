@@ -4,7 +4,7 @@ const { shitpostChannel, cursoLink } = discordServer;
 async function ping (msg) {
     if (msg.channel.name !== shitpostChannel) return;
     const m = await msg.channel.send("...");
-    m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${Math.round(client.ping)}ms`);
+    m.edit(`\`Bot Latency:\` ${m.createdTimestamp - msg.createdTimestamp}ms\n\`API Latency:\` ${Math.round(msg.ping)}ms`);
 }
 
 function curso (msg) {
