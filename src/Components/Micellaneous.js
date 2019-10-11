@@ -14,7 +14,7 @@ function emoji(msg, args) {
     }
 
     const e = msg.guild.emojis.find(a => a.name === args[1]);
-    if (e === undefined) {
+    if (e === null) {
         msg.channel.send(`O emoji \`${args[1]}\` é inválido.`);
         return;
     }
