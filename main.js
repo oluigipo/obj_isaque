@@ -41,7 +41,8 @@ const Commands = {
 	eval: Moderation.eval_,
 	rank: Loteria.rank,
 	mendigar: Loteria.mendigar,
-	corrida: Loteria.corrida
+	corrida: Loteria.corrida,
+	bingo: Loteria.bingo
 };
 
 client.on('ready', () => {

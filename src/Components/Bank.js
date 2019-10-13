@@ -38,13 +38,18 @@ const Banco = {
         this.jsonClose();
         return true;
     },
+
+    /**
+     * @returns {number} Retorna 0 se o usuário não estiver registrado, um número menor que 0 cujo será o tempo que falta para poder resgatar de novo se ele ainda não poder resgatar seu prêmio semanal e um número maior que 0 cujo será o valor ganho pelo usuário.
+     * @param {string} userid ID do usuário
+     */
     weekMoney(userid) {
         this.jsonOpen();
         const user = this.json.users.findIndex(a => a.userid === userid);
 
         if (user === -1) {
             this.jsonClose();
-            return -1;
+            return 0;
         }
 
         if (this.json.users[user].last + discordServer.timing.week <= Date.now()) {
@@ -53,8 +58,9 @@ const Banco = {
             this.jsonClose();
             return moneyToWon;
         } else {
+            const falta = -Math.abs(discordServer.timing.week - (Date.now() - this.json.users[user].last));
             this.jsonClose();
-            return 0;
+            return falta;
         }
     },
     /**
@@ -204,11 +210,11 @@ const Banco = {
             this.jsonClose();
             return -2;
         }
+        this.json.users[user].mendigagem = Date.now();
 
         if (Math.random() < 0.5) {
             const m = Math.trunc((Math.random()) * 81 + 20);
             this.json.users[user].money += m;
-            this.json.users[user].mendigagem = Date.now();
             this.jsonClose();
             return m;
         } else {
@@ -316,7 +322,7 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
     const filter = (reaction, user) => reaction.emoji.name === discordServer.yesEmoji && user.id !== msg.client.user.id && Banco.isRegistered(user.id);
     const horseEmoji = '🏇';
     let users = [];
-    msg.channel.send(`${msg.author} A corrida de cavalos iniciará em ${timeToRun} segundos!`)
+    msg.channel.send(`${msg.author} A corrida de cavalos iniciará em ${timeToRun} segundos! A aposta é de \`$${cost}\``)
         .then(message => {
             message.react(discordServer.yesEmoji)
                 .then(() => {
@@ -351,9 +357,9 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
         let horses = [];
 
         let _maxstr = String(users.length).length + 1;
-        let newText = "Participantes escolhidos!\n```";
+        let newText = `Total acumulado: ${cost * users.length}\nParticipantes escolhidos (Total: ${users.length}):\n\`\`\``;
         for (let i = 0; i < users.length; i++) {
-            horses.push({ progress: 0, owner: users[i] });
+            horses.push({ progress: 1, owner: users[i] });
             const member = mymsg.guild.members.find(a => a.id === users[i]);
             newText += `${i + 1 + (' '.repeat(_maxstr - String(i).length))}- ${member.user.tag}\n`;
         }
@@ -383,9 +389,9 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
         let member;
         if (winner > 0) {
             member = message.guild.members.find(a => a.id === horses[winner].owner);
-            newText = [...`Vencedor: ${member.user}\n`, ...newText].join('');
+            newText = `Vencedor: ${member.user}\n` + newText;
         } else {
-            newText = [..."Vencedor: (Ainda em andamento...)\n", ...newText].join('');
+            newText = "Vencedor: (Ainda em andamento...)\n" + newText;
         }
 
         newText += "```";
@@ -395,7 +401,7 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
             else {
                 let moneyWon = horses.length * cost;
                 member = message.guild.members.find(a => a.id === horses[winner].owner);
-                Banco.giveMoney(member, moneyWon);
+                Banco.giveMoney(horses[winner].owner, moneyWon);
                 msg.channel.send(`Parabéns, ${member.user}! Você acaba de ganhar \`$${moneyWon}\`!`);
                 corridaCurrent = false;
             }
@@ -454,10 +460,10 @@ function register(msg) {
 
 function semanal(msg) {
     const result = Banco.weekMoney(msg.author.id);
-    if (result < 0) {
+    if (result === 0) {
         msg.channel.send(`${msg.author} Você não está registrado!`);
-    } else if (result === 0) {
-        msg.channel.send(`${msg.author} Você ainda não pode resgatar o prêmio semanal!`);
+    } else if (result < 0) {
+        msg.channel.send(`${msg.author} Você ainda não pode resgatar o prêmio semanal! Ainda faltam ${formatDate(-result)}.`);
     } else {
         msg.channel.send(`${msg.author} Você resgatou \`$${result}\``);
     }
@@ -688,6 +694,42 @@ function mendigar(msg) {
     }
 }
 
+function formatDate(ms) {
+    let str = [];
+
+    switch (true) {
+        case ms > discordServer.timing.week:
+            const weeks = Math.trunc(ms / discordServer.timing.week);
+            ms = ms % discordServer.timing.week;
+            str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
+        case ms > discordServer.timing.day:
+            const days = Math.trunc(ms / discordServer.timing.day);
+            ms = ms % discordServer.timing.day;
+            str.push(`${days} dia${days > 1 ? 's' : ''}`);
+        case ms > discordServer.timing.hour:
+            const hours = Math.trunc(ms / discordServer.timing.hour);
+            ms = ms % discordServer.timing.hour;
+            str.push(`${hours} hora${hours > 1 ? 's' : ''}`);
+        case ms > discordServer.timing.minute:
+            const minutes = Math.trunc(ms / discordServer.timing.minute);
+            ms = ms % discordServer.timing.minute;
+            str.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+        case ms > discordServer.timing.second:
+            const seconds = Math.trunc(ms / discordServer.timing.second);
+            ms = ms % discordServer.timing.second;
+            str.push(`${seconds} segundo${seconds > 1 ? 's' : ''}`);
+            break;
+    }
+    if (str.length === 0) {
+        return "alguns instantes";
+    }
+
+    let last = str[str.length - 1];
+    str = str.slice(0, str.length - 1);
+    let final = str.join(", ") + " e " + last;
+    return final;
+}
+
 /*
     Função guardada para usos futuros
 function normalizar(msg) {
@@ -701,6 +743,139 @@ function normalizar(msg) {
     Banco.jsonClose();
     msg.channel.send(`Normalizado!`);
 }*/
+
+let globalBingo = -1;
+function bingo(msg, args) {
+    if (globalBingo != -1) {
+        if (globalBingo.check()) {
+            clearInterval(globalBingo.loop);
+            // código de vitória
+            msg.reply("você ganhou!!!");
+        } else {
+            msg.channel.send("você não ganhou :(");
+        }
+    } else {
+        if (!isAdmin(msg.author)) return;
+        if (args.length < 3) {
+            return msg.channel.send("tu ta usando o comando errado :<");
+        }
+        globalBingo = new Bingo(msg, args[1], args[2]);
+        globalBingo.startStep();
+    }
+}
+
+class Bingo {
+    constructor(msg, time, size) {
+        this.generated_nums = [];
+        this.emoji = '✅';
+        this.msg = msg;
+        this.time = time;
+        this.size = size;
+        this.filter = (reaction, user) => reaction.emoji.name === this.emoji && Banco.isRegistered(user.id);
+        this.max = 100;
+        this.init();
+    }
+
+    init() {
+        this.msg.react(this.emoji);
+        let users = [];
+        this.msg.awaitReactions(this.filter, { time: this.time }).then(collected => {
+            collected.forEach(reaction => {
+                reaction.users.forEach(user => { this.msg.client.user.id !== user.id ? users.push(user) : null });
+            });
+            this.entries = this.genEntries(users);
+            this.sendDms();
+        }).catch(console.error);
+    }
+
+    sendDms() {
+        this.entries.forEach(e => {
+            e.user.createDM().then(dm => {
+                dm.send(this.genEntryMessage(e.entry)).then(() => dm.delete());
+            }).catch(console.error);
+        });
+    }
+
+    genEntryMessage(entry) {
+        let msg = "";
+        for (let row = 0; row < this.size; row++) {
+            for (let column = 0; column < this.size; column++) {
+                msg += entry[row][column];
+                msg += " ";
+            }
+            msg += "\n";
+        }
+    }
+
+    genEntries(users) {
+        const entries = [];
+        users.forEach(user => {
+            entries.push({
+                user: user, entry: this.genEntry()
+            });
+        });
+        return entries;
+    }
+
+    genEntry() {
+        let entry = [];
+        for (let row = 0; row < this.size; row++) {
+            entry.push([]);
+            for (let column = 0; column < this.size; column++) {
+                entry[row][column] = this.genNewNumber();
+            }
+        }
+        return entry;
+    }
+
+    startStep() {
+        this.loop = setInterval(() => {
+            this.step();
+        }, 5000);
+    }
+
+    step() {
+        let new_number = this.genNewNumber();
+        while (true) {
+            let x = 0;
+            this.generated_nums.forEach(el => {
+                (new_number == el) ? x++ : null;
+            });
+            if (x == 0) {
+                this.generated_nums.push(new_number);
+                break;
+            }
+            new_number = this.genNewNumber();
+        }
+        this.msg.channel.send(`O próximo número é: ${new_number}`);
+    }
+
+    check(id) {
+        this.entries.forEach(e => {
+            if (e.user.id == id) {
+                let line = 0;
+                for (let row = 0; row < this.size; row++) {
+                    for (let column = 0; column < this.size; column++) {
+                        this.generated_nums.forEach(n => {
+                            if (e.entry[row][column] == n) {
+                                line += 1;
+                            }
+                        });
+                        if (line == this.size) {
+                            return true;
+                        }
+                    }
+                    line = 0;
+                }
+            }
+        });
+        return false;
+    }
+
+    genNewNumber() {
+        return Math.trunc(this.max * Math.random()) + 1;
+    }
+}
 
 module.exports = {
     register,
@@ -717,5 +892,6 @@ module.exports = {
     sorteio,
     rank,
     mendigar,
-    corrida
+    corrida,
+    bingo
 };
