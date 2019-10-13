@@ -486,5 +486,6 @@ module.exports = {
     transfer,
     messages,
     pot,
-    sorteio
+    sorteio,
+    bingo
 };

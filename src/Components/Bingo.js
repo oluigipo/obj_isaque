@@ -1,59 +1,86 @@
-// Nada disso funciona ainda. NÃO TOQUE!
+/*
+ * Este código está guardado para uso futuro.
+ * Ele não funciona.
+ */
 
 function bingo(msg, args) {
-    if (args.length < 1) {
-        msg.channel.send("presiso de um tempo ai po");
-        return;
-    }
-    const time = parseInt(args[0]);
-    if (!time) {
-        msg.channel.send("isso não é um tempo porrar");
-        return;
-    }
-    const users = init_bingo(msg, time);
     if (args.length < 2) {
-        msg.channel.send("presiso do tamanho da cartela po");
-        return;
+        return msg.channel.send("tu ta usando o comando errado :<");
     }
-    const entries = genEntries(users, 5);
-    console.log(entries);
+    const bingo = new Bingo(msg, args[0], args[1]);
 }
 
+class Bingo {
+    constructor(msg, time, size) {
+        this.msg = msg;
+        this.time = time;
+        this.size = size;
+        this.emoji = '✅';
+        this.filter = (reaction, user) => reaction.emoji.name === this.emoji && Banco.isRegistered(user.id);
+        this.max = 100;
+        const users = this.initBingo();
+        this.entries = this.genEntries(users);
+        console.log(this.entries);
+    }
 
-const emoji = '✅';
-
-const filter = (reaction, user) => reaction.emoji.name === emoji && Banco.isRegistered();
-
-function init_bingo(msg, time) {
-    msg.react(emoji);
-    let users = [];
-    let collector = msg.awaitReactions(filter, { time: time })
-    collector.on("end", collected => {
-        collected.forEach(reaction => {
-            reaction.users.forEach(user => { msg.client.user.id !== user.id ? users.push(user.id) : null });
+    initBingo() {
+        this.msg.react(this.emoji);
+        let users = [];
+        let collector = this.msg.createReactionCollector(this.filter, { time: this.time });
+        collector.on("end", collected => {
+            collected.forEach(reaction => {
+                reaction.users.forEach(user => { this.msg.client.user.id !== user.id ? users.push(user) : null });
+            });
+            return users;
         });
-        return users;
-    });
-}
-
-function genEntries(users, size) {
-    const entries = [];
-    users.forEach(user => {
-        entries.push({ id: user, genEntry(size) });
-    });
-    return entries;
-}
-
-const max = 100;
-
-function genEntry(size) {
-    let entry = "";
-    for (let row = 0; i < size; i++) {
-        for (let column = 0; i < size; i++) {
-            entry += Math.trunc(max * Math.random()) + 1;
-            entry += " ";
-        }
-        entry += "\n";
     }
-    return entry;
+
+    // sendDms() {
+    // 	this.entries.forEach(entry => {
+    // 		let dm = entry.user.createDM().catch(console.error);
+    // 		dm.send(this.genEntryMessage(entry.entry));
+    // 		dm.delete();
+    // 	});
+    // }
+
+    // genEntryMessage(entry) {
+    // 	let msg = "";
+    // 	for (let row = 0; row < this.size; i++) {
+    // 		for (let column = 0; column < this.size; i++) {
+    // 			entry[row][column] = Math.trunc(max * Math.random()) + 1;
+    // 		}
+    // 	}
+    // }
+
+    genEntries(users) {
+        const entries = [];
+        users.forEach(user => {
+            entries.push({
+                user: user, entry: this.genEntry()
+            });
+        });
+        return entries;
+    }
+
+    genEntry() {
+        let entry = [];
+        for (let row = 0; row < this.size; i++) {
+            for (let column = 0; column < this.size; i++) {
+                entry[row][column] = Math.trunc(max * Math.random()) + 1;
+            }
+        }
+        return entry;
+    }
+    // genEntry() {
+    // 	let entry = "";
+    // 	for (let row = 0; row < this.size; i++) {
+    // 		for (let column = 0; column < this.size; i++) {
+    // 			entry += Math.trunc(max * Math.random()) + 1;
+    // 			entry += " ";
+    // 		}
+    // 		entry += "\n";
+    // 	}
+    // 	return entry;
+    // }
 }
+

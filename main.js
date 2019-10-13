@@ -6,7 +6,7 @@ const discordServer = require('./src/constants');
 const Moderation = require('./src/Components/Moderation');
 const Utils = require('./src/Components/Utils');
 const Micellanious = require('./src/Components/Micellaneous');
-const Loteria = require("./src/Components/Bank").default;
+const Loteria = require("./src/Components/Bank");
 
 const specialInvite = 'p9WN6Rx';
 const roleToAdd = "585871344718184458";
@@ -38,7 +38,8 @@ const Commands = {
 	sorteio: Loteria.sorteio,
 	messages: Loteria.messages,
 	pot: Loteria.pot,
-	eval: Moderation.eval_
+	eval: Moderation.eval_,
+	bingo: Loteria.bingo
 };
 
 client.on('ready', () => {
