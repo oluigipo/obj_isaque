@@ -6,6 +6,7 @@ const discordServer = require('./src/constants');
 const Moderation = require('./src/Components/Moderation');
 const Utils = require('./src/Components/Utils');
 const Micellanious = require('./src/Components/Micellaneous');
+const Loteria = require("./src/Components/Bank").default;
 
 const specialInvite = 'p9WN6Rx';
 const roleToAdd = "585871344718184458";
@@ -23,10 +24,25 @@ const Commands = {
 	ping: Utils.ping,
 	ulon: Micellanious.ulon,
 	curso: Utils.curso,
+	help: Utils.help,
+	emoji: Micellanious.emoji,
+	nonetube: Utils.nonetube,
+	register: Loteria.register,
+	semanal: Loteria.semanal,
+	punish: Loteria.punish,
+	loteria: Loteria.loteria,
+	bilhete: Loteria.bilhete,
+	resultado: Loteria.resultado,
+	saldo: Loteria.saldo,
+	transfer: Loteria.transfer,
+	sorteio: Loteria.sorteio,
+	messages: Loteria.messages,
+	pot: Loteria.pot,
+	eval: Moderation.eval_
 };
 
 client.on('ready', () => {
-	wait(1000);
+	wait(3000);
 
 	client.guilds.forEach(g => {
 		g.fetchInvites().then(guildInvites => {
@@ -41,7 +57,7 @@ client.on('ready', () => {
 
 	const minute = 1000 * 60;
 	const curr = Date.now();
-	setTimeout(Moderation.autoUnmute, minute - (curr - Math.floor(curr / minute) * minute), client);
+	setTimeout(Moderation.autoUnmute, minute - (curr % minute), client);
 });
 
 client.on('guildMemberAdd', member => {
@@ -69,7 +85,10 @@ client.on('message', async msg => {
 		return;
 	}
 
-	if (msg.content.slice(0, discordServer.prefix.length) !== discordServer.prefix) return;
+	if (msg.content.slice(0, discordServer.prefix.length) !== discordServer.prefix) {
+		if (msg.channel.name === discordServer.shitpostChannel) Loteria.onUserMessage(msg);
+		return;
+	}
 
 	const args = msg.content.slice(discordServer.prefix.length, msg.content.length).split(' ');
 
@@ -82,3 +101,5 @@ client.on('message', async msg => {
 });
 
 client.login('NjMwODkyNjY5Mzg3OTMxNjQ5.XZvwgA.giplHaiI73t62ThkYwMqKygpgIM');
+
+

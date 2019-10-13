@@ -8,15 +8,16 @@ const fs = require('fs');
 function autoUnmute(client) {
     let raw = fs.readFileSync(muteJSON, 'utf8');
     let json = JSON.parse(raw);
+    const now = Date.now();
 
     for (let i = 0; i < json.mutes.length;) {
         const userid = json.mutes[i].userid;
         const duration = json.mutes[i].duration;
         const time = json.mutes[i].time;
-        const now = Date.now();
 
         if (now > time + duration) {
-            const member = client.guilds.find(a => a.id === discordServer.serverID).members.find(a => a.id === userid);
+            const guild = client.guilds.find(a => a.id === discordServer.serverID);
+            const member = guild.members.find(a => a.id === userid);
             if (member) {
                 member.removeRole(roleMuted);
             }
@@ -25,6 +26,7 @@ function autoUnmute(client) {
             continue;
         }
 
+        //console.log("Checked " + i);
         ++i;
     }
 
@@ -42,7 +44,7 @@ function isAdmin(_user) {
 function mute(msg, args) {
     if (!isAdmin(msg.author)) return;
     if (args.length < 2 || msg.mentions.members.array().length === 0) {
-        msg.channel.send(`Uso correto: \`\`\`\n${discordServer.prefix}mute @user\n${discordServer.prefix}mute 30m @user\n${discordServer.prefix}mute @user1 @user2...\n${discordServer.prefix}mute 1h @user1 @user2...\n\`\`\``);
+        msg.channel.send(discordServer.sintaxErrorMessage);
         return;
     }
 
@@ -171,10 +173,29 @@ function ban(msg, args) {
     });
 }
 
+function eval_(msg, args) {
+    if (!(msg.author.id === "373670846792990720" || msg.author.id === "330403904992837632")) return;
+    if (args.length < 2) {
+        msg.channel.send(`${msg.author} Sintaxe incorreta.`);
+        return;
+    }
+
+    const cmd = args.slice(1, args.length).join(' ');
+    let result;
+    try {
+        result = eval(cmd);
+    } catch (e) {
+        result = e;
+    }
+    msg.channel.send(String(result));
+}
+
 module.exports = {
     mute,
     unmute,
     kick,
     ban,
-    autoUnmute
+    autoUnmute,
+    isAdmin,
+    eval_
 }

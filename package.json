@@ -7,13 +7,14 @@
     "node": "12.3.1"
   },
   "dependencies": {
-        "async-limiter": "1.0.1",
-        "discord.js": "11.5.1",
-        "long": "4.0.0",
-        "prism-media": "0.0.3",
-        "snekfetch": "3.6.4",
-        "tweetnacl": "1.0.1",
-        "util": "^0.12.1",
-        "ws": "6.2.1"
-    }
+    "app-root-path": "^2.2.1",
+    "async-limiter": "1.0.1",
+    "discord.js": "^11.5.1",
+    "long": "4.0.0",
+    "prism-media": "0.0.3",
+    "snekfetch": "3.6.4",
+    "tweetnacl": "1.0.1",
+    "util": "^0.12.1",
+    "ws": "6.2.1"
+  }
 }
