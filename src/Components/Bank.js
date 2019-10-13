@@ -346,6 +346,7 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
                     });
                 });
         });
+
     function gameRun(users, mymsg) {
         let horses = [];
 
@@ -371,7 +372,8 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
 
             newText += `${i + 1 + (i < 9 ? ' ' : '  ')}- |`;
             newText += ' '.repeat(duration - horses[i].progress);
-            newText += `${horseEmoji}\n`;
+            newText += `${horseEmoji}`;
+            newText += `${' '.repeat(duration - (duration - horses[i].progress) - 1)}|\n`;
 
             if (horses[i].progress >= duration) {
                 winner = i;
@@ -381,7 +383,7 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
         let member;
         if (winner > 0) {
             member = message.guild.members.find(a => a.id === horses[winner].owner);
-            newText = [...`Vencedor: (${member.user})\n`, ...newText].join('');
+            newText = [...`Vencedor: ${member.user}\n`, ...newText].join('');
         } else {
             newText = [..."Vencedor: (Ainda em andamento...)\n", ...newText].join('');
         }
@@ -400,8 +402,6 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
         });
     }
 }
-
-
 
 // !!corrida maxParticipantes tempoParaComeçar duração aposta
 function corrida(msg, args) {
