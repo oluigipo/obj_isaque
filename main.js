@@ -39,7 +39,7 @@ const Commands = {
 	messages: Loteria.messages,
 	pot: Loteria.pot,
 	eval: Moderation.eval_,
-	bingo: Loteria.bingo
+	rank: Loteria.rank
 };
 
 client.on('ready', () => {
@@ -87,7 +87,7 @@ client.on('message', async msg => {
 	}
 
 	if (msg.content.slice(0, discordServer.prefix.length) !== discordServer.prefix) {
-		if (msg.channel.name === discordServer.shitpostChannel) Loteria.onUserMessage(msg);
+		Loteria.onUserMessage(msg);
 		return;
 	}
 

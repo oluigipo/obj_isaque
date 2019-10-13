@@ -466,12 +466,21 @@ function sorteio(msg, args) {
     sorteioCurrent = new Sorteio(msg, qnt, time);
 }
 
-function rank(msg, args) {
+function rank(msg) {
     Banco.jsonOpen();
-
-    const list = { ...Banco.json };
-
+    const list = [...Banco.json.users];
     Banco.jsonClose();
+
+    list.sort((a, b) => b.money - a.money);
+
+    let text = "Rank de usuários (ordem: Nível de Burguesia):\n```";
+    list.forEach((u, index) => {
+        if (index >= 10) return;
+        const member = msg.guild.members.find(a => a.id === u.userid);
+        text += `${index + 1 + 'º' + (index === 9 ? ' ' : '  ')}- ${member.user.tag}\n`;
+    });
+    text += "```";
+    msg.channel.send(text);
 }
 
 module.exports = {
@@ -487,5 +496,5 @@ module.exports = {
     messages,
     pot,
     sorteio,
-    bingo
+    rank
 };

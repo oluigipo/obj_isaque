@@ -25,7 +25,7 @@ const helpCommands = {
     saldo: `Veja quanto saldo há em sua conta. Uso: \`\`\`${prefix}saldo\n${prefix}saldo @membro\`\`\``,
     transfer: `Transfira dinheiro para outro usuário. Uso: \`\`\`${prefix}transfer quantidade @membro\`\`\``,
     sorteio: `Inicie um sorteio! Um sorteio consiste em entregar uma quantidade de dinheiro (que veio do nada) para algum membro aleatório que reagir a sua mensagem. Uso: \`\`\`${prefix}sorteio quantidade duraçãoEmSegundos\`\`\``,
-    messages: `Veja quantas mensagens lhe falta para receber seu próximo prêmio. A cada 100 mensagens, você recebe uma quantia de dinheiro (mensagens que forem enviadas no #${shitpostChannel} não contaram). Uso: \`\`\`${prefix}messages\n${prefix}messages @member\`\`\``,
+    messages: `Veja quantas mensagens lhe faltam para receber seu próximo prêmio. A cada 100 mensagens, você recebe uma quantia de dinheiro (mensagens que forem enviadas no #${shitpostChannel} não contaram). Uso: \`\`\`${prefix}messages\n${prefix}messages @member\`\`\``,
     pot: `Veja quanto dinheiro está acumulado numa loteria acontecendo agora. Uso: \`\`\`${prefix}pot\`\`\``,
     eval: `Por que está perguntando? Você não irá usá-lo de qualquer maneira! <:Jebaited:575786620368977940>`
 };

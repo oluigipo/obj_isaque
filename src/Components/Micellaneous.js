@@ -24,11 +24,12 @@ function emoji(msg, args) {
     const image = msg.author.avatarURL;
 
     const wh = new WebhookClient("632682130211602432", "DqxkqXbOOK7WZXRjhFx36raoe1UuPQ55I1ZqnPD_YZR-z3ORIubZgKXnxvx5gd4ZkTw9");
-    wh.avatar = image;
     wh.channelID = msg.channel.id;
     wh.name = name;
-    wh.send(`${e}`);
-    wh.destroy();
+    wh.edit(name, image).then(() => {
+        wh.send(`${e}`);
+        wh.destroy();
+    });
 
     msg.delete();
 }
