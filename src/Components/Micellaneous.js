@@ -14,22 +14,19 @@ function emoji(msg, args) {
         return;
     }
 
-    const e = msg.guild.emojis.find(a => a.name.toLowerCase() === args[1].toLowerCase());
-    if (e === null) {
+    const e = msg.guild.emojis.find(a => a.name === args[1]);
+    if (e === null || e === undefined) {
         msg.channel.send(`O emoji \`${args[1]}\` é inválido.`);
         return;
     }
 
-    const name = msg.member.nickname;
+    const name = msg.member.nickname === null ? msg.author.username : msg.member.nickname;
     const image = msg.author.avatarURL;
 
-    const wh = new WebhookClient("632682130211602432", "DqxkqXbOOK7WZXRjhFx36raoe1UuPQ55I1ZqnPD_YZR-z3ORIubZgKXnxvx5gd4ZkTw9");
-    wh.channelID = msg.channel.id;
-    wh.name = name;
-    wh.edit(name, image).then(() => {
-        wh.send(`${e}`);
-        wh.destroy();
-    });
+    msg.channel.createWebhook(name, image)
+        .then(w => {
+            w.send(`${e}`).then(() => w.delete())
+        }).catch(a => msg.channel.send(a));
 
     msg.delete();
 }

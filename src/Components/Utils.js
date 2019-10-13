@@ -28,15 +28,16 @@ function nonetube(msg, args) {
         return;
     }
 
+    let _did = false;
     playlists.forEach((list) => {
-        if (list.name === playlistName) {
+        if (!_did && list.name === playlistName) {
             msg.channel.send(`${msg.author} Aqui está o link do youtube: ${list.link}`);
-            return;
+            _did = true;
         }
     });
+    if (_did) return;
 
     msg.channel.send(`${msg.author} Aqui está o link do youtube: ${youtubeLink}`);
-    return;
 }
 
 function help(msg, args) {

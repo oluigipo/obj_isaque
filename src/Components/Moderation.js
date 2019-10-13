@@ -16,7 +16,7 @@ function autoUnmute(client) {
         const time = json.mutes[i].time;
 
         if (now > time + duration) {
-            const guild = client.guilds.find(a => a.id === discordServer.serverID);
+            const guild = client.guilds.get(discordServer.serverID);
             const member = guild.members.find(a => a.id === userid);
             if (member) {
                 member.removeRole(roleMuted);

@@ -34,7 +34,7 @@ const Banco = {
             this.jsonClose();
             return false;
         }
-        this.json.users.push({ userid: userid, money: 100, messages: 0, last: 0 });
+        this.json.users.push({ userid: userid, money: 100, messages: 0, last: 0, mendigagem: 0 });
         this.jsonClose();
         return true;
     },
@@ -47,7 +47,7 @@ const Banco = {
             return -1;
         }
 
-        if (this.json.users[user].last + weekTime <= Date.now()) {
+        if (this.json.users[user].last + discordServer.timing.week <= Date.now()) {
             this.json.users[user].money += moneyToWon;
             this.json.users[user].last = Date.now();
             this.jsonClose();
@@ -185,6 +185,35 @@ const Banco = {
 
         this.json.users[user].money += qnt;
         this.jsonClose();
+    },
+
+    /**
+     * @returns {number} Retorna -1 se o usuário não está registrado, -2 se ele ainda não pode mendigar de novo, 0 se ele não ganhou nada e um número maior que 0 se o usuário ganhou algo.
+     * @param {string} userid ID do usuário
+     */
+    mendigar(userid) {
+        this.jsonOpen();
+        const user = this.json.users.findIndex(a => a.userid === userid);
+
+        if (user === -1) {
+            this.jsonClose();
+            return -1;
+        }
+
+        if (Date.now() < this.json.users[user].mendigagem) {
+            this.jsonClose();
+            return -2;
+        }
+
+        if (Math.random() < 0.5) {
+            const m = Math.trunc((Math.random()) * 81 + 20);
+            this.json.users[user].money += m;
+            this.jsonClose();
+            return m;
+        } else {
+            this.jsonClose();
+            return 0;
+        }
     }
 };
 
@@ -254,6 +283,19 @@ class Sorteio {
             msg.channel.send(`Parabéns, <@${this.participantes[winner]}>! Você ganhou \`$${this.qnt}\`!`);
             sorteioCurrent = -1;
         });
+    }
+}
+
+class Race {
+
+}
+
+// !!corrida maxParticipantes tempoParaComeçar duração
+function corrida(msg, args) {
+    if (!isAdmin(msg.author)) return;
+    if (args.length < 4) {
+        msg.channel.send(`${msg.author} Sintaxe inválida!`);
+        return;
     }
 }
 
@@ -420,6 +462,12 @@ function transfer(msg, args) {
         return;
     }
     const member = msg.mentions.members.first();
+
+    if (member.id === msg.author.id) {
+        msg.channel.send(`${msg.author} Você tem algum problema por acaso?`);
+        return;
+    }
+
     const result = Banco.transfer(msg.author.id, member.id, qnt);
 
     switch (result) {
@@ -483,6 +531,33 @@ function rank(msg) {
     msg.channel.send(text);
 }
 
+function mendigar(msg) {
+    const result = Banco.mendigar(msg.author.id);
+    if (result === -2) {
+        msg.channel.send(`${msg.author} Você ainda não pode mendigar duas vezes em um dia!`);
+    } else if (result === -1) {
+        msg.channel.send(`${msg.author} Você não está registrado.`);
+    } else if (result === 0) {
+        msg.channel.send(`${msg.author} Infelizmente ninguém quis te doar nada.`);
+    } else {
+        msg.channel.send(`${msg.author} Parabéns! Alguém te doou \`$${result}\`!`);
+    }
+}
+
+/*
+    Função guardada para usos futuros
+function normalizar(msg) {
+    Banco.jsonOpen();
+
+    this.json = Banco.json.users.map(user => {
+        user.mendigagem = 0;
+        return user;
+    });
+
+    Banco.jsonClose();
+    msg.channel.send(`Normalizado!`);
+}*/
+
 module.exports = {
     register,
     semanal,
@@ -496,5 +571,6 @@ module.exports = {
     messages,
     pot,
     sorteio,
-    rank
+    rank,
+    mendigar,
 };

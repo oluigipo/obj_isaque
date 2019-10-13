@@ -39,7 +39,8 @@ const Commands = {
 	messages: Loteria.messages,
 	pot: Loteria.pot,
 	eval: Moderation.eval_,
-	rank: Loteria.rank
+	rank: Loteria.rank,
+	mendigar: Loteria.mendigar
 };
 
 client.on('ready', () => {
