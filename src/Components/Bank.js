@@ -4,9 +4,9 @@ const userData = "./data/usersdata.json";
 const fs = require("fs");
 const moneyToWon = 100;
 const messagesPerMoney = 100;
-const weekTime = 1000 * 60 * 60 * 24 * 7;
 let loteriaCurrent = -1;
 let sorteioCurrent = -1;
+let corridaCurrent = false;
 
 const Banco = {
     json: {},
@@ -200,7 +200,7 @@ const Banco = {
             return -1;
         }
 
-        if (Date.now() < this.json.users[user].mendigagem) {
+        if (this.json.users[user].mendigagem + discordServer.timing.day > Date.now()) {
             this.jsonClose();
             return -2;
         }
@@ -208,12 +208,37 @@ const Banco = {
         if (Math.random() < 0.5) {
             const m = Math.trunc((Math.random()) * 81 + 20);
             this.json.users[user].money += m;
+            this.json.users[user].mendigagem = Date.now();
             this.jsonClose();
             return m;
         } else {
             this.jsonClose();
             return 0;
         }
+    },
+
+    /**
+     * @returns {number} Retorna -1 se o usuário não estiver registrado e -2 caso o usuário não tenha dinheiro o suficiente. Caso contrário retornará 0.
+     * @param {string} userid ID do usuário.
+     * @param {number} cost Custo da corrida.
+     */
+    horseraceJoin(userid, cost) {
+        this.jsonOpen();
+        const user = this.json.users.findIndex(a => a.userid === userid);
+
+        if (user === -1) {
+            this.jsonClose();
+            return -1;
+        }
+
+        if (this.json.users[user].money < cost) {
+            this.jsonClose();
+            return -2;
+        }
+
+        this.json.users[user].money -= cost;
+        this.jsonClose();
+        return 0;
     }
 };
 
@@ -268,10 +293,10 @@ class Loteria {
 
 class Sorteio {
     constructor(msg, qnt, time) {
-        msg.react('✅');
+        msg.react(discordServer.yesEmoji);
         this.participantes = [];
         this.qnt = qnt;
-        const filter = (reaction, user) => reaction.emoji.name === '✅' && Banco.isRegistered(user.id);
+        const filter = (reaction, user) => reaction.emoji.name === discordServer.yesEmoji && Banco.isRegistered(user.id);
         this.collector = msg.createReactionCollector(filter, { time: time });;
         this.collector.on('end', collected => {
             collected.forEach(reaction => {
@@ -286,17 +311,136 @@ class Sorteio {
     }
 }
 
-class Race {
+function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
+    corridaCurrent = true;
+    const filter = (reaction, user) => reaction.emoji.name === discordServer.yesEmoji && user.id !== msg.client.user.id && Banco.isRegistered(user.id);
+    const horseEmoji = '🏇';
+    let users = [];
+    msg.channel.send(`${msg.author} A corrida de cavalos iniciará em ${timeToRun} segundos!`)
+        .then(message => {
+            message.react(discordServer.yesEmoji)
+                .then(() => {
+                    const collector = message.createReactionCollector(filter, { time: timeToRun * 1000 });
+                    collector.on("end", collection => {
+                        collection.forEach(reaction => {
+                            reaction.users.forEach(user => {
+                                if (msg.client.user.id !== user.id && users.length < maxUsers) {
+                                    const result = Banco.horseraceJoin(user.id, cost);
+                                    if (result === -1) {
+                                        msg.channel.send(`${user} Você não está registrado!`);
+                                    } else if (result === -2) {
+                                        msg.channel.send(`${user} Você não tem dinheiro o suficiente para participar desta corrida!`);
+                                    } else {
+                                        users.push(user.id);
+                                    }
+                                }
+                            });
+                        });
 
+                        if (users.length < 2) {
+                            msg.channel.send("Não é possível ter corrida com menos de 2 participantes!");
+                            corridaCurrent = false;
+                        } else {
+                            gameRun(users, message);
+                        }
+                    });
+                });
+        });
+    function gameRun(users, mymsg) {
+        let horses = [];
+
+        let _maxstr = String(users.length).length + 1;
+        let newText = "Participantes escolhidos!\n```";
+        for (let i = 0; i < users.length; i++) {
+            horses.push({ progress: 0, owner: users[i] });
+            const member = mymsg.guild.members.find(a => a.id === users[i]);
+            newText += `${i + 1 + (' '.repeat(_maxstr - String(i).length))}- ${member.user.tag}\n`;
+        }
+        newText += "```";
+        mymsg.edit(newText).then(msg => {
+            msg.channel.send("...").then(message => tick(message, horses));
+        });
+    }
+
+    function tick(message, horses) {
+        let winner = -1;
+        let newText = "Progresso da corrida:```";
+
+        for (let i = 0; i < horses.length; i++) {
+            if (Math.random() < 0.75) horses[i].progress++;
+
+            newText += `${i + 1 + (i < 9 ? ' ' : '  ')}- |`;
+            newText += ' '.repeat(duration - horses[i].progress);
+            newText += `${horseEmoji}\n`;
+
+            if (horses[i].progress >= duration) {
+                winner = i;
+            }
+        }
+
+        let member;
+        if (winner > 0) {
+            member = message.guild.members.find(a => a.id === horses[winner].owner);
+            newText = [...`Vencedor: (${member.user})\n`, ...newText].join('');
+        } else {
+            newText = [..."Vencedor: (Ainda em andamento...)\n", ...newText].join('');
+        }
+
+        newText += "```";
+
+        message.edit(newText).then(msg => {
+            if (winner === -1) setTimeout(tick, discordServer.timing.second, message, horses);
+            else {
+                let moneyWon = horses.length * cost;
+                member = message.guild.members.find(a => a.id === horses[winner].owner);
+                Banco.giveMoney(member, moneyWon);
+                msg.channel.send(`Parabéns, ${member.user}! Você acaba de ganhar \`$${moneyWon}\`!`);
+                corridaCurrent = false;
+            }
+        });
+    }
 }
 
-// !!corrida maxParticipantes tempoParaComeçar duração
+
+
+// !!corrida maxParticipantes tempoParaComeçar duração aposta
 function corrida(msg, args) {
     if (!isAdmin(msg.author)) return;
-    if (args.length < 4) {
+    if (args.length < 5) {
         msg.channel.send(`${msg.author} Sintaxe inválida!`);
         return;
     }
+
+    if (corridaCurrent) {
+        msg.channel.send(`${msg.author} Já existe uma corrida rolando!`);
+        return;
+    }
+
+    const maxUsers = Number(args[1]);
+    if (maxUsers === NaN) {
+        msg.channel.send(`${msg.author} Quantidade máxima de participantes inválida!`);
+        return;
+    }
+
+    const timeToRun = Number(args[2]);
+    if (timeToRun === NaN || timeToRun < 10) {
+        msg.channel.send(`${msg.author} Tempo para começar inválido!`);
+        return;
+    }
+
+    const duration = Number(args[3]);
+    if (duration === NaN || duration < 5) {
+        msg.channel.send(`${msg.author} Duração inválida!`);
+        return;
+    }
+
+    const cost = Number(args[4]);
+    if (cost === NaN || cost < 10) {
+        msg.channel.send(`${msg.author} Aposta inválida!`);
+        return;
+    }
+
+    CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost);
 }
 
 function register(msg) {
@@ -573,4 +717,5 @@ module.exports = {
     sorteio,
     rank,
     mendigar,
+    corrida
 };
