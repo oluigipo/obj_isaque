@@ -1,15 +1,14 @@
-const Discord = require('discord.js');
+import Discord from 'discord.js';
+import * as discordServer from './src/constants';
+
+import {
+	Moderation,
+	Utils,
+	Micellaneous,
+	Loteria,
+} from "./src/components";
 
 const client = new Discord.Client();
-
-const discordServer = require('./src/constants');
-const Moderation = require('./src/Components/Moderation');
-const Utils = require('./src/Components/Utils');
-const Micellanious = require('./src/Components/Micellaneous');
-const Loteria = require("./src/Components/Bank");
-
-const specialInvite = 'p9WN6Rx';
-const roleToAdd = "585871344718184458";
 
 const invites = {};
 
@@ -19,7 +18,7 @@ const wait = require('util').promisify(setTimeout);
 const Commands = {
 	...Moderation,
 	...Utils,
-	...Micellanious,
+	...Micellaneous,
 	...Loteria,
 };
 
@@ -49,8 +48,8 @@ client.on('guildMemberAdd', member => {
 		const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
 		//const inviter = invite.inviter.id;
 
-		if (invite !== null && invite.code === specialInvite) {
-			member.addRole(roleToAdd);
+		if (invite !== null && invite.code === discordServer.specialInvite) {
+			member.addRole(discordServer.roleToAdd);
 		}
 	});
 });
