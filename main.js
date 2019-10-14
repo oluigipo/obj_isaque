@@ -17,32 +17,10 @@ const wait = require('util').promisify(setTimeout);
 
 // Argumentos padrões: (Message, Arguments)
 const Commands = {
-	mute: Moderation.mute,
-	unmute: Moderation.unmute,
-	ban: Moderation.ban,
-	kick: Moderation.kick,
-	ping: Utils.ping,
-	ulon: Micellanious.ulon,
-	curso: Utils.curso,
-	help: Utils.help,
-	emoji: Micellanious.emoji,
-	nonetube: Utils.nonetube,
-	register: Loteria.register,
-	semanal: Loteria.semanal,
-	punish: Loteria.punish,
-	loteria: Loteria.loteria,
-	bilhete: Loteria.bilhete,
-	resultado: Loteria.resultado,
-	saldo: Loteria.saldo,
-	transfer: Loteria.transfer,
-	sorteio: Loteria.sorteio,
-	messages: Loteria.messages,
-	pot: Loteria.pot,
-	eval: Moderation.eval_,
-	rank: Loteria.rank,
-	mendigar: Loteria.mendigar,
-	corrida: Loteria.corrida,
-	bingo: Loteria.bingo
+	...Moderation,
+	...Utils,
+	...Micellanious,
+	...Loteria,
 };
 
 client.on('ready', () => {
@@ -79,6 +57,7 @@ client.on('guildMemberAdd', member => {
 
 // Comandos
 client.on('message', async msg => {
+	if (msg.author.id === client.user.id) return;
 	let justMentioned = false;
 	msg.mentions.members.forEach(m => {
 		if (m.id === client.user.id && msg.content.split(' ').length === 1) justMentioned = true;

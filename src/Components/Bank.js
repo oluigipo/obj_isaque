@@ -7,6 +7,7 @@ const messagesPerMoney = 100;
 let loteriaCurrent = -1;
 let sorteioCurrent = -1;
 let corridaCurrent = false;
+let bingoCurrent = -1;
 
 const Banco = {
     json: {},
@@ -397,7 +398,7 @@ function CorridaDeCavalo(msg, maxUsers, timeToRun, duration, cost) {
         newText += "```";
 
         message.edit(newText).then(msg => {
-            if (winner === -1) setTimeout(tick, discordServer.timing.second, message, horses);
+            if (winner === -1) setTimeout(tick, discordServer.timing.second / 2, message, horses);
             else {
                 let moneyWon = horses.length * cost;
                 member = message.guild.members.find(a => a.id === horses[winner].owner);
@@ -744,136 +745,208 @@ function normalizar(msg) {
     msg.channel.send(`Normalizado!`);
 }*/
 
-let globalBingo = -1;
-function bingo(msg, args) {
-    if (globalBingo != -1) {
-        if (globalBingo.check()) {
-            clearInterval(globalBingo.loop);
-            // código de vitória
-            msg.reply("você ganhou!!!");
-        } else {
-            msg.channel.send("você não ganhou :(");
-        }
-    } else {
-        if (!isAdmin(msg.author)) return;
-        if (args.length < 3) {
-            return msg.channel.send("tu ta usando o comando errado :<");
-        }
-        globalBingo = new Bingo(msg, args[1], args[2]);
-        globalBingo.startStep();
-    }
-}
-
 class Bingo {
-    constructor(msg, time, size) {
-        this.generated_nums = [];
-        this.emoji = '✅';
-        this.msg = msg;
-        this.time = time;
+    constructor(msg, timeToRun, size, prize) {
         this.size = size;
-        this.filter = (reaction, user) => reaction.emoji.name === this.emoji && Banco.isRegistered(user.id);
-        this.max = 100;
-        this.init();
+        this.timeToRun = timeToRun * 1000; // TRansformar em MS, coisa que tu não fez.
+        this.msg = msg;
+        this.prizeval = prize;
+        this.cartelas = [];
+        this.sorteados = [];
+        this.checkWin = "";
+        this.max = 60;
+        this.sorteadosN = [];
+        bingoRun(this);
     }
+    /**
+         * @returns {boolean}
+         */
+    check() {
+        const index = this.cartelas.findIndex(c => c.owner === this.checkWin);
+        let confirm = this.size;
 
-    init() {
-        this.msg.react(this.emoji);
-        let users = [];
-        this.msg.awaitReactions(this.filter, { time: this.time }).then(collected => {
-            collected.forEach(reaction => {
-                reaction.users.forEach(user => { this.msg.client.user.id !== user.id ? users.push(user) : null });
-            });
-            this.entries = this.genEntries(users);
-            this.sendDms();
-        }).catch(console.error);
-    }
-
-    sendDms() {
-        this.entries.forEach(e => {
-            e.user.createDM().then(dm => {
-                dm.send(this.genEntryMessage(e.entry)).then(() => dm.delete());
-            }).catch(console.error);
-        });
-    }
-
-    genEntryMessage(entry) {
-        let msg = "";
-        for (let row = 0; row < this.size; row++) {
-            for (let column = 0; column < this.size; column++) {
-                msg += entry[row][column];
-                msg += " ";
+        for (let i = 0; i < this.cartelas[index].cartela.length; i++) {
+            let confirm2 = this.size;
+            for (let j = 0; j < this.cartelas[index].cartela.length; j++) {
+                if (j === 0) confirm2 = this.size;
+                if (this.sorteados[this.cartelas[index].cartela[i + j * this.size]]) confirm2--;
+                if (confirm2 === 0) return true;
             }
-            msg += "\n";
+            if (i % this.size === 0) confirm = this.size;
+            if (this.sorteados[this.cartelas[index].cartela[i]]) confirm--;
+            if (confirm === 0) return true;
         }
-    }
 
-    genEntries(users) {
-        const entries = [];
-        users.forEach(user => {
-            entries.push({
-                user: user, entry: this.genEntry()
-            });
-        });
-        return entries;
-    }
-
-    genEntry() {
-        let entry = [];
-        for (let row = 0; row < this.size; row++) {
-            entry.push([]);
-            for (let column = 0; column < this.size; column++) {
-                entry[row][column] = this.genNewNumber();
-            }
-        }
-        return entry;
-    }
-
-    startStep() {
-        this.loop = setInterval(() => {
-            this.step();
-        }, 5000);
-    }
-
-    step() {
-        let new_number = this.genNewNumber();
-        while (true) {
-            let x = 0;
-            this.generated_nums.forEach(el => {
-                (new_number == el) ? x++ : null;
-            });
-            if (x == 0) {
-                this.generated_nums.push(new_number);
-                break;
-            }
-            new_number = this.genNewNumber();
-        }
-        this.msg.channel.send(`O próximo número é: ${new_number}`);
-    }
-
-    check(id) {
-        this.entries.forEach(e => {
-            if (e.user.id == id) {
-                let line = 0;
-                for (let row = 0; row < this.size; row++) {
-                    for (let column = 0; column < this.size; column++) {
-                        this.generated_nums.forEach(n => {
-                            if (e.entry[row][column] == n) {
-                                line += 1;
-                            }
-                        });
-                        if (line == this.size) {
-                            return true;
-                        }
-                    }
-                    line = 0;
-                }
-            }
-        });
         return false;
     }
 
-    genNewNumber() {
-        return Math.trunc(this.max * Math.random()) + 1;
+    prize() {
+        return this.prizeval;
+    }
+}
+
+/**
+ * 
+ * @param {Bingo} b 
+ */
+function bingoRun(b) {
+    let gamemsg;
+    let tickCount = 0;
+    let winner = -1;
+    let gameEnd = false;
+    let text;
+    const numberPerTick = 5;
+    const tickRate = 100;
+    initialize();
+    // Gera as paradinhas do bingo (cartelas) e manda as msgs na dm dos users
+    function initialize() {
+        for (let i = 0; i < b.max; i++) {
+            b.sorteados[i] = false;
+        }
+
+        const filter = (reaction, user) => reaction.emoji.name === discordServer.yesEmoji && user.id !== b.msg.client.user.id && Banco.isRegistered(user.id);
+
+        b.msg.channel.send(`${b.msg.author} O bingo iniciará em ${formatDate(b.timeToRun)}! Prêmio: \`${b.prizeval}\``)
+            .then(message => {
+                message.react(discordServer.yesEmoji);
+                const collector = message.createReactionCollector(filter, { time: b.timeToRun });
+                collector.on("end", collection => {
+                    collection.forEach(reaction => {
+                        reaction.users.forEach(user => {
+                            if (user.id === b.msg.client.user.id) return;
+                            if (Banco.isRegistered(user.id)) {
+                                const car = generateCartela();
+                                b.cartelas.push({ owner: user.id, cartela: car });
+
+                                user.createDM()
+                                    .then(dm => {
+                                        dm.send(`${fortmatCartela(car)}`).then(() => { dm.delete(); });
+                                    });
+                            } else {
+                                b.msg.channel.send(`${user} Você não está registrado.`);
+                            }
+                        });
+                    });
+
+                    start();
+                });
+            });
+    }
+
+    /**
+     * 
+     * @param {number[]} cartela 
+     */
+    function fortmatCartela(cartela) {
+        let text = "```";
+        for (let i = 0; i < cartela.length; i++) {
+            if (i % b.size === 0) text += "\n";
+            text += `${cartela[i] + ' '.repeat(3 - String(cartela[i]).length)}`;
+        }
+        text += "\n```";
+        return text;
+    }
+
+    function generateCartela() {
+        let cartela = [];
+        let generated = [];
+
+        for (let i = 0; i < b.size * b.size; i++) {
+            let gen;
+            do {
+                gen = Math.trunc(Math.random() * b.max + 1);
+            } while (generated.some(a => a === gen));
+
+            cartela.push(gen);
+            generated.push(gen);
+        }
+
+        cartela = cartela.sort((a, b) => a > b);
+        return cartela;
+    }
+
+    function start() {
+        const maxSize = String(b.cartelas.length).length;
+        text = "Os participantes são:```";
+        for (let i = 0; i < b.cartelas.length; i++) {
+            const member = b.msg.guild.members.find(a => a.id === b.cartelas[i].owner);
+            text += `${i + 1 + ' '.repeat(maxSize - String(i).length)}- ${member.user.tag}\n`;
+        }
+        text += "```";
+
+        b.msg.channel.send(text).then(message => {
+            gamemsg = message;
+            setTimeout(tick, tickRate);
+        });
+    }
+
+    function tick() {
+        let generateNumber = (tickCount === 0);
+        tickCount = (tickCount + 1) % numberPerTick;
+        console.log(generateNumber);
+
+        if (b.checkWin !== "") {
+            for (let i = 0; i < b.cartelas.length; i++) {
+                if (b.cartelas[i].owner === b.checkWin && b.check(i)) {
+                    gameEnd = true;
+                    winner = i;
+                }
+            }
+            b.checkWin = "";
+        }
+
+        if (generateNumber) {
+            let gen;
+            do {
+                gen = Math.trunc(Math.random() * b.max + 1);
+            } while (b.sorteados[gen]);
+
+            b.sorteados[gen] = true;
+            b.sorteadosN.push(gen);
+        }
+
+        let toEdit = text + `\`\`\`${b.sorteadosN.join(' ')}\`\`\``;
+        gamemsg.edit(toEdit).then(() => {
+            if (gameEnd) {
+                const member = b.msg.guild.members.find(a => a.id === b.cartelas[winner].owner);
+                Banco.giveMoney(b.cartelas[winner].owner, b.prize());
+                gamemsg.channel.send(`${member.user} Parabéns, você ganhou o bingo! Prêmio: \`$${b.prize()}\``);
+                bingoCurrent = -1;
+            } else
+                setTimeout(tick, tickRate);
+        });
+    }
+}
+
+function bingo(msg, args) {
+    if (bingoCurrent !== -1) {
+        bingoCurrent.checkWin = msg.author.id;
+    } else {
+        if (!isAdmin(msg.author)) return;
+        if (args.length < 4) {
+            msg.channel.send(`${msg.author} Sintaxe incorreta!`);
+            return;
+        }
+
+        const timeToRun = Number(args[1]);
+        if (timeToRun === NaN || timeToRun < 0) {
+            msg.channel.send(`${msg.author} Tempo incorreto!`);
+            return;
+        }
+
+        const size = Number(args[2]);
+        if (size === NaN || size < 1) {
+            msg.channel.send(`${msg.author} Tamanho da cartela incorreta!`);
+            return;
+        }
+
+        const prize = Number(args[3]);
+        if (prize === NaN || prize < 5) {
+            msg.channel.send(`${msg.author} Valor do prêmio incorreto!`);
+            return;
+        }
+
+        bingoCurrent = new Bingo(msg, timeToRun, size, prize);
     }
 }
 
