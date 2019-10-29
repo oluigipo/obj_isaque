@@ -2,11 +2,12 @@
   "name": "obj_isaque",
   "description": "Um Bot",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "./build/main.js",
   "engines": {
     "node": "12.3.1"
   },
   "dependencies": {
+    "@types/node": "^12.7.12",
     "app-root-path": "^2.2.1",
     "async-limiter": "1.0.1",
     "discord.js": "^11.5.1",
