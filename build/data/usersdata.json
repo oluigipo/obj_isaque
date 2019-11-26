@@ -1,0 +1,474 @@
+{
+    "users": [
+        {
+            "userid": "373670846792990720",
+            "money": 100,
+            "messages": 8,
+            "last": 1574643962727,
+            "mendigagem": 1574780234576
+        },
+        {
+            "userid": "310480160640073729",
+            "money": 72,
+            "messages": 72,
+            "last": 1570765438803,
+            "mendigagem": 1571329094279
+        },
+        {
+            "userid": "330403904992837632",
+            "money": 0,
+            "messages": 66,
+            "last": 1574696325030,
+            "mendigagem": 1574696320703
+        },
+        {
+            "userid": "290130764853411840",
+            "money": 20461,
+            "messages": 40,
+            "last": 1574647600507,
+            "mendigagem": 1574720269544
+        },
+        {
+            "userid": "457020706857943051",
+            "money": 666,
+            "messages": 43,
+            "last": 1574563373157,
+            "mendigagem": 1574736071084
+        },
+        {
+            "userid": "352923030810263557",
+            "money": 4312,
+            "messages": 56,
+            "last": 1574007062357,
+            "mendigagem": 1574284961830
+        },
+        {
+            "userid": "194463676558737408",
+            "money": 1143,
+            "messages": 3,
+            "last": 1574696271052,
+            "mendigagem": 1574696265799
+        },
+        {
+            "userid": "412797158622756864",
+            "money": 19000,
+            "messages": 52,
+            "last": 1574616768772,
+            "mendigagem": 1574726862604
+        },
+        {
+            "userid": "401365061660180480",
+            "money": 43,
+            "messages": 63,
+            "last": 1570812948097,
+            "mendigagem": 0
+        },
+        {
+            "userid": "338717274032701460",
+            "money": 163,
+            "messages": 13,
+            "last": 1574781509332,
+            "mendigagem": 1574726818142
+        },
+        {
+            "userid": "602986190538539033",
+            "money": 1416,
+            "messages": 34,
+            "last": 1573073080537,
+            "mendigagem": 1571596960700
+        },
+        {
+            "userid": "371389558312402945",
+            "money": 806,
+            "messages": 47,
+            "last": 1573583548778,
+            "mendigagem": 1573583553129
+        },
+        {
+            "userid": "226716226770960385",
+            "money": 912,
+            "messages": 56,
+            "last": 1574618164940,
+            "mendigagem": 1574618169602
+        },
+        {
+            "userid": "275767471342878721",
+            "money": 598,
+            "messages": 31,
+            "last": 1574041161483,
+            "mendigagem": 1574041165150
+        },
+        {
+            "userid": "422503592734490624",
+            "money": 348,
+            "messages": 87,
+            "last": 1574645152371,
+            "mendigagem": 1574736356856
+        },
+        {
+            "userid": "422186769778343946",
+            "money": 767,
+            "messages": 17,
+            "last": 1574563350018,
+            "mendigagem": 1574563341704
+        },
+        {
+            "userid": "390178247230488586",
+            "money": 1319,
+            "messages": 26,
+            "last": 1574195581215,
+            "mendigagem": 1574729259342
+        },
+        {
+            "userid": "408421418368368640",
+            "money": 1,
+            "messages": 3,
+            "last": 1570896855300,
+            "mendigagem": 0
+        },
+        {
+            "userid": "515307625819275298",
+            "money": 2864,
+            "messages": 56,
+            "last": 1574218350602,
+            "mendigagem": 1574726808829
+        },
+        {
+            "userid": "327576484396924929",
+            "money": 1369,
+            "messages": 13,
+            "last": 1574338547233,
+            "mendigagem": 1574546395067
+        },
+        {
+            "userid": "337743401476947978",
+            "money": 400,
+            "messages": 31,
+            "last": 1574121498640,
+            "mendigagem": 0
+        },
+        {
+            "userid": "210434956114132992",
+            "money": 200,
+            "messages": 7,
+            "last": 1572016470681,
+            "mendigagem": 1573067931823
+        },
+        {
+            "userid": "141958545397645312",
+            "money": 597,
+            "messages": 3,
+            "last": 1570990788483,
+            "mendigagem": 1571241399028
+        },
+        {
+            "userid": "371340137893986321",
+            "money": 942,
+            "messages": 0,
+            "last": 1572957132392,
+            "mendigagem": 1573057554342
+        },
+        {
+            "userid": "517020559561719808",
+            "money": 0,
+            "messages": 31,
+            "last": 1573959819616,
+            "mendigagem": 1573959813073
+        },
+        {
+            "userid": "452127944605696001",
+            "money": 540,
+            "messages": 77,
+            "last": 1574617363058,
+            "mendigagem": 1573822634602
+        },
+        {
+            "userid": "408620428471566338",
+            "money": 1074,
+            "messages": 1,
+            "last": 1574601799975,
+            "mendigagem": 1574546387086
+        },
+        {
+            "userid": "191303630685601793",
+            "money": 398,
+            "messages": 64,
+            "last": 1571232415529,
+            "mendigagem": 1571556320091
+        },
+        {
+            "userid": "603989083383136267",
+            "money": 3045,
+            "messages": 50,
+            "last": 1574353962160,
+            "mendigagem": 1574652038661
+        },
+        {
+            "userid": "211139711522177024",
+            "money": 255,
+            "messages": 22,
+            "last": 0,
+            "mendigagem": 1571435053028
+        },
+        {
+            "userid": "346137795804266498",
+            "money": 376,
+            "messages": 55,
+            "last": 1572300638255,
+            "mendigagem": 1572300609271
+        },
+        {
+            "userid": "562734521129238534",
+            "money": 795,
+            "messages": 50,
+            "last": 1573763058793,
+            "mendigagem": 1573683576659
+        },
+        {
+            "userid": "240232493247234050",
+            "money": 100,
+            "messages": 19,
+            "last": 0,
+            "mendigagem": 1571203646375
+        },
+        {
+            "userid": "139032522536255489",
+            "money": 200,
+            "messages": 2,
+            "last": 1571232086996,
+            "mendigagem": 0
+        },
+        {
+            "userid": "549954459652849679",
+            "money": 295,
+            "messages": 9,
+            "last": 1571268450351,
+            "mendigagem": 1571268457474
+        },
+        {
+            "userid": "333813363824132098",
+            "money": 447,
+            "messages": 18,
+            "last": 1572019084892,
+            "mendigagem": 1572360666528
+        },
+        {
+            "userid": "401883497767239680",
+            "money": 328,
+            "messages": 26,
+            "last": 1572448994532,
+            "mendigagem": 1572449005037
+        },
+        {
+            "userid": "452805455178235906",
+            "money": 612,
+            "messages": 58,
+            "last": 1574429607426,
+            "mendigagem": 1574692676640
+        },
+        {
+            "userid": "241461429746663424",
+            "money": 267,
+            "messages": 22,
+            "last": 1571550667009,
+            "mendigagem": 1571667191014
+        },
+        {
+            "userid": "589479580822405132",
+            "money": 200,
+            "messages": 94,
+            "last": 1574617553766,
+            "mendigagem": 1574719703123
+        },
+        {
+            "userid": "302489302045163521",
+            "money": 100,
+            "messages": 0,
+            "last": 0,
+            "mendigagem": 0
+        },
+        {
+            "userid": "632298806800678942",
+            "money": 935,
+            "messages": 29,
+            "last": 1574352726084,
+            "mendigagem": 1574713469534
+        },
+        {
+            "userid": "274947242912120832",
+            "money": 2025,
+            "messages": 4,
+            "last": 1574529136741,
+            "mendigagem": 1574529127162
+        },
+        {
+            "userid": "354367246967111681",
+            "money": 480,
+            "messages": 2,
+            "last": 1571956262573,
+            "mendigagem": 1571956268285
+        },
+        {
+            "userid": "337288954435076107",
+            "money": 241,
+            "messages": 0,
+            "last": 1572230105166,
+            "mendigagem": 1572230097645,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "366665437234331649",
+            "money": 0,
+            "messages": 1,
+            "last": 1572635156281,
+            "mendigagem": 1572804488783,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "269547451877163018",
+            "money": 200,
+            "messages": 0,
+            "last": 1572638256066,
+            "mendigagem": 1572638270393,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "567890452062142474",
+            "money": 200,
+            "messages": 0,
+            "last": 1572656301805,
+            "mendigagem": 1572656382059,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "640651618626437166",
+            "money": 200,
+            "messages": 15,
+            "last": 1573081453198,
+            "mendigagem": 1573081469501,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "537783053393723403",
+            "money": 400,
+            "messages": 85,
+            "last": 1574602708932,
+            "mendigagem": 1574602699129,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "497940292004216832",
+            "money": 199,
+            "messages": 9,
+            "last": 1574285105920,
+            "mendigagem": 1574464168149,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "273633090277212160",
+            "money": 655,
+            "messages": 86,
+            "last": 1574201060513,
+            "mendigagem": 1574700333358,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "478723988928069632",
+            "money": 902,
+            "messages": 66,
+            "last": 1574219091383,
+            "mendigagem": 1574723565291,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "469323639402266685",
+            "money": 639,
+            "messages": 79,
+            "last": 1574460285244,
+            "mendigagem": 1574644390329,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "156863638265790464",
+            "money": 303,
+            "messages": 23,
+            "last": 0,
+            "mendigagem": 1574294642989,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "338394291510444034",
+            "money": 200,
+            "messages": 6,
+            "last": 1574041264744,
+            "mendigagem": 1574200545353,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "452519394212315137",
+            "money": 253,
+            "messages": 88,
+            "last": 1574251392687,
+            "mendigagem": 1574382347913,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "279363131975925761",
+            "money": 200,
+            "messages": 11,
+            "last": 1574616875378,
+            "mendigagem": 0,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "238419774822940673",
+            "money": 200,
+            "messages": 5,
+            "last": 1574713491225,
+            "mendigagem": 1574713486447,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "402573103227600907",
+            "money": 158,
+            "messages": 0,
+            "last": 0,
+            "mendigagem": 1574726866284,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "352948874387783680",
+            "money": 270,
+            "messages": 1,
+            "last": 1574770886867,
+            "mendigagem": 1574770864802,
+            "medalha": 0,
+            "lastMedalha": 0
+        },
+        {
+            "userid": "561322373945622528",
+            "money": 100,
+            "messages": 0,
+            "last": 0,
+            "mendigagem": 0,
+            "medalha": 0,
+            "lastMedalha": 0
+        }
+    ]
+}

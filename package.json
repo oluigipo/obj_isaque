@@ -1,0 +1,15 @@
+{
+  "name": "obj_isaque_updated",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^12.12.14",
+    "discord.js": "^11.5.1"
+  }
+}
