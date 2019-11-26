@@ -62,7 +62,7 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 });
 
 client.on("message", (msg: Message) => {
-    if (msg.author.id === client.user.id || msg.author.bot) return;
+    if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text") return;
     onUserMessage(msg);
     if (msg.content.slice(0, prefix.length) != prefix) return;
 

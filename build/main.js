@@ -56,7 +56,7 @@ client.on("guildMemberAdd", function (member) {
     });
 });
 client.on("message", function (msg) {
-    if (msg.author.id === client.user.id || msg.author.bot)
+    if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text")
         return;
     onUserMessage(msg);
     if (msg.content.slice(0, prefix.length) != prefix)

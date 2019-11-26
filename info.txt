@@ -1,13 +1,12 @@
-// import { Command, Arguments, Server } from "../../definitions";
-// import { Message } from "discord.js";
-
-// export default <Command>{
-//     run: (msg: Message, args: Arguments): void => {
-//     
-//     },
-//     staff: false,
-//     aliases: ["cmd"],
-//     shortHelp: "",
-//     longHelp: "",
-//     example: `${Server.prefix}`
-// };
+import { Command, Arguments, Server } from "../../definitions";
+import { Message } from "discord.js";
+export default <Command>{
+    run: (msg: Message, args: Arguments): void => {
+    
+    },
+    staff: false,
+    aliases: ["cmd"],
+    shortHelp: "",
+    longHelp: "",
+    example: `${Server.prefix}`
+};
