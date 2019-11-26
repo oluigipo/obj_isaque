@@ -20,7 +20,7 @@ export default <Command>{
             return;
         }
 
-        Loteria.setCurrent(new Loteria(Number(args[1])));
+        Loteria.current = new Loteria(Number(args[1]));
         msg.channel.send(`${msg.author} Loteria iniciada!`);
     },
     staff: true,

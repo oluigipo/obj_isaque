@@ -38,9 +38,9 @@ exports.default = {
                 break;
         }
     },
-    staff: true,
+    staff: false,
     aliases: ["transfer", "transferir"],
     shortHelp: "Transfira dinheiro para outro usuário",
     longHelp: "Transfira dinheiro para outro usuário",
-    example: "" + definitions_1.Server.prefix
+    example: definitions_1.Server.prefix + "transfer quantidade @member"
 };

@@ -21,7 +21,7 @@ exports.default = {
         }
         msg.channel.send("Parab\u00E9ns, <@" + result.user + ">! Voc\u00EA acaba de ganhar `$" + result.money + "`!");
         msg.channel.send("Obrigado a todos os outros membros que participaram dessa loteria! Boa sorte na pr\u00F3xima para os outros participantes.");
-        loteria_1.Loteria.setCurrent(-1);
+        loteria_1.Loteria.current = -1;
     },
     staff: true,
     aliases: ["resultado", "result"],

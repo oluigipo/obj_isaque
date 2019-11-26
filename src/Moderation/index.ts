@@ -12,43 +12,45 @@ interface MuteJson {
     mutes: Muted[];
 }
 
-export default {
-    autoUnmute(client: Client): void {
-        let raw: string = fs.readFileSync(Files.mutes, 'utf8');
-        let json: MuteJson = JSON.parse(raw);
-        const now: number = Date.now();
+function autoUnmute(client: Client): void {
+    let raw: string = fs.readFileSync(Files.mutes, 'utf8');
+    let json: MuteJson = JSON.parse(raw);
+    const now: number = Date.now();
 
-        for (let i = 0; i < json.mutes.length;) {
-            const userid = json.mutes[i].userid;
-            const duration = json.mutes[i].duration;
-            const time = json.mutes[i].time;
+    for (let i = 0; i < json.mutes.length;) {
+        const userid = json.mutes[i].userid;
+        const duration = json.mutes[i].duration;
+        const time = json.mutes[i].time;
 
-            if (now > time + duration && duration > 0) {
-                const guild = client.guilds.get(Server.id);
+        if (now > time + duration && duration > 0) {
+            const guild = client.guilds.get(Server.id);
 
-                if (guild == undefined) {
-                    console.error("WTF");
-                    continue;
-                }
-
-                const member = guild.members.find(a => a.id === userid);
-                if (member) {
-                    member.removeRole(Roles.Muted);
-                    member.setMute(false);
-                }
-
-                json.mutes = json.mutes.filter((a, ind) => ind !== i);
+            if (guild == undefined) {
+                console.error("WTF");
                 continue;
             }
 
-            ++i;
+            const member = guild.members.find(a => a.id === userid);
+            if (member) {
+                member.removeRole(Roles.Muted);
+                member.setMute(false);
+            }
+
+            json.mutes = json.mutes.filter((a, ind) => ind !== i);
+            continue;
         }
 
-        const _m = JSON.stringify(json);
-        fs.writeFileSync(Files.mutes, _m);
+        ++i;
+    }
 
-        setTimeout(this.autoUnmute, Time.minute, client);
-    },
+    const _m = JSON.stringify(json);
+    fs.writeFileSync(Files.mutes, _m);
+
+    setTimeout(autoUnmute, Time.minute, client);
+}
+
+export default {
+    autoUnmute,
     unmute(client: Client, userid: string): boolean {
         let raw: string = fs.readFileSync(Files.mutes, 'utf8');
         let json: MuteJson = JSON.parse(raw);

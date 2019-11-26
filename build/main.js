@@ -33,7 +33,7 @@ client.on("ready", function () {
     client.user.setPresence({ game: { name: "o curso do NoNe!", url: "", type: "WATCHING" }, status: "online" })
         .catch(console.error);
     var curr = Date.now();
-    //setTimeout(Moderation.autoUnmute, Time.minute - (curr % Time.minute), client);
+    setTimeout(Moderation_1.default.autoUnmute, definitions_1.Time.minute - (curr % definitions_1.Time.minute), client);
 });
 client.on("guildMemberAdd", function (member) {
     if (member.user.bot) {

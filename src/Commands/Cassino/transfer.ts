@@ -34,9 +34,9 @@ export default <Command>{
             case 1: msg.channel.send(`${msg.author} Você transferiu \`${qnt}\` para ${member.user.tag}!`); break;
         }
     },
-    staff: true,
+    staff: false,
     aliases: ["transfer", "transferir"],
     shortHelp: "Transfira dinheiro para outro usuário",
     longHelp: "Transfira dinheiro para outro usuário",
-    example: `${Server.prefix}`
+    example: `${Server.prefix}transfer quantidade @member`
 };

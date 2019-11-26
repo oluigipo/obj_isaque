@@ -35,7 +35,7 @@ client.on("ready", () => {
         .catch(console.error);
 
     const curr = Date.now();
-    //setTimeout(Moderation.autoUnmute, Time.minute - (curr % Time.minute), client);
+    setTimeout(Moderation.autoUnmute, Time.minute - (curr % Time.minute), client);
 });
 
 client.on("guildMemberAdd", (member: GuildMember) => {

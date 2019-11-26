@@ -19,7 +19,7 @@ export default <Command>{
 
         msg.channel.send(`Parabéns, <@${result.user}>! Você acaba de ganhar \`$${result.money}\`!`);
         msg.channel.send(`Obrigado a todos os outros membros que participaram dessa loteria! Boa sorte na próxima para os outros participantes.`);
-        Loteria.setCurrent(-1);
+        Loteria.current = -1;
     },
     staff: true,
     aliases: ["resultado", "result"],

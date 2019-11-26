@@ -17,7 +17,7 @@ exports.default = {
             msg.channel.send(msg.author + " Pre\u00E7o dos bilhetes inv\u00E1lido!");
             return;
         }
-        loteria_1.Loteria.setCurrent(new loteria_1.Loteria(Number(args[1])));
+        loteria_1.Loteria.current = new loteria_1.Loteria(Number(args[1]));
         msg.channel.send(msg.author + " Loteria iniciada!");
     },
     staff: true,

@@ -1,5 +1,6 @@
 import { Bank } from "./index";
 
+// Não posso dar assign nessa variável fora desse script.
 export let currentLoteria: Loteria | -1 = -1;
 
 export class Loteria {
@@ -9,7 +10,7 @@ export class Loteria {
         this.custo = custo;
     }
 
-    static setCurrent(a: Loteria | -1) {
+    static set current(a: Loteria | -1) {
         currentLoteria = a;
     }
 

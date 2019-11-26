@@ -1,15 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("./index");
+// Não posso dar assign nessa variável fora desse script.
 exports.currentLoteria = -1;
 var Loteria = /** @class */ (function () {
     function Loteria(custo) {
         this.participantes = [];
         this.custo = custo;
     }
-    Loteria.setCurrent = function (a) {
-        exports.currentLoteria = a;
-    };
+    Object.defineProperty(Loteria, "current", {
+        set: function (a) {
+            exports.currentLoteria = a;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @returns {number} Retorna -1 se o usuário já tiver comprado algum bilhete, caso contrário retorna a quantidade de bilhetes compradas
      * @param {string} user
