@@ -116,5 +116,5 @@ export default <Command>{
     aliases: ["velha", "tictactoe"],
     shortHelp: "Jogo da velha apostado",
     longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n---------\n4 | 5 | 6\n---------\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
-    example: `${Server.prefix}velha aposta @member | Chamar um usuário para jogar\n${Server.prefix}velha posição[1-9]   | Marcar uma posição\n${Server.prefix}velha                | Aceitar um convite de jogo\n${Server.prefix}velha table          | Veja como está a partida atual`
+    example: `${Server.prefix}velha aposta @member | Chamar um usuário para jogar\n${Server.prefix}velha posição[1-9]   | Marcar uma posição\n${Server.prefix}velha                | Aceitar um convite de jogo\n${Server.prefix}velha table          | Veja como está a partida atual\n${Server.prefix}velha cancel         | Cancele um convite de jogo ou desista de uma partida (desistir de uma partida não te livrará da aposta!)`
 };

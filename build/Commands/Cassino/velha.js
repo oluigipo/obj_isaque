@@ -113,5 +113,5 @@ exports.default = {
     aliases: ["velha", "tictactoe"],
     shortHelp: "Jogo da velha apostado",
     longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n---------\n4 | 5 | 6\n---------\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
-    example: definitions_1.Server.prefix + "velha aposta @member | Chamar um usu\u00E1rio para jogar\n" + definitions_1.Server.prefix + "velha posi\u00E7\u00E3o[1-9]   | Marcar uma posi\u00E7\u00E3o\n" + definitions_1.Server.prefix + "velha                | Aceitar um convite de jogo\n" + definitions_1.Server.prefix + "velha table          | Veja como est\u00E1 a partida atual"
+    example: definitions_1.Server.prefix + "velha aposta @member | Chamar um usu\u00E1rio para jogar\n" + definitions_1.Server.prefix + "velha posi\u00E7\u00E3o[1-9]   | Marcar uma posi\u00E7\u00E3o\n" + definitions_1.Server.prefix + "velha                | Aceitar um convite de jogo\n" + definitions_1.Server.prefix + "velha table          | Veja como est\u00E1 a partida atual\n" + definitions_1.Server.prefix + "velha cancel         | Cancele um convite de jogo ou desista de uma partida (desistir de uma partida n\u00E3o te livrar\u00E1 da aposta!)"
 };
