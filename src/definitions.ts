@@ -54,7 +54,7 @@ export const CommonMessages = {
 };
 
 // Functions
-export function formatDate(ms: number) {
+export function formatDate(ms: number): string {
     let str: string[] = [];
 
     switch (true) {

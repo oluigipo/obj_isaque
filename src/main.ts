@@ -64,7 +64,13 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 client.on("message", (msg: Message) => {
     if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text") return;
     onUserMessage(msg);
-    if (msg.content.slice(0, prefix.length) != prefix) return;
+    if (msg.content.slice(0, prefix.length) != prefix) {
+        let m = msg.mentions.members.first();
+        if (m !== undefined && m.user.id === client.user.id && msg.content[msg.content.length - 1] === '?') {
+            msg.channel.send(`${msg.author} ${Math.random() >= 0.5 ? "Sim" : "Não"}`);
+        }
+        return;
+    }
 
     const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ');
     const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0]));

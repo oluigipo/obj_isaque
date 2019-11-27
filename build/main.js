@@ -59,8 +59,13 @@ client.on("message", function (msg) {
     if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text")
         return;
     onUserMessage(msg);
-    if (msg.content.slice(0, prefix.length) != prefix)
+    if (msg.content.slice(0, prefix.length) != prefix) {
+        var m = msg.mentions.members.first();
+        if (m !== undefined && m.user.id === client.user.id && msg.content[msg.content.length - 1] === '?') {
+            msg.channel.send(msg.author + " " + (Math.random() >= 0.5 ? "Sim" : "Não"));
+        }
         return;
+    }
     var args = msg.content.slice(prefix.length, msg.content.length).split(' ');
     var run = Commands_1.default.find(function (v) { return v.aliases.includes(args[0]); });
     if (run == undefined || (run.staff && !Moderation_1.default.isAdmin(msg.member)))
