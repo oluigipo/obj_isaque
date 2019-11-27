@@ -8,6 +8,7 @@ var definitions_1 = require("./definitions");
 var Cassino_1 = require("./Cassino");
 var Moderation_1 = __importDefault(require("./Moderation"));
 var Commands_1 = __importDefault(require("./Commands"));
+var fs_1 = __importDefault(require("fs"));
 var wait = require('util').promisify(setTimeout);
 var client = new discord_js_1.Client();
 var invites = {};
@@ -66,10 +67,11 @@ client.on("message", function (msg) {
         }
         return;
     }
-    var args = msg.content.slice(prefix.length, msg.content.length).split(' ');
+    var content = msg.content.toLowerCase();
+    var args = content.slice(prefix.length, content.length).split(' ');
     var run = Commands_1.default.find(function (v) { return v.aliases.includes(args[0]); });
     if (run == undefined || (run.staff && !Moderation_1.default.isAdmin(msg.member)))
         return;
     run.run(msg, args);
 });
-client.login('NjMwODkyNjY5Mzg3OTMxNjQ5.XZvwgA.giplHaiI73t62ThkYwMqKygpgIM');
+client.login(fs_1.default.readFileSync("./botkey.txt", "utf8"));

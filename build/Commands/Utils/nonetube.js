@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var definitions_1 = require("../../definitions");
+// Variáveis que serão usadas só nesse comando
 var playlists = {
     "primeiro-jogo": "https://www.youtube.com/watch?v=lak9iTwvN8Q&list=PLKTRv0drNjJ-6bglGqfgBe7YlCstCa2wx",
     rpg: "https://www.youtube.com/watch?v=WvbqpY9CsR8&list=PLKTRv0drNjJ8zkzW9IeJknzDi6E5kjlwL",
@@ -9,6 +10,7 @@ var playlists = {
     animacao: "https://www.youtube.com/watch?v=dIQ_SIXzpzk&list=PLKTRv0drNjJ8KpDQcJu1kKHG8igpb6hjn",
     tiro: "https://www.youtube.com/watch?v=TOX9goFTqes&list=PLKTRv0drNjJ_aA8ft5-y8Ok2wJfY4n4vj"
 };
+// Comando
 exports.default = {
     run: function (msg, args) {
         var link = "https://www.youtube.com/channel/UCHJPSW9FgSoXGVFV489XXag";

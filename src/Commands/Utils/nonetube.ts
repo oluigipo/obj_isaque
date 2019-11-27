@@ -1,6 +1,7 @@
 import { Command, Arguments, CommonMessages, Server } from "../../definitions";
 import { Message } from "discord.js";
 
+// Variáveis que serão usadas só nesse comando
 const playlists = {
     "primeiro-jogo": "https://www.youtube.com/watch?v=lak9iTwvN8Q&list=PLKTRv0drNjJ-6bglGqfgBe7YlCstCa2wx",
     rpg: "https://www.youtube.com/watch?v=WvbqpY9CsR8&list=PLKTRv0drNjJ8zkzW9IeJknzDi6E5kjlwL",
@@ -12,6 +13,7 @@ const playlists = {
 
 type __index = "primeiro-jogo" | "rpg" | "plataforma" | "dialogo" | "animacao" | "tiro";
 
+// Comando
 export default <Command>{
     run: (msg: Message, args: Arguments) => {
         let link: string = "https://www.youtube.com/channel/UCHJPSW9FgSoXGVFV489XXag";

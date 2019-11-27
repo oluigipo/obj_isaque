@@ -3,6 +3,7 @@ import { Command, Arguments, Roles, Server, Time, Channels } from "./definitions
 import { Bank } from "./Cassino";
 import Moderation from "./Moderation";
 import cmds from './Commands';
+import fs from "fs";
 
 const wait = require('util').promisify(setTimeout);
 
@@ -72,7 +73,8 @@ client.on("message", (msg: Message) => {
         return;
     }
 
-    const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ');
+    const content: string = msg.content.toLowerCase();
+    const args: Arguments = content.slice(prefix.length, content.length).split(' ');
     const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0]));
 
     if (run == undefined || (run.staff && !Moderation.isAdmin(msg.member))) return;
@@ -80,4 +82,4 @@ client.on("message", (msg: Message) => {
     run.run(msg, args);
 })
 
-client.login('NjMwODkyNjY5Mzg3OTMxNjQ5.XZvwgA.giplHaiI73t62ThkYwMqKygpgIM');
+client.login(fs.readFileSync("./botkey.txt", "utf8"));

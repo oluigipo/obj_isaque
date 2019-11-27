@@ -16,6 +16,11 @@ export default <Command>{
 
             let other = msg.mentions.members.first();
 
+            if (other === undefined) {
+                msg.channel.send(`${msg.author} Usuário inválido!`);
+                return;
+            }
+
             if (Velha.isPlaying(other.user.id)) {
                 msg.channel.send(`${msg.author} Este usuário já está em um jogo!`);
                 return;
@@ -115,6 +120,6 @@ export default <Command>{
     staff: false,
     aliases: ["velha", "tictactoe"],
     shortHelp: "Jogo da velha apostado",
-    longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n---------\n4 | 5 | 6\n---------\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
+    longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n--+---+--\n4 | 5 | 6\n--+---+--\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
     example: `${Server.prefix}velha aposta @member | Chamar um usuário para jogar\n${Server.prefix}velha posição[1-9]   | Marcar uma posição\n${Server.prefix}velha                | Aceitar um convite de jogo\n${Server.prefix}velha table          | Veja como está a partida atual\n${Server.prefix}velha cancel         | Cancele um convite de jogo ou desista de uma partida (desistir de uma partida não te livrará da aposta!)`
 };
