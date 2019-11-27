@@ -18,6 +18,7 @@ var saldo_1 = __importDefault(require("./saldo"));
 var semanal_1 = __importDefault(require("./semanal"));
 var sorteio_1 = __importDefault(require("./sorteio"));
 var transfer_1 = __importDefault(require("./transfer"));
+var velha_1 = __importDefault(require("./velha"));
 exports.default = [corrida_1.default, register_1.default, bilhete_1.default, bingo_1.default, loteria_1.default, mendigar_1.default, messages_1.default,
-    pot_1.default, punish_1.default, rank_1.default, resultado_1.default, saldo_1.default, semanal_1.default, sorteio_1.default, transfer_1.default
+    pot_1.default, punish_1.default, rank_1.default, resultado_1.default, saldo_1.default, semanal_1.default, sorteio_1.default, transfer_1.default, velha_1.default
 ];

@@ -4,5 +4,6 @@ import emoji from "./emoji";
 import danki from "./danki";
 import sonbra from "./sonbra";
 import brainfuck from "./brainfuck";
+import ulon from "./ulon";
 
-export default <Command[]>[emoji, danki, sonbra, brainfuck];
+export default <Command[]>[emoji, danki, sonbra, brainfuck, ulon];

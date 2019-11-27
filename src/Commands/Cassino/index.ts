@@ -15,7 +15,8 @@ import saldo from "./saldo";
 import semanal from "./semanal";
 import sorteioPauNaSuaCara from "./sorteio";
 import transfer from "./transfer";
+import velha from "./velha";
 
 export default <Command[]>[corrida, register, bilhete, bingo, loteria, mendigar, messages,
-    pot, punish, rank, resultado, saldo, semanal, sorteioPauNaSuaCara, transfer
+    pot, punish, rank, resultado, saldo, semanal, sorteioPauNaSuaCara, transfer, velha
 ];
