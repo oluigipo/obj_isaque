@@ -7,7 +7,7 @@
 * É necessário incluir o seu comando no arquivo `index.ts` de sua categoria.
 ## Interface `Command`
 * `(msg:  Message, args:  Arguments) =>  void`: A função que será executada quando o comando for chamado;
-> **Argumentos**
+> **Argumentos:**
 > * `msg: Message`: Mensagem que chamou o comando;
 > * `args: Arguments`: Argumentos do comando.
 * `staff: boolean`: Se a função é exclusiva da Staff;
