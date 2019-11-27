@@ -29,7 +29,7 @@ export default <Command>{
 
             let result = Velha.makeRequest(msg.author.id, other.user.id, price);
             if (!result) {
-                msg.channel.send(`Algo deu errado com o jogo da velha... <@373670846792990720> ARRUMA ESSA BAGAÇA`);
+                msg.channel.send(`${msg.author} Não foi possível chamar este usuário para jogar. Talvez você ou ele não estejam registrados ou algum de vocês não possui dinheiro o suficiente para esta aposta.`);
                 return;
             }
 
@@ -42,6 +42,18 @@ export default <Command>{
                     return;
                 }
                 msg.channel.send(`${msg.author}${__mkstr(t)}`);
+                return;
+            }
+
+            if (args[1] === "cancel") {
+                let t = Velha.cancelMatch(msg.author.id);
+                if (t === -1) {
+                    msg.channel.send(`${msg.author} Você não está em nenhuma partida!`);
+                } else if (t === 1) {
+                    msg.channel.send(`${msg.author} Você cancelou o convite de jogo!`);
+                } else {
+                    msg.channel.send(`${msg.author} Você desistiu de uma partida, logo irá pagar o valor da aposta para o outro jogador!`);
+                }
                 return;
             }
 
@@ -58,7 +70,7 @@ export default <Command>{
                     msg.channel.send(`${msg.author} Esta posição não está livre!`);
                     break;
                 case -1:
-                    msg.channel.send(`${msg.author} Você não está em nenhum jogo!`);
+                    msg.channel.send(`${msg.author} Você não está em nenhum jogo ou não é a sua vez!`);
                     break;
                 default:
                     if (__is(result)) {
@@ -104,5 +116,5 @@ export default <Command>{
     aliases: ["velha", "tictactoe"],
     shortHelp: "Jogo da velha apostado",
     longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n---------\n4 | 5 | 6\n---------\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
-    example: `${Server.prefix}velha aposta @member | Chamar um usuário para jogar\n${Server.prefix}velha posição[1-9]   | Marcar uma posição\n${Server.prefix}velha                | Aceitar um convite de jogo`
+    example: `${Server.prefix}velha aposta @member | Chamar um usuário para jogar\n${Server.prefix}velha posição[1-9]   | Marcar uma posição\n${Server.prefix}velha                | Aceitar um convite de jogo\n${Server.prefix}velha table          | Veja como está a partida atual`
 };

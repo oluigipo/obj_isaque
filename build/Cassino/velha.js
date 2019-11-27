@@ -21,6 +21,8 @@ var Velha = /** @class */ (function () {
     Velha.checkRequests = function () {
         var _this = this;
         var now = Date.now();
+        if (this.requests === undefined)
+            this.requests = [];
         var _loop_1 = function (i) {
             if (this_1.requests[i].date + this_1.maxRequestTime > now) {
                 this_1.requests = this_1.requests.filter(function (a) { return a !== _this.requests[i]; });
@@ -42,7 +44,8 @@ var Velha = /** @class */ (function () {
         }
     };
     Velha.makeRequest = function (p1, p2, price) {
-        if (this.requests.some(function (r) { return r.players.some(function (p) { return p === p1 || p === p2; }); }) || !index_1.Bank.isRegistered(p1) || !index_1.Bank.isRegistered(p2))
+        if (this.requests.some(function (r) { return r.players.some(function (p) { return p === p1 || p === p2; }); }) || !index_1.Bank.isRegistered(p1) || !index_1.Bank.isRegistered(p2)
+            || index_1.Bank.saldo(p1) < price || index_1.Bank.saldo(p2) < price)
             return false;
         this.requests.push({ players: [p1, p2], date: Date.now(), price: price });
         if (!this.timerRunning) {
@@ -78,10 +81,15 @@ var Velha = /** @class */ (function () {
                 run.table[r] = run.time;
                 var win = this_3.checkResult(run.table, run.time);
                 if (win !== 0) {
-                    var toR = { w: run.table, p: (win === -1 ? -1 : run.players[run.time]) };
+                    var p_1 = (win === -1 ? -1 : run.players[run.time]);
+                    if (p_1 !== -1) {
+                        index_1.Bank.transfer(run.players[__aa(run.time)], p_1, run.price);
+                    }
+                    var toR = { w: run.table, p: p_1 };
                     this_3.running = this_3.running.filter(function (aa) { return aa !== run; });
                     return { value: toR };
                 }
+                run.time = __aa(run.time);
                 return { value: run.table };
             }
         };
@@ -92,6 +100,9 @@ var Velha = /** @class */ (function () {
                 return state_2.value;
         }
         return -1;
+        function __aa(s) {
+            return s === Spot.X ? Spot.O : Spot.X;
+        }
     };
     Velha.checkResult = function (t, s) {
         for (var i = 0; i < this.winningCombinations.length; i++) {
@@ -108,6 +119,35 @@ var Velha = /** @class */ (function () {
             return -1;
         }
         return 0;
+    };
+    Velha.cancelMatch = function (p) {
+        var _this = this;
+        var _loop_4 = function (i) {
+            if (this_4.requests[i].players.includes(p)) {
+                this_4.requests = this_4.requests.filter(function (rr) { return rr !== _this.requests[i]; });
+                return { value: 1 };
+            }
+        };
+        var this_4 = this;
+        for (var i = 0; i < this.requests.length; i++) {
+            var state_3 = _loop_4(i);
+            if (typeof state_3 === "object")
+                return state_3.value;
+        }
+        var _loop_5 = function (i) {
+            if (this_5.running[i].players.includes(p)) {
+                index_1.Bank.transfer(p, this_5.running[i].players.filter(function (pp) { return pp !== p; })[0], this_5.running[i].price);
+                this_5.running = this_5.running.filter(function (rr) { return rr !== _this.running[i]; });
+                return { value: 0 };
+            }
+        };
+        var this_5 = this;
+        for (var i = 0; i < this.running.length; i++) {
+            var state_4 = _loop_5(i);
+            if (typeof state_4 === "object")
+                return state_4.value;
+        }
+        return -1;
     };
     Velha.getTable = function (p) {
         for (var i = 0; i < this.running.length; i++) {

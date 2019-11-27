@@ -30,7 +30,7 @@ exports.default = {
             }
             var result = velha_1.default.makeRequest(msg.author.id, other.user.id, price);
             if (!result) {
-                msg.channel.send("Algo deu errado com o jogo da velha... <@373670846792990720> ARRUMA ESSA BAGA\u00C7A");
+                msg.channel.send(msg.author + " N\u00E3o foi poss\u00EDvel chamar este usu\u00E1rio para jogar. Talvez voc\u00EA ou ele n\u00E3o estejam registrados ou algum de voc\u00EAs n\u00E3o possui dinheiro o suficiente para esta aposta.");
                 return;
             }
             msg.channel.send(other + " Digite `" + definitions_1.Server.prefix + "velha` para aceitar a partida");
@@ -45,6 +45,19 @@ exports.default = {
                 msg.channel.send("" + msg.author + __mkstr(t));
                 return;
             }
+            if (args[1] === "cancel") {
+                var t = velha_1.default.cancelMatch(msg.author.id);
+                if (t === -1) {
+                    msg.channel.send(msg.author + " Voc\u00EA n\u00E3o est\u00E1 em nenhuma partida!");
+                }
+                else if (t === 1) {
+                    msg.channel.send(msg.author + " Voc\u00EA cancelou o convite de jogo!");
+                }
+                else {
+                    msg.channel.send(msg.author + " Voc\u00EA desistiu de uma partida, logo ir\u00E1 pagar o valor da aposta para o outro jogador!");
+                }
+                return;
+            }
             var pos = Number(args[1]);
             if (pos === NaN || pos < 1 || pos > 9) {
                 msg.channel.send(msg.author + " Posi\u00E7\u00E3o inv\u00E1lida!");
@@ -56,7 +69,7 @@ exports.default = {
                     msg.channel.send(msg.author + " Esta posi\u00E7\u00E3o n\u00E3o est\u00E1 livre!");
                     break;
                 case -1:
-                    msg.channel.send(msg.author + " Voc\u00EA n\u00E3o est\u00E1 em nenhum jogo!");
+                    msg.channel.send(msg.author + " Voc\u00EA n\u00E3o est\u00E1 em nenhum jogo ou n\u00E3o \u00E9 a sua vez!");
                     break;
                 default:
                     if (__is(result)) {
@@ -100,5 +113,5 @@ exports.default = {
     aliases: ["velha", "tictactoe"],
     shortHelp: "Jogo da velha apostado",
     longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n---------\n4 | 5 | 6\n---------\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",
-    example: definitions_1.Server.prefix + "velha aposta @member | Chamar um usu\u00E1rio para jogar\n" + definitions_1.Server.prefix + "velha posi\u00E7\u00E3o[1-9]   | Marcar uma posi\u00E7\u00E3o\n" + definitions_1.Server.prefix + "velha                | Aceitar um convite de jogo"
+    example: definitions_1.Server.prefix + "velha aposta @member | Chamar um usu\u00E1rio para jogar\n" + definitions_1.Server.prefix + "velha posi\u00E7\u00E3o[1-9]   | Marcar uma posi\u00E7\u00E3o\n" + definitions_1.Server.prefix + "velha                | Aceitar um convite de jogo\n" + definitions_1.Server.prefix + "velha table          | Veja como est\u00E1 a partida atual"
 };

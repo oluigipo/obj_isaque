@@ -37,6 +37,7 @@ export default class Velha {
     static checkRequests(): void {
         const now = Date.now();
 
+        if (this.requests === undefined) this.requests = [];
         for (let i = 0; i < this.requests.length;) {
             if (this.requests[i].date + this.maxRequestTime > now) {
                 this.requests = this.requests.filter(a => a !== this.requests[i]);
@@ -54,8 +55,10 @@ export default class Velha {
     }
 
     static makeRequest(p1: Player, p2: Player, price: number): boolean {
-        if (this.requests.some(r => r.players.some(p => p === p1 || p === p2)) || !Bank.isRegistered(p1) || !Bank.isRegistered(p2))
-            return false;
+        if (
+            this.requests.some(r => r.players.some(p => p === p1 || p === p2)) || !Bank.isRegistered(p1) || !Bank.isRegistered(p2)
+            || Bank.saldo(p1) < price || Bank.saldo(p2) < price
+        ) return false;
 
         this.requests.push({ players: [p1, p2], date: Date.now(), price: price });
         if (!this.timerRunning) {
@@ -88,16 +91,26 @@ export default class Velha {
 
                 let win = this.checkResult(run.table, run.time);
                 if (win !== 0) {
-                    let toR = <{ w: Table, p: Player | -1 }>{ w: run.table, p: (win === -1 ? -1 : run.players[run.time]) };
+                    let p: string | -1 = (win === -1 ? -1 : run.players[run.time]);
+                    if (p !== -1) {
+                        Bank.transfer(run.players[__aa(run.time)], p, run.price);
+                    }
+                    let toR = <{ w: Table, p: Player | -1 }>{ w: run.table, p: p };
                     this.running = this.running.filter(aa => aa !== run);
                     return toR;
                 }
+
+                run.time = __aa(run.time);
 
                 return run.table;
             }
         }
 
         return -1;
+
+        function __aa(s: Spot) {
+            return s === Spot.X ? Spot.O : Spot.X;
+        }
     }
 
     static checkResult(t: Table, s: Spot.X | Spot.O): -1 | 0 | 1 {
@@ -117,6 +130,26 @@ export default class Velha {
         }
 
         return 0;
+    }
+
+    static cancelMatch(p: Player): -1 | 0 | 1 {
+        for (let i = 0; i < this.requests.length; i++) {
+            if (this.requests[i].players.includes(p)) {
+                this.requests = this.requests.filter(rr => rr !== this.requests[i]);
+                return 1;
+            }
+        }
+
+        for (let i = 0; i < this.running.length; i++) {
+            if (this.running[i].players.includes(p)) {
+                Bank.transfer(p, this.running[i].players.filter(pp => pp !== p)[0], this.running[i].price);
+
+                this.running = this.running.filter(rr => rr !== this.running[i]);
+                return 0;
+            }
+        }
+
+        return -1;
     }
 
     static getTable(p: Player): Table | -1 {
