@@ -51,7 +51,7 @@ export default <Command>{
                 return;
             }
 
-            let result = Velha.makePlay(msg.author.id, pos);
+            let result = Velha.makePlay(msg.author.id, pos - 1);
 
             switch (result) {
                 case 0:

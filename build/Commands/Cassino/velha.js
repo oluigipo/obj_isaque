@@ -50,7 +50,7 @@ exports.default = {
                 msg.channel.send(msg.author + " Posi\u00E7\u00E3o inv\u00E1lida!");
                 return;
             }
-            var result = velha_1.default.makePlay(msg.author.id, pos);
+            var result = velha_1.default.makePlay(msg.author.id, pos - 1);
             switch (result) {
                 case 0:
                     msg.channel.send(msg.author + " Esta posi\u00E7\u00E3o n\u00E3o est\u00E1 livre!");
