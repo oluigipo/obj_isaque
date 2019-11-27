@@ -1,10 +1,12 @@
 import { Command, Arguments, CommonMessages, Server } from "../../definitions";
 import cmds from "../index";
 import { Message } from "discord.js";
+import Moderation from "../../Moderation";
 
 export default <Command>{
     run: (msg: Message, args: Arguments) => {
         let final: string;
+        let isAdm = Moderation.isAdmin(msg.member);
 
         if (args.length > 1) { // !!help comando
             let command = cmds.find((v: Command) => v.aliases.includes(args[1]));
@@ -29,7 +31,8 @@ export default <Command>{
             final = "```markdown\n";
             for (let i = 0; i < cmds.length; i++) {
                 let cmd = cmds[i];
-                final += `< ${cmd.aliases[0]} >${' '.repeat(size - cmd.aliases[0].length)}${cmd.shortHelp}${cmd.staff ? " (Staff Only)" : ""}.\n`;
+                if (cmd.staff && !isAdm) continue;
+                final += `< ${cmd.aliases[0]} >${' '.repeat(size - cmd.aliases[0].length)}${cmd.shortHelp}.\n`; // ${cmd.staff ? " (Staff Only)" : ""}
             }
             final += "\n```";
         }

@@ -5,9 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var definitions_1 = require("../../definitions");
 var index_1 = __importDefault(require("../index"));
+var Moderation_1 = __importDefault(require("../../Moderation"));
 exports.default = {
     run: function (msg, args) {
         var final;
+        var isAdm = Moderation_1.default.isAdmin(msg.member);
         if (args.length > 1) { // !!help comando
             var command = index_1.default.find(function (v) { return v.aliases.includes(args[1]); });
             if (command === undefined) {
@@ -31,7 +33,9 @@ exports.default = {
             final = "```markdown\n";
             for (var i = 0; i < index_1.default.length; i++) {
                 var cmd = index_1.default[i];
-                final += "< " + cmd.aliases[0] + " >" + ' '.repeat(size - cmd.aliases[0].length) + cmd.shortHelp + (cmd.staff ? " (Staff Only)" : "") + ".\n";
+                if (cmd.staff && !isAdm)
+                    continue;
+                final += "< " + cmd.aliases[0] + " >" + ' '.repeat(size - cmd.aliases[0].length) + cmd.shortHelp + ".\n"; // ${cmd.staff ? " (Staff Only)" : ""}
             }
             final += "\n```";
         }
