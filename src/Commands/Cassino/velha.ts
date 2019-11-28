@@ -27,7 +27,7 @@ export default <Command>{
             }
 
             let price = Number(args[1]);
-            if (price === NaN || price < 0) {
+            if (isNaN(price) || price < 0) {
                 msg.channel.send(`${msg.author} Aposta inválida!`);
                 return;
             }

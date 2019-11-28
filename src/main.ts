@@ -17,8 +17,8 @@ function onUserMessage(msg: Message) {
     if (chn.id === Channels.shitpost || chn.id === Channels.music) return;
     const result = Bank.userMessage(msg.author.id);
     if (result > 0) {
-        (<TextChannel>msg.guild.channels.find(a => a.id === Channels.shitpost))
-            .send(`${msg.author} Parabéns! Você ganhou \`$${result}\``);
+        let c = (<TextChannel>msg.guild.channels.find(a => a.id === Channels.shitpost));
+        if (c !== null) c.send(`${msg.author} Parabéns! Você ganhou \`$${result}\``);
     }
 }
 
