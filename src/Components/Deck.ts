@@ -18,7 +18,7 @@ export class Deck {
 
         if (this.useJokers) {
             for (let i = 0; i < 2; i++) {
-                this.inDeck.push(new Card("Coringa", ""));
+                this.inDeck.push(new Card("Coringa", "", true));
             }
         }
         
@@ -27,11 +27,13 @@ export class Deck {
     }
 
     listInDeck() {
-        this.inDeck.map(item => console.log(item));
+        console.log('Cartas no Deck:\n');
+        this.inDeck.map(item => console.log(item.describe()));
     }
 
     listOffDeck() {
-        this.offDeck.map(item => console.log(item));
+        console.log("Cartas fora do Deck:\n");
+        this.offDeck.map(item => console.log(item.describe()));
     }
 
     shuffle() {
@@ -44,8 +46,20 @@ class Card {
     public value: string;
     public naipe: string;
 
-    constructor(value: string, naipe: string) {
+    private joker: boolean;
+
+    constructor(value: string, naipe: string, joker: boolean = false) {
         this.value = value;
         this.naipe = naipe;
+        this.joker = joker;
+    }
+
+    describe() {
+        const { value, naipe, joker } = this;
+
+        if (joker)
+            return value;
+        
+        return `${value} de ${naipe}`;
     }
 } 
