@@ -1,3 +1,7 @@
 #node.js
 #
 node_modules/
+build/
+botkey.txt
+obj_isaque_updated.zip
+tsconfig.json
