@@ -22,7 +22,7 @@ export default <Command>{
         }
 
         const duration = Number(args[3]);
-        if (duration === NaN || duration < 5) {
+        if (duration === NaN || duration < 5 || duration > 100) {
             msg.channel.send(`${msg.author} Duração inválida!`);
             return;
         }

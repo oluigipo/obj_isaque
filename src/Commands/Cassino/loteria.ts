@@ -1,11 +1,11 @@
 import { Command, Arguments, Server } from "../../definitions";
 import { Message } from "discord.js";
 import { Bank } from "../../Cassino";
-import { Loteria, currentLoteria } from "../../Cassino/loteria";
+import Loteria from "../../Cassino/loteria";
 
 export default <Command>{
     run: (msg: Message, args: Arguments) => {
-        if (currentLoteria !== -1) {
+        if (Loteria.currentLoteria !== -1) {
             msg.channel.send(`${msg.author} Já existe uma loteria rolando!`);
             return;
         }
@@ -20,7 +20,7 @@ export default <Command>{
             return;
         }
 
-        Loteria.current = new Loteria(Number(args[1]));
+        Loteria.currentLoteria = new Loteria(Number(args[1]));
         msg.channel.send(`${msg.author} Loteria iniciada!`);
     },
     staff: true,

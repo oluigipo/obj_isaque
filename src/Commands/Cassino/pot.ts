@@ -1,15 +1,15 @@
 import { Command, Arguments, Server } from "../../definitions";
 import { Message } from "discord.js";
-import { currentLoteria } from "../../Cassino/loteria";
+import Loteria from "../../Cassino/loteria";
 
 export default <Command>{
     run: (msg: Message, args: Arguments) => {
-        if (currentLoteria === -1) {
+        if (Loteria.currentLoteria === -1) {
             msg.channel.send(`${msg.author} Não existe nenhuma loteria iniciada!`);
             return;
         }
 
-        const result = currentLoteria.pot();
+        const result = Loteria.currentLoteria.pot();
         msg.channel.send(`${msg.author} A quantidade de dinheiro acumulada é ${result}`);
     },
     staff: false,

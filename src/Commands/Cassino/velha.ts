@@ -16,7 +16,7 @@ export default <Command>{
 
             let other = msg.mentions.members.first();
 
-            if (other === undefined) {
+            if (other === undefined || other.user.id === msg.author.id) {
                 msg.channel.send(`${msg.author} Usuário inválido!`);
                 return;
             }

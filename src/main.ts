@@ -14,7 +14,7 @@ const prefix = "!!";
 
 function onUserMessage(msg: Message) {
     let chn: TextChannel = <TextChannel>msg.channel;
-    if (chn.id === Channels.shitpost || chn.id === Channels.music) return;
+    if (chn.id === Channels.shitpost || chn.id === Channels.music || chn.name.startsWith("jogos-bot")) return;
     const result = Bank.userMessage(msg.author.id);
     if (result > 0) {
         let c = (<TextChannel>msg.guild.channels.find(a => a.id === Channels.shitpost));

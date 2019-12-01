@@ -1,17 +1,12 @@
 import { Bank } from "./index";
 
 // Não posso dar assign nessa variável fora desse script.
-export let currentLoteria: Loteria | -1 = -1;
-
-export class Loteria {
+export default class Loteria {
     participantes: string[] = [];
     custo: number;
+    static currentLoteria: Loteria | -1 = -1;
     constructor(custo: number) {
         this.custo = custo;
-    }
-
-    static set current(a: Loteria | -1) {
-        currentLoteria = a;
     }
 
     /**
@@ -46,13 +41,16 @@ export class Loteria {
      */
     resultado(): object | undefined {
         if (this.participantes.length === 0) return undefined;
+
         const result = Math.min(Math.floor(Math.random() * this.participantes.length), this.participantes.length - 1);
         const moneyWon = this.participantes.length * this.custo;
+
         Bank.jsonOpen();
         const ind = Bank.json.users.findIndex(a => a.userid === this.participantes[result]);
         Bank.json.users[ind].money += moneyWon;
         const toReturn = { user: this.participantes[result], money: moneyWon };
         Bank.jsonClose();
+
         return toReturn;
     }
 }
