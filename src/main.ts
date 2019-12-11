@@ -73,9 +73,8 @@ client.on("message", (msg: Message) => {
         return;
     }
 
-    const content: string = msg.content.toLowerCase();
-    const args: Arguments = content.slice(prefix.length, content.length).split(' ');
-    const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0]));
+    const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ');
+    const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0].toLowerCase()));
 
     if (run == undefined || (run.staff && !Moderation.isAdmin(msg.member))) return;
 
