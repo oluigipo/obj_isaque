@@ -6,7 +6,7 @@ import Moderation from "../../Moderation";
 export default <Command>{
     run: (msg: Message, args: Arguments) => {
         let final: string;
-        let isAdm = Moderation.isAdmin(msg.member);
+        let isAdm = Moderation.isAdmin(msg.member) || msg.member.hasPermission("ADMINISTRATOR");
 
         if (args.length > 1) { // !!help comando
             let command = cmds.find((v: Command) => v.aliases.includes(args[1]));

@@ -23,11 +23,12 @@ export default <Command>{
                 case 'h': duration *= 60;
                 case 'm': duration *= 60; break;
                 default:
-                    msg.channel.send(`${_t + _d} isn't a valid time`);
+                    msg.channel.send(`${_t + _d} não é uma duração válida`);
                     return;
             }
 
             duration *= _t;
+            duration *= 1000;
 
             // Sem mais limite de mute!
             // if (duration > maxMuteTime) {

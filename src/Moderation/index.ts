@@ -25,7 +25,7 @@ function autoUnmute(client: Client): void {
         if (now > time + duration && duration > 0) {
             const guild = client.guilds.get(Server.id);
 
-            if (guild == undefined) {
+            if (guild === undefined) {
                 console.error("WTF");
                 continue;
             }

@@ -4,6 +4,7 @@ import { Bank } from "./Cassino";
 import Moderation from "./Moderation";
 import cmds from './Commands';
 import fs from "fs";
+import { isNullOrUndefined } from "util";
 
 const wait = require('util').promisify(setTimeout);
 
@@ -73,12 +74,12 @@ client.on("message", (msg: Message) => {
         return;
     }
 
-    const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ');
+    const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ').filter((a) => a !== "");
     const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0].toLowerCase()));
 
-    if (run == undefined || (run.staff && !Moderation.isAdmin(msg.member))) return;
+    if (run == undefined || (run.staff && (!Moderation.isAdmin(msg.member) && !msg.member.hasPermission("ADMINISTRATOR")))) return;
 
     run.run(msg, args);
-})
+});
 
 client.login(fs.readFileSync("./botkey.txt", "utf8")); // A token tá não tá no repositório (obviamente)
