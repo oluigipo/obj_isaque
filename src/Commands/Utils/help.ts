@@ -1,47 +1,73 @@
 import { Command, Arguments, CommonMessages, Server } from "../../definitions";
 import cmds from "../index";
-import { Message } from "discord.js";
+import { Message, RichEmbed } from "discord.js";
 import Moderation from "../../Moderation";
 
+function makeRGB(r: number, g: number, b: number): number {
+	return (r << 16) | (g << 8) | (b);
+}
+
 export default <Command>{
-    run: (msg: Message, args: Arguments) => {
-        let final: string;
-        let isAdm = Moderation.isAdmin(msg.member) || msg.member.hasPermission("ADMINISTRATOR");
+	run: (msg: Message, args: Arguments) => {
+		let pagesCount = Math.ceil(cmds.length / 10);
+		let final = new RichEmbed();
+		final.color = makeRGB(48, 162, 70);
+		final.author = { name: (msg.member.nickname ? msg.member.nickname : msg.author.username), icon_url: msg.author.avatarURL };
+		final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
+		let isAdm = Moderation.isAdmin(msg.member) || msg.member.hasPermission("ADMINISTRATOR");
 
-        if (args.length > 1) { // !!help comando
-            let command = cmds.find((v: Command) => v.aliases.includes(args[1]));
-            if (command === undefined) {
-                msg.channel.send(`${msg.author} Este comando não existe.`);
-                return;
-            }
+		if (args.length > 1) { // !!help <algumaCoisa>
+			let num = parseInt(args[1]);
 
-            final = `${msg.author} ${command.staff ? "(Staff Only) " : ""}`;
-            if (command.aliases.length > 1) {
-                final += `Aliases: \`${command.aliases.join(', ')}\`. `;
-            }
-            final += command.longHelp + ". ";
-            final += `Exemplo: \`\`\`${command.example}\`\`\``;
-        } else { // !!help
-            let size = 0;
-            for (let i = 0; i < cmds.length; i++) {
-                if (size < cmds[i].aliases[0].length) size = cmds[i].aliases[0].length;
-            }
-            ++size;
+			if (isNaN(num)) { // !!help comando
+				let command = cmds.find((v: Command) => v.aliases.includes(args[1]));
+				if (command === undefined) {
+					msg.channel.send(`${msg.author} Este comando não existe.`);
+					return;
+				}
 
-            final = "```markdown\n";
-            for (let i = 0; i < cmds.length; i++) {
-                let cmd = cmds[i];
-                if (cmd.staff && !isAdm) continue;
-                final += `< ${cmd.aliases[0]} >${' '.repeat(size - cmd.aliases[0].length)}${cmd.shortHelp}.\n`; // ${cmd.staff ? " (Staff Only)" : ""}
-            }
-            final += "\n```";
-        }
+				final.title = `Comando: ${command.aliases[0]}${(command.staff ? " (Staff Only)" : "")}`;
+				final.description = command.longHelp;
+				if (command.aliases.length > 1) {
+					final.addField("Aliases", `\`${command.aliases.join('`, `')}\``);
+				}
+				final.addField("Exemplo", command.example);
+			} else { // !!help número
+				if (num > pagesCount || num <= 0) {
+					msg.channel.send(`${msg.author} Essa página não existe.`);
+					return;
+				}
 
-        msg.channel.send(final);
-    },
-    staff: false,
-    aliases: ["help", "ajuda"],
-    shortHelp: "Helpa aqui!",
-    longHelp: "HEEEELP",
-    example: `${Server.prefix}help\n${Server.prefix}help comando`
+				final.title = `Lista de comandos (${num}/${pagesCount})`;
+
+				let count = 0;
+				for (let i = (num - 1) * 10; count < 10; i++) {
+					let cmd = cmds[i];
+					if (cmd === undefined) break;
+					if (cmd.staff && !isAdm) continue;
+					final.addField(cmd.aliases[0], cmd.shortHelp);
+					++count;
+				}
+			}
+		} else { // !!help
+			final.title = `Lista de comandos (1/${pagesCount})`;
+			final.description = `Dica: você pode usar \`${Server.prefix}help númeroDaPágina\` para ver mais comandos!`;
+			let count = 0;
+			for (let i = 0; count < 10; i++) {
+				let cmd = cmds[i];
+				if (cmd === undefined) break;
+				if (cmd.staff && !isAdm) continue;
+				let helpMessage = cmd.shortHelp[cmd.shortHelp.length - 1].includes('!') ? cmd.shortHelp : `${cmd.shortHelp}.`;
+				final.addField(cmd.aliases[0], helpMessage);
+				++count;
+			}
+		}
+
+		msg.channel.send(final);
+	},
+	staff: false,
+	aliases: ["help", "ajuda"],
+	shortHelp: "Helpa aqui!",
+	longHelp: "HEEEELP",
+	example: `${Server.prefix}help\n${Server.prefix}help comando\n${Server.prefix}help númeroDaPágina`
 };
