@@ -7,5 +7,6 @@ import github from "./github";
 import num from "./number";
 import calc from "./calc";
 import color from "./color";
+import docs from "./docs";
 
-export default <Command[]>[ping, help, nt, github, num, calc, color];
+export default <Command[]>[ping, help, nt, github, num, calc, color, docs];
