@@ -63,79 +63,85 @@ export default <Command>{
 		final.author = { name: (msg.member.nickname ? msg.member.nickname : msg.author.username), icon_url: msg.author.avatarURL };
 		final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
 
-		let fn = args[1];
-		let ind = exists(fn);
-		if (ind === -1) {
-			let items = closest(fn);
+		try {
+			let fn = args[1];
+			let ind = exists(fn);
+			if (ind === -1) {
+				let items = closest(fn);
 
-			final.title = "Erro: nome não encontrado!";
-			final.description = `Não foi possível achar o nome \`${fn}\`. Você quis dizer algum dos nomes a seguir?`;
-			items.forEach(i => {
-				final.description += `\n[${i.name}](${i.link})`;
-			});
-			//msg.channel.send(`${msg.author} A função/variável/constante \`${fn}\` não existe. Ela pode ser do GMS1, e este comando funciona somente com o GMS2`);
+				final.title = "Erro: nome não encontrado!";
+				final.description = `Não foi possível achar o nome \`${fn}\`. Você quis dizer algum dos nomes a seguir?`;
+				items.forEach(i => {
+					final.description += `\n[${i.name}](${i.link})`;
+				});
+				//msg.channel.send(`${msg.author} A função/variável/constante \`${fn}\` não existe. Ela pode ser do GMS1, e este comando funciona somente com o GMS2`);
 
-			msg.channel.send(final);
-		} else {
-			const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
+				msg.channel.send(final);
+			} else {
+				const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
 
-			if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
-				msg.channel.send(`${msg.author} Aqui está o link: ${link}`);
-				return;
-			}
-
-			final.title = docs.SearchTitles[ind];
-			final.description = `[[Link](${link})] `;
-			request(link, {}, (error, response, body) => {
-				if (error) {
-					msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
-					console.log(error);
-				}
-				const { document } = new JSDOM(response.body).window;
-
-				const page = document.getElementsByClassName("body-scroll")[0];
-				const descriptionEle = page.getElementsByTagName("blockquote")[0];
-				const noteEle = descriptionEle.getElementsByClassName("note")[0];
-
-				let description: any = descriptionEle.getElementsByTagName("p");
-
-				if (description.length === 0) {
-					let mmmmmm = Math.max(
-						(<string>descriptionEle.textContent).indexOf("NOTES"),
-						(<string>descriptionEle.textContent).indexOf("IMPORTANT"),
-						(<string>descriptionEle.textContent).indexOf("WARNING")
-					);
-					description = (<string>descriptionEle.textContent).slice(0, mmmmmm !== -1 ? mmmmmm : undefined);
-				} else {
-					description = description[0].textContent;
+				if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
+					msg.channel.send(`${msg.author} Aqui está o link: ${link}`);
+					return;
 				}
 
-				if (description !== null) final.description += description;
-				if (noteEle !== undefined) {
-					final.addField("Note", (<string>noteEle.textContent).replace("NOTE: ", ''));
-				}
+				final.title = docs.SearchTitles[ind];
+				final.description = `[[Link](${link})] `;
+				request(link, {}, (error, response, body) => {
+					if (error) {
+						msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
+						console.log(error);
+						return;
+					}
+					const { document } = new JSDOM(response.body).window;
 
-				const params = page.getElementsByClassName("param")[0];
-				if (params !== undefined) {
-					const ppp = params.getElementsByTagName("tr");
-					let f = "";
+					const page = document.getElementsByClassName("body-scroll")[0];
+					const descriptionEle = page.getElementsByTagName("blockquote")[0];
+					const noteEle = descriptionEle.getElementsByClassName("note")[0];
 
-					for (let i = 1; i < ppp.length; i++) {
-						const eee = ppp[i].getElementsByTagName("td");
+					let description: any = descriptionEle.getElementsByTagName("p");
 
-						f += `\`${eee[0].textContent}\`: ${eee[1].textContent}\n`;
+					if (description.length === 0) {
+						let mmmmmm = Math.max(
+							(<string>descriptionEle.textContent).indexOf("NOTES"),
+							(<string>descriptionEle.textContent).indexOf("IMPORTANT"),
+							(<string>descriptionEle.textContent).indexOf("WARNING")
+						);
+						description = (<string>descriptionEle.textContent).slice(0, mmmmmm !== -1 ? mmmmmm : undefined);
+					} else {
+						description = description[0].textContent;
 					}
 
-					final.addField("Parameters (name: desc)", f);
-				}
+					if (description !== null) final.description += description;
+					if (noteEle !== undefined) {
+						final.addField("Note", (<string>noteEle.textContent).replace("NOTE: ", ''));
+					}
 
-				const codes = page.getElementsByClassName("code");
-				final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
+					const params = page.getElementsByClassName("param")[0];
+					if (params !== undefined) {
+						const ppp = params.getElementsByTagName("tr");
+						let f = "";
 
-				final.addField("Returns", codes[codes.length - 2].textContent);
-				final.addField("Example", `\`\`\`js\n${codes[codes.length - 1].textContent}\`\`\``);
-				msg.channel.send(final);
-			});
+						for (let i = 1; i < ppp.length; i++) {
+							const eee = ppp[i].getElementsByTagName("td");
+
+							f += `\`${eee[0].textContent}\`: ${eee[1].textContent}\n`;
+						}
+
+						final.addField("Parameters (name: desc)", f);
+					}
+
+					const codes = page.getElementsByClassName("code");
+					final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
+
+					final.addField("Returns", codes[codes.length - 2].textContent);
+					final.addField("Example", `\`\`\`js\n${codes[codes.length - 1].textContent}\`\`\``);
+					msg.channel.send(final);
+				});
+			}
+		} catch (e) {
+			msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
+			console.log(e);
 		}
 	},
 	staff: false,
