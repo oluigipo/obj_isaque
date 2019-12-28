@@ -6,5 +6,6 @@ import nt from "./nonetube";
 import github from "./github";
 import num from "./number";
 import calc from "./calc";
+import color from "./color";
 
-export default <Command[]>[ping, help, nt, github, num, calc];
+export default <Command[]>[ping, help, nt, github, num, calc, color];
