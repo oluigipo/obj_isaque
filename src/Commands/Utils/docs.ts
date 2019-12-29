@@ -87,7 +87,7 @@ export default <Command>{
 
 				final.title = docs.SearchTitles[ind];
 				final.description = `[[Link](${link})] `;
-				request(link, {}, (error, response, body) => {
+				request(link, {}, (error, response) => {
 					if (error) {
 						msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
 						console.log(error);
@@ -96,6 +96,11 @@ export default <Command>{
 					const { document } = new JSDOM(response.body).window;
 
 					const page = document.getElementsByClassName("body-scroll")[0];
+					const image = page.getElementsByTagName("img");
+					if (image.length > 0) {
+						final.image = { url: `${link.slice(0, link.lastIndexOf('/') + 1)}${image[0].getAttribute("src")}` };
+					}
+
 					const descriptionEle = page.getElementsByTagName("blockquote")[0];
 					const noteEle = descriptionEle.getElementsByClassName("note")[0];
 

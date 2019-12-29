@@ -32,7 +32,8 @@ client.on("ready", () => {
 	});
 
 	console.log("Online");
-	client.user.setPresence({ game: { name: "o curso do NoNe!", url: "", type: "WATCHING" }, status: "online" })
+
+	client.user.setPresence({ game: { name: "o curso do NoNe!", type: "WATCHING" }, status: "online" })
 		.catch(console.error);
 
 	const curr = Date.now();
