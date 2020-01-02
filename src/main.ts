@@ -63,6 +63,16 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 	});
 });
 
+client.on("voiceStateUpdate", (oldMember, newMember) => {
+	if (newMember.voiceChannelID === undefined) return;
+
+	if (Moderation.isMuted(newMember.user.id)) {
+		if (!newMember.mute) newMember.setMute(true);
+	} else {
+		if (newMember.mute) newMember.setMute(false);
+	}
+});
+
 client.on("message", (msg: Message) => {
 	if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text") return;
 	onUserMessage(msg);

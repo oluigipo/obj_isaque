@@ -33,7 +33,7 @@ function autoUnmute(client: Client): void {
 			const member = guild.members.find(a => a.id === userid);
 			if (member) {
 				member.removeRole(Roles.Muted);
-				member.setMute(false);
+				if (member.voiceChannelID !== undefined) member.setMute(false);
 			}
 
 			json.mutes = json.mutes.filter((a, ind) => ind !== i);
@@ -90,7 +90,7 @@ export default {
 		const member = guild.members.find(a => a.id === userid);
 		if (member) {
 			member.addRole(Roles.Muted);
-			member.setMute(true);
+			if (member.voiceChannelID !== undefined) member.setMute(true);
 
 			json.mutes.push(<Muted>{ userid: userid, duration: duration === undefined ? -1 : duration, time: Date.now() });
 			const _m = JSON.stringify(json);
