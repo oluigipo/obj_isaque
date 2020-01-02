@@ -7,19 +7,23 @@ import { Message } from "discord.js";
 import { isUndefined, isNull } from "util";
 
 const rules = [
-	{ name: "number_literal", re: /^[0-9]+(\.[0-9]+)?/ },
 	{ name: "number_literal_hex", re: /^0x[0-9a-fA-F]+/ },
+	{ name: "number_literal", re: /^[0-9]+(\.[0-9]+)?/ },
 	{ name: "plus", re: /^\+/ },
 	{ name: "minus", re: /^-/ },
+	{ name: "not", re: /^~/ },
 	{ name: "div", re: /^\// },
 	{ name: "pot", re: /^\*\*/ },
 	{ name: "mult", re: /^\*/ },
+	{ name: "mod", re: /^%/ },
 	{ name: "open_p", re: /^\(/ },
 	{ name: "close_p", re: /^\)/ },
-	{ name: "close_p", re: /^,/ },
-	// { name: "and", re: /^&/ },
-	// { name: "or", re: /^\|/ },
-	// { name: "xor", re: /^\^/ },
+	{ name: "comma", re: /^,/ },
+	{ name: "left", re: /^<</ },
+	{ name: "right", re: /^>>/ },
+	{ name: "and", re: /^&/ },
+	{ name: "or", re: /^\|/ },
+	{ name: "xor", re: /^\^/ },
 	{ name: "identifier", re: /^[a-zA-Z][a-zA-Z0-9]*/ }
 ];
 
@@ -102,10 +106,10 @@ function parseFactor(): number {
 	if (currentToken() === ')') return NaN;
 	let t = nextToken();
 
-	let mult = 1;
 	if (t === '-') {
-		mult = -1;
-		t = nextToken();
+		return -parseFactor();
+	} else if (t === '~') {
+		return ~parseFactor();
 	}
 
 	if (t === '(') { // Parênteses
@@ -114,7 +118,8 @@ function parseFactor(): number {
 		let a = rules[rules.length - 1].re.exec(t);
 
 		if (a === null) { // Número
-			return Number(t) * mult;
+			if (t.startsWith("0x")) return parseInt(t.slice(2), 16);
+			return Number(t);
 		} else { // Constante ou função
 			if (Object.keys(functions).includes(t)) { // função
 				let args: number[] = [];
@@ -129,13 +134,13 @@ function parseFactor(): number {
 				} while (currentToken() === ',');
 
 				nextToken();
-				return <number>functions[t](...args) * mult;
+				return <number>functions[t](...args);
 			} else { // constante
 				if (!Object.keys(consts).includes(t)) {
 					throw `Função ou constante ${t} inexistente.`;
 				}
 
-				return <number>consts[t] * mult;
+				return <number>consts[t];
 			}
 		}
 	}
@@ -173,7 +178,7 @@ function parseMult(): number {
 }
 
 // + e -
-function parse(): number {
+function parseSum(): number {
 	let result = parseMult();
 
 	while (currentToken() === '+' || currentToken() === '-') {
@@ -184,6 +189,66 @@ function parse(): number {
 			nextToken();
 			result -= parseMult();
 		}
+	}
+
+	return result;
+}
+
+function parseMod(): number {
+	let result = parseSum();
+
+	while (currentToken() === '%') {
+		nextToken();
+		result = result % parseSum();
+	}
+
+	return result;
+}
+
+function parseShift(): number {
+	let result = parseMod();
+
+	while (currentToken() === '<<' || currentToken() === '>>') {
+		if (currentToken() === '<<') {
+			nextToken();
+			result = result << parseMod();
+		} else {
+			nextToken();
+			result = result >> parseMod();
+		}
+	}
+
+	return result;
+}
+
+function parseAnd(): number {
+	let result = parseShift();
+
+	while (currentToken() === '&') {
+		nextToken();
+		result = result & parseShift();
+	}
+
+	return result;
+}
+
+function parseXor(): number {
+	let result = parseAnd();
+
+	while (currentToken() === '^') {
+		nextToken();
+		result = result ^ parseAnd();
+	}
+
+	return result;
+}
+
+function parse(): number {
+	let result = parseXor();
+
+	while (currentToken() === '|') {
+		nextToken();
+		result = result | parseXor();
 	}
 
 	return result;

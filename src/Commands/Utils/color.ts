@@ -116,44 +116,55 @@ function _format(s: string): string {
 
 export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
-		let color: number;
-
-		switch (args[1].toLowerCase()) {
-			case 'rgb':
-				if (args.length > 3) {
-					color = makeRGB(parseInt(args[2]), parseInt(args[3]), parseInt(args[4]));
-				} else {
-					color = parseInt((args[2][0] === '#' ? args[2].slice(1) : args[2]), 16);
-				}
-				break;
-			case 'bgr':
-				if (args.length > 3) {
-					color = makeRGB(parseInt(args[4]), parseInt(args[3]), parseInt(args[2]));
-				} else {
-					color = parseInt(RGB2BGR(args[2][0] === '#' ? args[2].slice(1) : args[2]), 16);
-				}
-				break;
-			case 'hsv':
-			case 'hsb':
-				if (args.length > 3) {
-					color = hsvToRgb(parseInt(args[2]) / 360, parseInt(args[3]) / 100, parseInt(args[4]) / 100);
-				} else {
-					msg.channel.send(`${msg.author} Não é possível usar hexadecimal para os formatos HSL e HSV/HSB!`);
-					return;
-				}
-				break;
-			case 'hsl':
-				if (args.length > 3) {
-					color = hslToRgb(parseInt(args[2]) / 360, parseInt(args[3]) / 100, parseInt(args[4]) / 100);
-				} else {
-					msg.channel.send(`${msg.author} Não é possível usar hexadecimal para os formatos HSL e HSV/HSB!`);
-					return;
-				}
-				break;
-			default:
-				msg.channel.send(`${msg.author} ${args[1]} não está disponível. As disponíveis são: \`rgb\`, \`bgr\`, \`hsv\`/\`hsb\` e \`hsl\``);
-				return;
+		if (args.length < 2) {
+			msg.channel.send(`${msg.author} ${CommonMessages.syntaxError}`);
+			return;
 		}
+
+		let color: number;
+		if (args.length === 2 || args.length === 4) {
+			if (args.length > 2) {
+				color = makeRGB(parseInt(args[1]), parseInt(args[2]), parseInt(args[3]));
+			} else {
+				color = parseInt((args[1][0] === '#' ? args[1].slice(1) : args[1]), 16);
+			}
+		} else
+			switch (args[1].toLowerCase()) {
+				case 'rgb':
+					if (args.length > 3) {
+						color = makeRGB(parseInt(args[2]), parseInt(args[3]), parseInt(args[4]));
+					} else {
+						color = parseInt((args[2][0] === '#' ? args[2].slice(1) : args[2]), 16);
+					}
+					break;
+				case 'bgr':
+					if (args.length > 3) {
+						color = makeRGB(parseInt(args[4]), parseInt(args[3]), parseInt(args[2]));
+					} else {
+						color = parseInt(RGB2BGR(args[2][0] === '#' ? args[2].slice(1) : args[2]), 16);
+					}
+					break;
+				case 'hsv':
+				case 'hsb':
+					if (args.length > 3) {
+						color = hsvToRgb(parseInt(args[2]) / 360, parseInt(args[3]) / 100, parseInt(args[4]) / 100);
+					} else {
+						msg.channel.send(`${msg.author} Não é possível usar hexadecimal para os formatos HSL e HSV/HSB!`);
+						return;
+					}
+					break;
+				case 'hsl':
+					if (args.length > 3) {
+						color = hslToRgb(parseInt(args[2]) / 360, parseInt(args[3]) / 100, parseInt(args[4]) / 100);
+					} else {
+						msg.channel.send(`${msg.author} Não é possível usar hexadecimal para os formatos HSL e HSV/HSB!`);
+						return;
+					}
+					break;
+				default:
+					msg.channel.send(`${msg.author} ${args[1]} não está disponível. As disponíveis são: \`rgb\`, \`bgr\`, \`hsv\`/\`hsb\` e \`hsl\``);
+					return;
+			}
 
 		if (isNaN(color) || color === null || color < 0 || color > 16777215) { // 16777215 é o limite
 			msg.channel.send(`${msg.author} Esta cor é inválida!`);

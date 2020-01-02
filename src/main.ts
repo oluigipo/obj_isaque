@@ -79,7 +79,13 @@ client.on("message", (msg: Message) => {
 
 	if (run == undefined || (run.staff && (!Moderation.isAdmin(msg.member) && !msg.member.hasPermission("ADMINISTRATOR")))) return;
 
-	run.run(msg, args);
+	try {
+		run.run(msg, args);
+	} catch (e) {
+		console.log("======================= ERRO =======================");
+		console.log(e);
+		msg.channel.send(`${msg.author} Algo deu beeeeeem errado... Peça para o <@373670846792990720> dar uma averiguada no console!`);
+	}
 });
 
-client.login(fs.readFileSync("./botkey.txt", "utf8")); // A token tá não tá no repositório (obviamente)
+client.login(fs.readFileSync("./botkey.txt", "utf8")); // A token não tá no repositório (obviamente)
