@@ -65,6 +65,7 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 
 client.on("voiceStateUpdate", (oldMember, newMember) => {
 	if (newMember.voiceChannelID === undefined) return;
+	if (newMember.voiceChannelID === oldMember.voiceChannelID) return;
 
 	if (Moderation.isMuted(newMember.user.id)) {
 		if (!newMember.mute) newMember.setMute(true);
