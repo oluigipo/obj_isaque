@@ -86,7 +86,8 @@ export default <Command>{
 				}
 
 				final.title = docs.SearchTitles[ind];
-				final.description = `[[Link](${link})] `;
+				final.description = "";
+				final.url = link;
 				request(link, {}, (error, response) => {
 					if (error) {
 						msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
