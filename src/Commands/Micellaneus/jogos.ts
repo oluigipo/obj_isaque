@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message, RichEmbed } from "discord.js";
 import fs from "fs";
 
@@ -128,7 +128,7 @@ export default <Command>{
 
 		msg.channel.send(final);
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["jogos", "jogo"],
 	shortHelp: "Descubra jogos e desenvolvedores dentro do servidor (Ainda em testes)",
 	longHelp: "Descubra jogos e desenvolvedores dentro do servidor! (Ainda em testes)",

@@ -1,4 +1,4 @@
-import { Command, Arguments, CommonMessages, Roles, Server } from "../../definitions";
+import { Command, Arguments, CommonMessages, Roles, Server, Permission } from "../../definitions";
 import Moderation from "../../Moderation";
 import { Message } from "discord.js";
 
@@ -71,5 +71,5 @@ export default <Command>{
 	longHelp: "Muta um ou mais usuários no servidor por um tempo in/determinado",
 	shortHelp: "Mutar usuários",
 	example: `${Server.prefix}mute @user\n${Server.prefix}mute 30m @user\n${Server.prefix}mute @user1 @user2...\n${Server.prefix}mute 1h @user1 @user2...`,
-	staff: true
+	permissions: Permission.Staff
 };

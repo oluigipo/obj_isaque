@@ -2,7 +2,7 @@
  * Este parser é um recursive-descent parser
  */
 
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message } from "discord.js";
 import { isUndefined, isNull } from "util";
 
@@ -274,7 +274,7 @@ export default <Command>{
 		}
 
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["calc"],
 	shortHelp: "Sua calculadora do discord!",
 	longHelp: "Esta calculadora possui as seguintes operações: `+`, `-`, `*`, `/` e `**` (potência). Também é possível usar constantes e funções matemáticas nela, como por exemplo `sin(x)`, `random()` e `atan2(0,-1)`. Se quiser conferir quais funções e constantes eu possuo ou até mesmo ver como isso funciona, você pode entrar no meu repositório usando o comando `" + Server.prefix + "github`!",

@@ -1,4 +1,4 @@
-import { Command, Arguments, CommonMessages, Server } from "../../definitions";
+import { Command, Arguments, CommonMessages, Server, Permission } from "../../definitions";
 import cmds from "../index";
 import { Message, RichEmbed } from "discord.js";
 import Moderation from "../../Moderation";
@@ -26,7 +26,7 @@ export default <Command>{
 					return;
 				}
 
-				final.title = `Comando: ${command.aliases[0]}${(command.staff ? " (Staff Only)" : "")}`;
+				final.title = `Comando: ${command.aliases[0]}${((command.permissions & Permission.Staff) ? " (Staff Only)" : "")}`;
 				final.description = command.longHelp;
 				if (command.aliases.length > 1) {
 					final.addField("Aliases", `\`${command.aliases.join('`, `')}\``);
@@ -44,7 +44,7 @@ export default <Command>{
 				for (let i = (num - 1) * 10; count < 10; i++) {
 					let cmd = cmds[i];
 					if (cmd === undefined) break;
-					if (cmd.staff && !isAdm) continue;
+					if ((cmd.permissions & Permission.Staff) && !isAdm) continue;
 					final.addField(cmd.aliases[0], cmd.shortHelp);
 					++count;
 				}
@@ -56,7 +56,7 @@ export default <Command>{
 			for (let i = 0; count < 10; i++) {
 				let cmd = cmds[i];
 				if (cmd === undefined) break;
-				if (cmd.staff && !isAdm) continue;
+				if ((cmd.permissions & Permission.Staff) && !isAdm) continue;
 				let helpMessage = cmd.shortHelp[cmd.shortHelp.length - 1].includes('!') ? cmd.shortHelp : `${cmd.shortHelp}.`;
 				final.addField(cmd.aliases[0], helpMessage);
 				++count;
@@ -65,7 +65,7 @@ export default <Command>{
 
 		msg.channel.send(final);
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["help", "ajuda"],
 	shortHelp: "Helpa aqui!",
 	longHelp: "HEEEELP",

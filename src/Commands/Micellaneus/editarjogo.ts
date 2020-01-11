@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message } from "discord.js";
 import fs from "fs";
 
@@ -240,7 +240,7 @@ export default <Command>{
 			}
 		}
 	},
-	staff: true,
+	permissions: Permission.Staff,
 	aliases: ["editarjogo", "editgame", "game"],
 	shortHelp: "Editar os jogos registrados no bot",
 	longHelp: "Comando para editar, criar e deletar jogos no sistema do bot.",

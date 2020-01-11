@@ -1,4 +1,4 @@
-import { Command, Arguments, Server } from "../../definitions";
+import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
 import { Bank } from "../../Cassino";
 
@@ -24,7 +24,7 @@ export default <Command>{
 		text += "```";
 		msg.channel.send(text);
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["rank"],
 	shortHelp: "Veja quais são os maiores burgueses do servidor",
 	longHelp: "Saiba qual é o rank das pessoas mais ricas do servidor",

@@ -1,5 +1,5 @@
 import { Client, Message, GuildMember, TextChannel } from "discord.js";
-import { Command, Arguments, Roles, Server, Time, Channels } from "./definitions";
+import { Command, Arguments, Roles, Server, Time, Channels, Permission } from "./definitions";
 import { Bank } from "./Cassino";
 import Moderation from "./Moderation";
 import cmds from './Commands';
@@ -77,7 +77,7 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
 client.on("message", (msg: Message) => {
 	if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text") return;
 	onUserMessage(msg);
-	if (msg.content.slice(0, prefix.length) != prefix) {
+	if (msg.content.slice(0, prefix.length) !== prefix) {
 		let m = msg.mentions.members.first();
 		if (m !== undefined && m.user.id === client.user.id && msg.content[msg.content.length - 1] === '?') {
 			msg.channel.send(`${msg.author} ${Math.random() >= 0.5 ? "Sim" : "Não"}`);
@@ -88,7 +88,12 @@ client.on("message", (msg: Message) => {
 	const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ').filter((a) => a !== "");
 	const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0].toLowerCase()));
 
-	if (run == undefined || (run.staff && (!Moderation.isAdmin(msg.member) && !msg.member.hasPermission("ADMINISTRATOR")))) return;
+	if (run == undefined) return;
+
+	// validar permissões
+	if ((run.permissions & Permission.Staff) && !Moderation.isAdmin(msg.member)) return;
+	if ((run.permissions & Permission.Shitpost) && msg.channel.id !== Channels.shitpost) return;
+	if ((run.permissions & Permission.Dev) && msg.author.id !== "373670846792990720") return;
 
 	try {
 		run.run(msg, args);

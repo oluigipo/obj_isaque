@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message } from "discord.js";
 import { Bank } from "../../Cassino";
 
@@ -56,7 +56,7 @@ export default <Command>{
 				}
 			})
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["slotmachine", "caçaniquel", "slotm"],
 	shortHelp: "Slot-Machine",
 	longHelp: "",

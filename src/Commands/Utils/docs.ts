@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message, RichEmbed } from "discord.js";
 import * as stringSimilarity from 'string-similarity';
 import request from 'request';
@@ -150,7 +150,7 @@ export default <Command>{
 			console.log(e);
 		}
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["docs"],
 	shortHelp: "A documentação do GMS2",
 	longHelp: "Este comando pesquisa uma palavra na documentação do GMS2 e te diz o resultado da pesquisa. Use a vontade!",

@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message, RichEmbed } from "discord.js";
 
 function makeRGB(r: number, g: number, b: number): number {
@@ -185,7 +185,7 @@ export default <Command>{
 
 		msg.channel.send(final);
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["color", "cor"],
 	shortHelp: "Veja uma cor em diferentes formatos (incluindo BGR).",
 	longHelp: "Converta uma cor para outros formatos de um jeito fácil. Os formatos disponíveis são: \`rgb\`, \`bgr\`, \`hsv\`/\`hsb\` e \`hsl\`",

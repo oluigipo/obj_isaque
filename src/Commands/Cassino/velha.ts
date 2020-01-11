@@ -1,4 +1,4 @@
-import { Command, Arguments, Server } from "../../definitions";
+import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
 import Velha from "../../Cassino/velha";
 
@@ -117,7 +117,7 @@ export default <Command>{
 			return str;
 		}
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["velha", "tictactoe"],
 	shortHelp: "Jogo da velha apostado",
 	longHelp: "Aposte dinheiro em um jogo da velha (ou tic-tac-toe). A cartela é representada dessa maneira: \`\`\`\n1 | 2 | 3\n--+---+--\n4 | 5 | 6\n--+---+--\n7 | 8 | 9\n```Cada jogador escolherá um lugar para jogar escolhendo um número da cartela",

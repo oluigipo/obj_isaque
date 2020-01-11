@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, CommonMessages } from "../../definitions";
+import { Command, Arguments, Server, CommonMessages, Permission } from "../../definitions";
 import { Message, RichEmbed } from "discord.js";
 
 function makeRGB(r: number, g: number, b: number): number {
@@ -44,7 +44,7 @@ export default <Command>{
 
 		msg.channel.send(final);
 	},
-	staff: false,
+	permissions: Permission.None,
 	aliases: ["number", "numero"],
 	shortHelp: "Mostra como um número é representado em diferentes sistemas numéricos",
 	longHelp: "Mostra como um número é representado no sistema decimal, octal, hexadecimal e binário.",
