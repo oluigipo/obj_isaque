@@ -1,11 +1,13 @@
 import { Message } from "discord.js";
 
 // Types
+
+// este é um bitenum, então você pode misturar as permissões usando o |
 export enum Permission {
-	None = 0,
-	Staff = 1,
-	Shitpost = 2,
-	Dev = 4
+	None = 0,		// nenhuma permissão necessária
+	Staff = 1,		// função exclusiva da staff
+	Shitpost = 2,	// função para ser usada no canal de shitpost
+	Dev = 4			// função exclusiva do tuas nega
 }
 
 export type Arguments = string[];

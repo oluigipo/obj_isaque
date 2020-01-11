@@ -10,7 +10,7 @@
 > **Argumentos:**
 > * `msg: Message`: Mensagem que chamou o comando;
 > * `args: Arguments`: Argumentos do comando.
-* `staff: boolean`: Se a função é exclusiva da Staff;
+* `permissions: Permission`: Permissões necessárias para o uso do comando;
 * `aliases:  string[]`: Todos os *aliases* do comando (Ao menos 1 alias é obrigatório);
 * `shortHelp:  string`: Breve resumo do comando (chamada quando `!!help`);
 * `longHelp:  string`: Mensagem de ajuda do comando (chamada quando `!!help seuComando`);

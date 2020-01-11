@@ -1,10 +1,10 @@
-import { Command, Arguments, Server } from "../../definitions";
+import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
 export default <Command>{
     run: (msg: Message, args: Arguments): void => {
     
     },
-    staff: false,
+    permissions: Permission.None,
     aliases: ["cmd"],
     shortHelp: "",
     longHelp: "",
