@@ -56,7 +56,7 @@ export default <Command>{
 				}
 			})
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["slotmachine", "caçaniquel", "slotm"],
 	shortHelp: "Slot-Machine",
 	longHelp: "",

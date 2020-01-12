@@ -25,7 +25,7 @@ export default <Command>{
 			msg.channel.send(`${msg.author} O saldo do(a) ${m.user.tag} é \`$${saldo}\``);
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["saldo", "balance"],
 	shortHelp: "Veja quanto dinheiro você tem em sua conta",
 	longHelp: "Veja quanto saldo há em sua conta",

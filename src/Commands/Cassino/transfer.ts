@@ -34,7 +34,7 @@ export default <Command>{
 			case 1: msg.channel.send(`${msg.author} Você transferiu \`${qnt}\` para ${member.user.tag}!`); break;
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["transfer", "transferir"],
 	shortHelp: "Transfira dinheiro para outro usuário",
 	longHelp: "Transfira dinheiro para outro usuário",

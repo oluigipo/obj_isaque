@@ -24,7 +24,7 @@ export default <Command>{
 		text += "```";
 		msg.channel.send(text);
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["rank"],
 	shortHelp: "Veja quais são os maiores burgueses do servidor",
 	longHelp: "Saiba qual é o rank das pessoas mais ricas do servidor",

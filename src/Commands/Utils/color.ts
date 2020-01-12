@@ -189,5 +189,5 @@ export default <Command>{
 	aliases: ["color", "cor"],
 	shortHelp: "Veja uma cor em diferentes formatos (incluindo BGR).",
 	longHelp: "Converta uma cor para outros formatos de um jeito fácil. Os formatos disponíveis são: \`rgb\`, \`bgr\`, \`hsv\`/\`hsb\` e \`hsl\`",
-	example: `${Server.prefix}color rgb RRGGBB\n${Server.prefix}color hsv H S V\n${Server.prefix}color rgb R G B`
+	example: `${Server.prefix}color rgb RRGGBB\n${Server.prefix}color hsv H S V\n${Server.prefix}color rgb R G B\n${Server.prefix}color #RRGGBB`
 };

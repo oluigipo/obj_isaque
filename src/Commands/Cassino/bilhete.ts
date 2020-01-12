@@ -29,7 +29,7 @@ export default <Command>{
 			msg.channel.send(`${msg.author} Você comprou ${qnt} bilhete(s). Boa sorte!`);
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["bilhete"],
 	shortHelp: "Compre bilhetes para participar da loteria. Quanto mais você compra, maiores as suas chances",
 	longHelp: "Compre biletes para participar da loteria. Quantos mais você comprar, maiores as suas chances de vencer.",

@@ -12,6 +12,8 @@ const client = new Client();
 const invites: any = {};
 const prefix = "!!";
 
+let typing = 0;
+
 function onUserMessage(msg: Message) {
 	let chn: TextChannel = <TextChannel>msg.channel;
 	if (chn.id === Channels.shitpost || chn.id === Channels.music || chn.name.startsWith("jogos-bot")) return;
@@ -91,12 +93,30 @@ client.on("message", (msg: Message) => {
 	if (run == undefined) return;
 
 	// validar permissões
-	if ((run.permissions & Permission.Staff) && !Moderation.isAdmin(msg.member)) return;
-	if ((run.permissions & Permission.Shitpost) && msg.channel.id !== Channels.shitpost) return;
+	if (!Moderation.isAdmin(msg.member)) {
+		let pass = false;
+		if (run.permissions === Permission.None) pass = true;
+		if ((run.permissions & Permission.Shitpost) && msg.channel.id === Channels.shitpost) pass = true;
+		if ((run.permissions & Permission.Cassino) && Channels.cassino.includes(msg.channel.id)) pass = true;
+		if (!!(run.permissions & Permission.Staff)) return;
+
+		if (!pass) {
+			msg.channel.send(`${msg.author} Você não pode usar esse comando aqui...`).then(mesg => setTimeout(() => {
+				(<Message>mesg).delete();
+				msg.delete();
+			}, Time.second * 5));
+			return;
+		}
+	}
+
 	if ((run.permissions & Permission.Dev) && msg.author.id !== "373670846792990720") return;
 
 	try {
-		run.run(msg, args);
+		if (typing++ === 0) msg.channel.startTyping();
+		setTimeout(() => {
+			run.run(msg, args);
+			if (--typing === 0) msg.channel.stopTyping(true);
+		}, 300);
 	} catch (e) {
 		console.log("======================= ERRO =======================");
 		console.log(e);

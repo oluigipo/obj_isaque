@@ -13,7 +13,7 @@ export default <Command>{
 			msg.channel.send(`${msg.author} Você resgatou \`$${result}\``);
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["semanal"],
 	shortHelp: "Resgate uma quantidade de dinheiro semanalmente",
 	longHelp: "Resgate uma certa quantidade de dinheiro semanalmente",

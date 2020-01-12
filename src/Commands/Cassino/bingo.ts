@@ -35,7 +35,7 @@ export default <Command>{
 			Bingo.setCurrent(new Bingo(msg, timeToRun, size, prize));
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["bingo"],
 	shortHelp: "Inicie uma partida de bingo",
 	longHelp: "Inicie uma partida de bingo. Para ganhar é necessário fazer uma linha ou uma coluna",

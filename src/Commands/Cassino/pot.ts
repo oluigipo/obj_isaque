@@ -12,7 +12,7 @@ export default <Command>{
 		const result = Loteria.currentLoteria.pot();
 		msg.channel.send(`${msg.author} A quantidade de dinheiro acumulada é ${result}`);
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["pot"],
 	shortHelp: "Veja quanto dinheiro está acumulado numa loteria",
 	longHelp: "Veja quanto dinheiro está acumulado numa loteria acontecendo agora",

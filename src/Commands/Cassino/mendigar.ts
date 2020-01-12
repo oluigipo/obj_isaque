@@ -15,7 +15,7 @@ export default <Command>{
 			msg.channel.send(`${msg.author} Parabéns! Alguém te doou \`$${result}\`!`);
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["mendigar"],
 	shortHelp: "Está com pouca grana? Não se preocupe, pois este comando existe para te ajudar",
 	longHelp: "Mendigue um pouco de dinheiro. Vai que alguém te dá algo. Obs.: Você só pode mendigar uma vez por dia",

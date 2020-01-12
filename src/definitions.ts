@@ -7,7 +7,8 @@ export enum Permission {
 	None = 0,		// nenhuma permissão necessária
 	Staff = 1,		// função exclusiva da staff
 	Shitpost = 2,	// função para ser usada no canal de shitpost
-	Dev = 4			// função exclusiva do tuas nega
+	Dev = 4,		// função exclusiva do tuas nega
+	Cassino = 8
 }
 
 export type Arguments = string[];
@@ -37,7 +38,8 @@ export const Server = {
 
 export const Channels = {
 	shitpost: "553933292542361601",
-	music: "621805258519216130"
+	music: "621805258519216130",
+	cassino: ["649336757653078036", "649336936732950559"]
 }
 
 export const Files = {

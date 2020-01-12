@@ -11,7 +11,7 @@ export default <Command>{
 			msg.channel.send(`${msg.author} Você já está registrado!`);
 		}
 	},
-	permissions: Permission.None,
+	permissions: Permission.Shitpost | Permission.Cassino,
 	aliases: ["register", "registrar"],
 	shortHelp: "Te registra no Banco",
 	longHelp: "Com este comando, você irá se registrar no Banco do servidor. Este é o primeiro passo para participar de eventos como a loteria, corrida de cavalos, etc",
