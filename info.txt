@@ -6,7 +6,7 @@ export default <Command>{
     },
     permissions: Permission.None,
     aliases: ["cmd"],
-    shortHelp: "",
-    longHelp: "",
+    shortHelp: ".",
+    longHelp: ".",
     example: `${Server.prefix}`
 };

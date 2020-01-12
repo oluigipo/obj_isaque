@@ -30,7 +30,7 @@ export default <Command>{
 		if (msg.channel.id !== Channels.shitpost) return;
 		let now = Date.now();
 
-		if (true) { // lastCached + timePerCache < now || index >= cache.length
+		if (lastCached + timePerCache < now || index >= cache.length) {
 			request("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100", {}, (error, response) => {
 				if (error) {
 					console.log(error);
@@ -49,7 +49,7 @@ export default <Command>{
 	},
 	permissions: Permission.Shitpost,
 	aliases: ["ph", "programmerhumor"],
-	shortHelp: "",
-	longHelp: "",
+	shortHelp: "/r/ProgrammerHumor",
+	longHelp: "Pega um meme no top 100 do [/r/ProgrammerHumor](https://reddit.com/r/ProgrammerHumor).",
 	example: `${Server.prefix}ph`
 };
