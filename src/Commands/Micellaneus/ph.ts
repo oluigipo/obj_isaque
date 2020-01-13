@@ -27,7 +27,6 @@ function sendMeme(msg: Message) {
 
 export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
-		if (msg.channel.id !== Channels.shitpost) return;
 		let now = Date.now();
 
 		if (lastCached + timePerCache < now || index >= cache.length) {

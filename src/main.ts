@@ -51,18 +51,22 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 	if (Moderation.isMuted(member.user.id))
 		member.addRole(Roles.Muted);
 
-	member.guild.fetchInvites().then(guildInvites => {
-		const ei = invites[member.guild.id];
-		invites[member.guild.id] = guildInvites;
-		const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
-		//const inviter = invite.inviter.id;
+	try {
+		member.guild.fetchInvites().then(guildInvites => {
+			const ei = invites[member.guild.id];
+			invites[member.guild.id] = guildInvites;
+			const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
+			//const inviter = invite.inviter.id;
 
-		if (invite !== null && invite.code === Server.specialInvite) {
-			member.addRole(Roles.Aluno);
-		} else {
-			member.addRole(Roles.Default);
-		}
-	});
+			if (invite !== null && invite.code === Server.specialInvite) {
+				member.addRole(Roles.Aluno);
+			} else {
+				member.addRole(Roles.Default);
+			}
+		});
+	} catch (e) {
+		member.addRole(Roles.Default);
+	}
 });
 
 client.on("voiceStateUpdate", (oldMember, newMember) => {

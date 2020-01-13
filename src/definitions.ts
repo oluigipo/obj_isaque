@@ -33,7 +33,8 @@ export const Roles = {
 export const Server = {
 	specialInvite: "p9WN6Rx",
 	id: "507550989629521922",
-	prefix: "!!"
+	prefix: "!!",
+	botcolor: 0x30a246
 };
 
 export const Channels = {
