@@ -8,5 +8,6 @@ import num from "./number";
 import calc from "./calc";
 import color from "./color";
 import docs from "./docs";
+import curso from "./curso";
 
-export default <Command[]>[ping, help, nt, github, num, calc, color, docs];
+export default <Command[]>[ping, help, nt, github, num, calc, color, docs, curso];
