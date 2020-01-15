@@ -2,7 +2,8 @@ import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
 
 const links: any = {
-
+	"330403904992837632": "https://go.hotmart.com/Y17948280P",
+	"338717274032701460": "https://go.hotmart.com/V17855634L"
 };
 
 export default <Command>{

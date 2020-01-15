@@ -4,6 +4,7 @@ import { Bank } from "./Cassino";
 import Moderation from "./Moderation";
 import cmds from './Commands';
 import fs from "fs";
+import { start } from "./Shop";
 
 const wait = require('util').promisify(setTimeout);
 
@@ -40,6 +41,7 @@ client.on("ready", () => {
 
 	const curr = Date.now();
 	setTimeout(Moderation.autoUnmute, Time.minute - (curr % Time.minute), client);
+	start();
 });
 
 client.on("guildMemberAdd", (member: GuildMember) => {
@@ -92,9 +94,15 @@ client.on("message", (msg: Message) => {
 	}
 
 	const args: Arguments = msg.content.slice(prefix.length, msg.content.length).split(' ').filter((a) => a !== "");
-	const run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0].toLowerCase()));
+	if (args.length === 0) return;
+	let run: Command | undefined = cmds.find((v: Command) => v.aliases.includes(args[0].toLowerCase()));
 
-	if (run == undefined) return;
+	if (run === void 0) return;
+
+	if (run.subcommands !== void 0) {
+		const cc = run.subcommands.find(c => c.aliases.includes(args[1]));
+		if (cc !== void 0) run = cc;
+	}
 
 	// validar permissões
 	if (!Moderation.isAdmin(msg.member)) {
@@ -102,6 +110,7 @@ client.on("message", (msg: Message) => {
 		if (run.permissions === Permission.None) pass = true;
 		if ((run.permissions & Permission.Shitpost) && msg.channel.id === Channels.shitpost) pass = true;
 		if ((run.permissions & Permission.Cassino) && Channels.cassino.includes(msg.channel.id)) pass = true;
+		if (msg.guild.id !== Server.id) pass = true;
 		if (!!(run.permissions & Permission.Staff)) return;
 
 		if (!pass) {
@@ -118,7 +127,7 @@ client.on("message", (msg: Message) => {
 	try {
 		if (typing++ === 0) msg.channel.startTyping();
 		setTimeout(() => {
-			run.run(msg, args);
+			(<Command>run).run(msg, args);
 			if (--typing === 0) msg.channel.stopTyping(true);
 		}, 300);
 	} catch (e) {

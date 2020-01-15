@@ -19,6 +19,7 @@ export interface Command {
 	shortHelp: string;
 	longHelp: string;
 	example: string;
+	subcommands?: Command[];
 }
 
 // Constants
@@ -58,11 +59,12 @@ export const Time = {
 
 export const Emojis = {
 	yes: '✅',
+	no: '<:error:666740656483467274>',
 	horse: '🏇'
 };
 
 export const CommonMessages = {
-	syntaxError: "Sintaxe incorreta.",
+	syntaxError: "Sintaxe incorreta. Tente ver como esse comando funciona usando o comando `" + Server.prefix + "help comando`",
 };
 
 // Functions

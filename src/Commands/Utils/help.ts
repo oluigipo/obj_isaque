@@ -103,6 +103,23 @@ export default <Command>{
 				return;
 			}
 
+			(function () {
+				if (command.subcommands !== void 0) {
+					if (args.length > 2) {
+						let cc = command.subcommands.find(v => v.aliases.includes(args[2]));
+						if (cc !== void 0) {
+							command = cc;
+							return;
+						}
+					}
+					let ccc = [];
+					for (let i = 0; i < command.subcommands.length; i++) {
+						ccc.push(command.subcommands[i].aliases[0]);
+					}
+					final.addField("Subcomandos", ccc.join('\n'));
+				}
+			})();
+
 			final.title = `Comando: ${command.aliases[0]}${((command.permissions & Permission.Staff) ? " (Staff Only)" : "")}`;
 			final.description = command.longHelp;
 			if (command.aliases.length > 1) {

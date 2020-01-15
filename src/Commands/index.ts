@@ -4,4 +4,6 @@ import Utils from "./Utils";
 import Micellaneus from "./Micellaneus";
 import Cassino from "./Cassino";
 
-export default <Command[]>[...Moderation, ...Utils, ...Micellaneus, ...Cassino];
+import Shop from "./Shop";
+
+export default <Command[]>[...Moderation, ...Utils, ...Micellaneus, ...Cassino, Shop];

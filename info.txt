@@ -1,5 +1,6 @@
 import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
+
 export default <Command>{
     run: (msg: Message, args: Arguments): void => {
     

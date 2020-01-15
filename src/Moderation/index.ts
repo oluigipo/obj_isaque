@@ -32,8 +32,8 @@ function autoUnmute(client: Client): void {
 
 			const member = guild.members.find(a => a.id === userid);
 			if (member) {
-				member.removeRole(Roles.Muted);
-				if (member.voiceChannelID !== undefined) member.setMute(false);
+				member.removeRole(Roles.Muted).catch(console.log);
+				if (member.voiceChannelID !== undefined) member.setMute(false).catch(console.log);
 			}
 
 			json.mutes = json.mutes.filter((a, ind) => ind !== i);
@@ -64,8 +64,8 @@ export default {
 
 		const member = guild.members.find(a => a.id === userid);
 		if (member) {
-			member.removeRole(Roles.Muted);
-			member.setMute(false);
+			member.removeRole(Roles.Muted).catch(console.log);
+			member.setMute(false).catch(console.log);
 
 			json.mutes = json.mutes.filter((a) => a.userid !== userid);
 			const _m = JSON.stringify(json);
@@ -89,8 +89,8 @@ export default {
 
 		const member = guild.members.find(a => a.id === userid);
 		if (member) {
-			member.addRole(Roles.Muted);
-			if (member.voiceChannelID !== undefined) member.setMute(true);
+			member.addRole(Roles.Muted).catch(console.log);
+			if (member.voiceChannelID !== undefined) member.setMute(true).catch(console.log);
 
 			json.mutes.push(<Muted>{ userid: userid, duration: duration === undefined ? -1 : duration, time: Date.now() });
 			const _m = JSON.stringify(json);
