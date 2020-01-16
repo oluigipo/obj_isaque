@@ -28,7 +28,7 @@ export default <Command>{
 		msg.channel.send(`${msg.author} Use \`${Server.prefix}help shop\` para ver tudo o que é possível fazer com uma lojinha!`);
 	},
 	permissions: Permission.None,
-	aliases: ["shop", "sp"],
+	aliases: ["shop", "sp", "s"],
 	shortHelp: "Tenha a sua própria lojinha no discord!",
 	longHelp: "Melhore, compartilhe e disputa! Sua lojinha é o seu negócio, você compra upgrades para ganhar mais dinheiro, participa de empresas e tudo mais! Para começar, use `" + Server.prefix + "shop create emoji nome` para começar!",
 	example: `${Server.prefix}shop [comando] ...`,

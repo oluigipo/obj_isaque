@@ -6,7 +6,7 @@ export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
 		const res = userDaily(msg.author.id);
 
-		if (!res.success) msg.channel.send(res.reason);
+		if (!res.success) msg.channel.send(res.reason.replace('#', `${msg.author}`));
 		else msg.channel.send(`💰 Você trabalhou e recebeu \`$${res.extra}\`!`);
 	},
 	permissions: Permission.None,

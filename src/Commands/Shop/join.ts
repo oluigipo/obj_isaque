@@ -6,7 +6,7 @@ export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
 		const result = companyJoin(msg.author.id);
 
-		if (!result.success) msg.channel.send(result.reason);
+		if (!result.success) msg.channel.send(result.reason.replace('#', `${msg.author}`));
 		else msg.channel.send(`${Emojis.yes} **|** ${msg.author} Parabéns, você entrou na **${result.extra}**!`);
 	},
 	permissions: Permission.None,

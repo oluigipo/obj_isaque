@@ -25,7 +25,7 @@ export default <Command>{
 		final.color = Server.botcolor;
 		if (c !== void 0) final.addField("🗃️ Empresa" + (c.members[0] === id ? " (Dono)" : ""), c.name, true);
 		final.addField("💵 Saldo", `$${u.money}`, true);
-		final.addField("📦 Vende", `${emojis.slice(u.emoji, (u.emoji + 2)) ?? '?'}`, true);
+		final.addField("📦 Vende", `${u.emoji ?? '?'}`, true);
 		final.addField("💸 Renda", `$${moneyPerHour(u.upgrades)} p/ Hora`);
 
 		msg.channel.send(final);

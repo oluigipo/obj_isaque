@@ -1,8 +1,8 @@
 import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message, RichEmbed } from "discord.js";
-import { getTop, CLS } from "../../Shop";
+import { getTop, CLS, moneyPerHour } from "../../Shop";
 
-const e = ['🟧', '⬛', '🟫'];
+const e = ['🥇', '🥈', '🥉'];
 export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
 		const users = getTop(CLS.INCOMES);
@@ -12,9 +12,10 @@ export default <Command>{
 		final.author = { name: (msg.member.nickname ? msg.member.nickname : msg.author.username), icon_url: msg.author.avatarURL };
 		final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
 		final.title = "Lojinhas com maior renda!";
+		final.description = "";
 
 		users.forEach((u, i) => {
-			final.addField(`${e[i] ?? ''} ${i + 1}º`, u.name, false);
+			final.description += `${e[i] ?? '⬛'}\`${i + 1}${i === 9 ? '' : ' '}º\` ${u.emoji} ${u.name} \`($${moneyPerHour(u.upgrades)})\`\n`;
 		});
 
 		msg.channel.send(final);

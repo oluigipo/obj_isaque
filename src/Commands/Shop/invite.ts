@@ -26,7 +26,7 @@ export default <Command>{
 		}
 		const result = companyInvite(comp, invited.id);
 
-		if (!result.success) msg.channel.send(result.reason);
+		if (!result.success) msg.channel.send(result.reason.replace('#', `${msg.author}`));
 		else msg.channel.send(`${Emojis.yes} **|** A lojinha **${result.extra}** foi convidada! ${invited}, use \`${Server.prefix}shop join\` para aceitar o convite!`);
 	},
 	permissions: Permission.None,

@@ -8,12 +8,12 @@ export default <Command>{
 		if (args.length === 2) {
 			const u = getUser(msg.author.id);
 			if (u === void 0) {
-				msg.channel.send(`${Emojis.no} **|** Você não tem uma lojinha!`);
+				msg.channel.send(`${Emojis.no} **|** ${msg.author} Você não tem uma lojinha!`);
 				return;
 			}
 			const company = getCompany(u);
 			if (company === void 0) {
-				msg.channel.send(`${Emojis.no} **|** Você não está em uma empresa!`);
+				msg.channel.send(`${Emojis.no} **|** ${msg.author} Você não está em uma empresa!`);
 				return;
 			}
 
@@ -42,7 +42,7 @@ export default <Command>{
 			const name = args.slice(2).join(' ');
 			const result = companyCreate(msg.author.id, name);
 
-			if (!result.success) msg.channel.send(result.reason);
+			if (!result.success) msg.channel.send(result.reason.replace('#', `${msg.author}`));
 			else msg.channel.send(`${Emojis.yes} **|** Parabéns! Você acaba de fundar a **${name}**!`);
 		}
 	},

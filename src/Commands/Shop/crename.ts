@@ -12,7 +12,7 @@ export default <Command>{
 		const name = args.slice(2).join(' ');
 		const result = companyRename(msg.author.id, name);
 
-		if (!result.success) msg.channel.send(result.reason);
+		if (!result.success) msg.channel.send(result.reason.replace('#', `${msg.author}`));
 		else msg.channel.send(`${Emojis.yes} **|** ${msg.author} Você acaba de renomar sua empresa para **${name}**!`);
 	},
 	permissions: Permission.None,

@@ -38,7 +38,7 @@ export default <Command>{
 
 			const res = userBuyUpgrade(u.id, i);
 			if (!res.success) {
-				msg.channel.send(res.reason);
+				msg.channel.send(res.reason.replace('#', `${msg.author}`));
 				return;
 			}
 

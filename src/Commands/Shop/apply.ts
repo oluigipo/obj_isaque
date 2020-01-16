@@ -17,7 +17,7 @@ export default <Command>{
 
 		const result = companyApply(msg.author.id, value);
 
-		if (!result.success) msg.channel.send(result.reason);
+		if (!result.success) msg.channel.send(result.reason.replace('#', `${msg.author}`));
 		else msg.channel.send(`${Emojis.yes} **|** ${msg.author} Você investiu \`$${value}\` em sua empresa!`);
 	},
 	permissions: Permission.None,

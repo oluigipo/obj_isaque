@@ -20,7 +20,7 @@ export default <Command>{
 		const result = userCreate(msg.author.id, emoji, name);
 
 		if (!result.success) {
-			msg.channel.send(result.reason);
+			msg.channel.send(result.reason.replace('#', `${msg.author}`));
 			return;
 		}
 

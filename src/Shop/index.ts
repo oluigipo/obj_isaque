@@ -9,8 +9,8 @@ interface UsersJSON {
 }
 
 const json: UsersJSON = JSON.parse(fs.readFileSync("./data/usersshop.json", "utf8"));
-const fail = (reason: string): ActionResponse => { return { success: false, reason: `${Emojis.no} **|** ${reason}` }; };
-const success = (extra?: any): ActionResponse => { return { success: true, extra: extra }; };
+const fail = (reason: string): __fail => { return { success: false, reason: `${Emojis.no} **|** ${reason}` }; };
+const success = <T>(extra: T): __succ<T> => { return { success: true, extra: extra }; };
 
 export function save() {
 	fs.writeFileSync("./data/usersshop.json", JSON.stringify(json), "utf8");
@@ -85,6 +85,16 @@ export function updateUser(user: User): void {
 	save();
 }
 
+export function userChangeEmoji(userid: string, emoji: string): ActionResponse<string> {
+	const user = getUser(userid);
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
+	if (emojis.indexOf(emoji) === -1) return fail("# Este emoji ~~ainda~~ não é permitido!");
+
+	user.emoji = emoji;
+	updateUser(user);
+	return success(emoji);
+}
+
 export function updateCompany(comp: Company): void {
 	const i = json.companies.findIndex((u) => u.name === comp.name);
 
@@ -110,28 +120,28 @@ export function upgradePrice(upindex: number, level: number): number {
 	return Math.round(upgradePrice(upindex, level - 1) * upgrades[upindex].costMult);
 }
 
-export function userBuyUpgrade(userid: string, upindex: number): ActionResponse {
+export function userBuyUpgrade(userid: string, upindex: number): ActionResponse<undefined> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
-	if (user.upgrades[upindex] >= upgrades[upindex].max) return fail("Este upgrade já está no nível máximo!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
+	if (user.upgrades[upindex] >= upgrades[upindex].max) return fail("# Este upgrade já está no nível máximo!");
 
 	const price = upgradePrice(upindex, user.upgrades[upindex] + 1);
 
-	if (user.money < price) return fail("Você não tem dinheiro o suficiente!");
+	if (user.money < price) return fail("# Você não tem dinheiro o suficiente!");
 	user.money -= price;
 	user.upgrades[upindex]++;
 
 	updateUser(user);
 
-	return success();
+	return success<undefined>(void 0);
 }
 
-export function userWork(userid: string): ActionResponse {
+export function userWork(userid: string): ActionResponse<number> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const now = Date.now();
-	if (user.lastWork + Time.minute * 5 > now) return fail("Descanse um pouco!");
+	if (user.lastWork + Time.minute * 5 > now) return fail("# Descanse um pouco!");
 
 	const g = 100 * ((getCompany(user)?.level ?? 0) + 1);
 	user.money += g;
@@ -140,12 +150,12 @@ export function userWork(userid: string): ActionResponse {
 	return success(g);
 }
 
-export function userDaily(userid: string): ActionResponse {
+export function userDaily(userid: string): ActionResponse<number> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const now = Date.now();
-	if (user.lastDaily + Time.day > now) return fail("Você ainda não pode resgatar o prêmio diário!");
+	if (user.lastDaily + Time.day > now) return fail("# Você ainda não pode resgatar o prêmio diário!");
 
 	const g = 5000 * ((getCompany(user)?.level ?? 0) + 1);
 	user.money += g;
@@ -154,21 +164,21 @@ export function userDaily(userid: string): ActionResponse {
 	return success(g);
 }
 
-export function userRename(userid: string, name: string): ActionResponse {
+export function userRename(userid: string, name: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	user.name = name;
 	updateUser(user);
 	return success(name);
 }
 
-export function companyCreate(userid: string, name: string): ActionResponse {
+export function companyCreate(userid: string, name: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
-	if (getCompany(name) !== void 0) return fail("Já existe uma empresa com esse nome!");
-	if (getCompany(user) !== void 0) return fail("Você já está em uma empresa!");
-	if (user.money < 50000) return fail("Você não tem dinheiro o suficiente para fundar uma empresa!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
+	if (getCompany(name) !== void 0) return fail("# Já existe uma empresa com esse nome!");
+	if (getCompany(user) !== void 0) return fail("# Você já está em uma empresa!");
+	if (user.money < 50000) return fail("# Você não tem dinheiro o suficiente para fundar uma empresa!");
 
 	const company: Company = {
 		level: 1,
@@ -181,13 +191,13 @@ export function companyCreate(userid: string, name: string): ActionResponse {
 	return success(name);
 }
 
-export function companyApply(userid: string, qnt: number): ActionResponse {
+export function companyApply(userid: string, qnt: number): ActionResponse<number> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const company = getCompany(user);
-	if (company === void 0) return fail("Você não está em uma empresa!");
-	if (user.money < qnt) return fail("Você não tem dinheiro o suficiente para doar essa quantidade!");
+	if (company === void 0) return fail("# Você não está em uma empresa!");
+	if (user.money < qnt) return fail("# Você não tem dinheiro o suficiente para doar essa quantidade!");
 
 	company.money += qnt;
 	user.money -= qnt;
@@ -200,10 +210,10 @@ export function companyUpgradePrice(level: number): number {
 	return 1000 * (10 ** level);
 }
 
-export function companyJoin(userid: string): ActionResponse {
+export function companyJoin(userid: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
-	if (user.invite === -1) return fail("Você não foi convidado para nenhuma empresa, você pode começar a sua!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
+	if (user.invite === -1) return fail("# Você não foi convidado para nenhuma empresa, você pode começar a sua!");
 
 	const company = json.companies[user.invite];
 	if (company === void 0) {
@@ -226,17 +236,17 @@ export function companyProducts(comp: Company): string {
 		const user = getUser(id);
 		if (user === void 0) throw `MASUQ????`;
 
-		products += emojis.slice(user.emoji, (user.emoji + 2));
+		products += user.emoji;
 	});
 
 	return products;
 }
 
-export function companyInvite(comp: Company, userid: string): ActionResponse {
+export function companyInvite(comp: Company, userid: string): ActionResponse<string> {
 	let user = getUser(userid);
-	if (user === void 0) return fail("Este usuário não tem uma lojinha!");
-	if (getCompany(user) !== void 0) return fail("Este usuário já está em uma empresa!");
-	if (user.invite !== -1) return fail("Este usuário já tem um convite pendente!");
+	if (user === void 0) return fail("# Este usuário não tem uma lojinha!");
+	if (getCompany(user) !== void 0) return fail("# Este usuário já está em uma empresa!");
+	if (user.invite !== -1) return fail("# Este usuário já tem um convite pendente!");
 
 	user.invite = json.companies.findIndex(c => c.name === comp.name);
 	if (user.invite === -1) throw `MASUQ 2????`;
@@ -257,45 +267,45 @@ export function companyIncomes(comp: Company): number {
 	return incomes;
 }
 
-export function companyDeny(userid: string): ActionResponse {
+export function companyDeny(userid: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
-	if (user.invite === -1) return fail("Você não foi convidado para nenhuma empresa!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
+	if (user.invite === -1) return fail("# Você não foi convidado para nenhuma empresa!");
 
 	const company = json.companies[user.invite];
 	if (company === void 0) {
 		user.invite = -1;
 		updateUser(user);
-		return fail("Convite inválido!");
+		return fail("# Convite inválido!");
 	}
 
 	user.invite = -1;
 	return success(company.name);
 }
 
-export function companyLeave(userid: string): ActionResponse {
+export function companyLeave(userid: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const company = getCompany(user);
-	if (company === void 0) return fail("Você não está em uma empresa!");
-	if (company.members[0] === user.id) return fail("Você não pode sair de uma empresa que você tem posse!");
+	if (company === void 0) return fail("# Você não está em uma empresa!");
+	if (company.members[0] === user.id) return fail("# Você não pode sair de uma empresa que você tem posse!");
 
 	company.members = company.members.filter(m => m !== user.id);
 	updateCompany(company);
 	return success(company.name);
 }
 
-export function companyLevelUp(userid: string): ActionResponse {
+export function companyLevelUp(userid: string): ActionResponse<number> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const company = getCompany(user);
-	if (company === void 0) return fail("Você não está em uma empresa!");
-	if (company.members[0] !== user.id) return fail("Você não pode dar Level Up numa empresa que você não tem posse!");
-	if (company.level > 5) return fail("Sua empresa já está no nível máximo!");
+	if (company === void 0) return fail("# Você não está em uma empresa!");
+	if (company.members[0] !== user.id) return fail("# Você não pode dar Level Up numa empresa que você não tem posse!");
+	if (company.level > 5) return fail("# Sua empresa já está no nível máximo!");
 	const cost = companyUpgradePrice(company.level);
-	if (company.money < cost) return fail("Sua empresa não tem dinheiro o suficiente para subir de nível!");
+	if (company.money < cost) return fail("# Sua empresa não tem dinheiro o suficiente para subir de nível!");
 
 	company.money -= cost;
 	company.level++;
@@ -303,41 +313,42 @@ export function companyLevelUp(userid: string): ActionResponse {
 	return success(company.level);
 }
 
-export function companyDelete(userid: string): ActionResponse {
+export function companyDelete(userid: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const company = getCompany(user);
-	if (company === void 0) return fail("Você não está em uma empresa!");
-	if (company.members[0] !== user.id) return fail("Você não pode deletar de uma empresa que você não tem posse!");
+	if (company === void 0) return fail("# Você não está em uma empresa!");
+	if (company.members[0] !== user.id) return fail("# Você não pode deletar de uma empresa que você não tem posse!");
 
 	json.companies = json.companies.filter(c => c.name !== company.name);
 	save();
 	return success(company.name);
 }
 
-export function companyRename(userid: string, name: string): ActionResponse {
+export function companyRename(userid: string, name: string): ActionResponse<string> {
 	const user = getUser(userid);
-	if (user === void 0) return fail("Você não tem uma lojinha!");
+	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const comp = getCompany(user);
-	if (comp === void 0) return fail("Você não está em uma empresa!");
-	if (user.id !== comp.members[0]) return fail("Você não é o dono dessa empresa!");
+	if (comp === void 0) return fail("# Você não está em uma empresa!");
+	if (user.id !== comp.members[0]) return fail("# Você não é o dono dessa empresa!");
 
 	comp.name = name;
 	updateCompany(comp);
 	return success(name);
 }
 
-export function userCreate(userid: string, emoji: string, name: string): ActionResponse {
+export function userCreate(userid: string, emoji: string, name: string): ActionResponse<undefined> {
 	let user = getUser(userid);
-	if (user !== void 0) return fail("Você já tem uma lojinha!");
+	if (user !== void 0) return fail("# Você já tem uma lojinha!");
+
 
 	user = {
 		id: userid,
 		money: 0,
 		upgrades: Array<number>(upgrades.length).fill(0),
-		emoji: emojis.indexOf(emoji),
+		emoji: emoji,
 		name: name,
 		slogan: `Dica: use \`${Server.prefix}shop slogan\` para escolher um slogan!\nAliás, markdown é permitido!`,
 		lastWork: 0,
@@ -346,13 +357,13 @@ export function userCreate(userid: string, emoji: string, name: string): ActionR
 	};
 
 	updateUser(user);
-	return success();
+	return success<undefined>(void 0);
 }
 
-export type ActionResponse = __succ | __fail;
-interface __succ {
+export type ActionResponse<T> = __succ<T> | __fail;
+interface __succ<T> {
 	success: true;
-	extra?: any;
+	extra: T;
 }
 interface __fail {
 	success: false;
