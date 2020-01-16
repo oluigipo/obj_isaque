@@ -1,6 +1,6 @@
 import { User, Company, upgrades, emojis } from "./defs";
 import fs from "fs";
-import { Server, Emojis, Time } from "../definitions";
+import { Server, Emojis, Time, formatTime } from "../definitions";
 
 interface UsersJSON {
 	users: User[];
@@ -155,7 +155,7 @@ export function userDaily(userid: string): ActionResponse<number> {
 	if (user === void 0) return fail("# Você não tem uma lojinha!");
 
 	const now = Date.now();
-	if (user.lastDaily + Time.day > now) return fail("# Você ainda não pode resgatar o prêmio diário!");
+	if (user.lastDaily + Time.day > now) return fail(`# Faltam **${formatTime(Time.day - (now - user.lastDaily))}** para você poder resgatar o prêmio diário!`);
 
 	const g = 5000 * ((getCompany(user)?.level ?? 0) + 1);
 	user.money += g;

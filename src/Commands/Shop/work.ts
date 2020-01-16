@@ -12,6 +12,6 @@ export default <Command>{
 	permissions: Permission.None,
 	aliases: ["work", "trabalhar", "w"],
 	shortHelp: "Trabalhe em sua loja e ganhe dinheiro!",
-	longHelp: "Trabalhe em sua loja e ganhe dinheiro! Você só pode trabalhar a cada 5 minutos, pois todo mundo precisa de um tempo para descançar.",
+	longHelp: "Trabalhe em sua loja e ganhe dinheiro! Você só pode trabalhar a cada 5 minutos, todo mundo precisa de um tempo para descançar.",
 	example: `${Server.prefix}shop work`
 };

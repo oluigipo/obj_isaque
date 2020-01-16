@@ -49,6 +49,6 @@ export default <Command>{
 	permissions: Permission.None,
 	aliases: ["company", "empresa", "c"],
 	shortHelp: "Visualize ou inicie agora a sua empresa!",
-	longHelp: "Visualize ou inicie agora a sua empresa! Uma empresa é um grupo de lojinhas. Cada empresa tem seu nível, quanto maior ele for, maior o bonus que você receberá por trabalhar e pelo bônus diário diariamente! O custo para criar uma empresa é `$50.000`",
+	longHelp: "Visualize ou inicie agora a sua empresa! Uma empresa é um grupo de lojinhas. Cada empresa tem seu nível, quanto maior ele for, maior o bonus que você receberá por trabalhar e pelo bônus diário! O custo para criar uma empresa é `$50.000`",
 	example: `\`${Server.prefix}shop company nome\` Criar uma empresa\n\`${Server.prefix}shop company\` Visualizar sua empresa`
 };

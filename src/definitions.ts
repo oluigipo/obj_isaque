@@ -109,3 +109,34 @@ export function formatDate(ms: number): string {
 	let final = str.join(", ") + " e " + last;
 	return final;
 }
+
+export function formatTime(ms: number): string {
+	switch (true) {
+		case ms > Time.week:
+			const weeks: number = Math.trunc(ms / Time.week);
+			ms = ms % Time.week;
+			return (`${weeks} semana${weeks > 1 ? 's' : ''}`);
+
+		case ms > Time.day:
+			const days = Math.trunc(ms / Time.day);
+			ms = ms % Time.day;
+			return (`${days} dia${days > 1 ? 's' : ''}`);
+
+		case ms > Time.hour:
+			const hours = Math.trunc(ms / Time.hour);
+			ms = ms % Time.hour;
+			return (`${hours} hora${hours > 1 ? 's' : ''}`);
+
+		case ms > Time.minute:
+			const minutes = Math.trunc(ms / Time.minute);
+			ms = ms % Time.minute;
+			return (`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+
+		case ms > Time.second:
+			const seconds = Math.trunc(ms / Time.second);
+			ms = ms % Time.second;
+			return (`${seconds} segundo${seconds > 1 ? 's' : ''}`);
+		default:
+			return `alguns instantes`;
+	}
+}
