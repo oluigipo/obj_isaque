@@ -1,1 +1,142 @@
-{"lastUpdate":1579126644502,"users":[{"id":"373670846792990720","money":1850,"upgrades":[1,2,0,0,0],"emoji":196,"name":"Taverna das Negas","slogan":"beber até morrer!","lastWork":1579126405959,"lastDaily":1579126410019,"invite":-1}],"companies":[]}
+{
+	"lastUpdate": 1579172067494,
+	"users": [
+		{
+			"id": "373670846792990720",
+			"money": 558,
+			"upgrades": [
+				4,
+				2,
+				1,
+				0,
+				2
+			],
+			"emoji": 196,
+			"name": "Taverna das Negas",
+			"slogan": "beber até morrer!",
+			"lastWork": 1579174800361,
+			"lastDaily": 1579126410019,
+			"invite": -1
+		},
+		{
+			"id": "417829177757007872",
+			"money": 23640,
+			"upgrades": [
+				5,
+				2,
+				2,
+				1,
+				1
+			],
+			"emoji": 93,
+			"name": "Doguinho Do Agp 🌭",
+			"slogan": "Onde a gula não é pecado!",
+			"lastWork": 1579142994951,
+			"lastDaily": 1579126985210,
+			"invite": -1
+		},
+		{
+			"id": "365249237598076928",
+			"money": 10440,
+			"upgrades": [
+				5,
+				1,
+				2,
+				0,
+				0
+			],
+			"emoji": 8,
+			"name": "LEMON COMPUTER",
+			"slogan": "O poder e a beleza combinados",
+			"lastWork": 1579128587607,
+			"lastDaily": 1579127439764,
+			"invite": -1
+		},
+		{
+			"id": "310480160640073729",
+			"money": 2489,
+			"upgrades": [
+				10,
+				3,
+				2,
+				3,
+				2
+			],
+			"emoji": 202,
+			"name": "Siphonophore",
+			"slogan": "<:zeidogado_wtf:664901621964341288> vendo comida tipica africana 👉 🍽️",
+			"lastWork": 1579174674548,
+			"lastDaily": 1579127530380,
+			"invite": -1
+		},
+		{
+			"id": "589479580822405132",
+			"money": 10100,
+			"upgrades": [
+				1,
+				1,
+				2,
+				2,
+				0
+			],
+			"emoji": 175,
+			"name": "Carrocinha da Pipoca",
+			"slogan": "Pipoca com ou sem Manteiga e Pipoca Doce :)",
+			"lastWork": 1579142986544,
+			"lastDaily": 1579129209736,
+			"invite": -1
+		},
+		{
+			"id": "361279687701561354",
+			"money": 1300,
+			"upgrades": [
+				0,
+				0,
+				0,
+				0,
+				0
+			],
+			"emoji": 93,
+			"name": "HOT DOGUERIA DO JACKSON",
+			"slogan": "VENDEMOS HAMBURGUER",
+			"lastWork": 1579133749026,
+			"lastDaily": 0,
+			"invite": -1
+		},
+		{
+			"id": "452805455178235906",
+			"money": 1000,
+			"upgrades": [
+				0,
+				0,
+				0,
+				0,
+				0
+			],
+			"emoji": 0,
+			"name": "LojaDoMozartão",
+			"slogan": "Dica: use `!!shop slogan` para escolher um slogan!\nAliás, markdown é permitido!",
+			"lastWork": 0,
+			"lastDaily": 0,
+			"invite": -1
+		},
+		{
+			"id": "475445492818378764",
+			"money": 240,
+			"upgrades": [
+				5,
+				2,
+				0,
+				0,
+				0
+			],
+			"emoji": 65,
+			"name": "Biquera do Zerca Urubu",
+			"slogan": "Aqui o cliente nunca tem razão.",
+			"lastWork": 1579174355673,
+			"lastDaily": 1579174496824,
+			"invite": -1
+		}
+	],
+	"companies": []
+}

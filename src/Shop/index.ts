@@ -38,7 +38,7 @@ function loop() {
 	json.lastUpdate = Date.now();
 	console.log("Atualizou!", Date.now());
 	save();
-	setTimeout(update, Time.hour);
+	setTimeout(loop, Time.hour);
 }
 
 export function moneyPerHour(upgs: number[]): number {
