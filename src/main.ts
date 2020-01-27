@@ -108,7 +108,7 @@ client.on("message", (msg: Message) => {
 	if (!Moderation.isAdmin(msg.member)) {
 		let pass = false;
 		if (run.permissions === Permission.None) pass = true;
-		if ((run.permissions & Permission.Shitpost) && msg.channel.id === Channels.shitpost) pass = true;
+		if ((run.permissions & Permission.Shitpost) && (msg.channel.id === Channels.shitpost || msg.channel.id === Channels.commands)) pass = true;
 		if ((run.permissions & Permission.Cassino) && Channels.cassino.includes(msg.channel.id)) pass = true;
 		if (msg.guild.id !== Server.id) pass = true;
 		if (!!(run.permissions & Permission.Staff)) return;

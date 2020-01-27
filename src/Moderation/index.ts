@@ -108,7 +108,7 @@ export default {
 		return json.mutes.findIndex((user: Muted) => user.userid === userid) !== -1;
 	},
 	isAdmin(member: GuildMember): boolean {
-		return member.roles.has(Roles.Mod);
+		return member.roles.has(Roles.Mod) || member.hasPermission("ADMINISTRATOR");
 	},
 	ban(client: Client, userid: string): boolean {
 		const guild = client.guilds.get(Server.id);

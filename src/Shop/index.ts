@@ -179,6 +179,8 @@ export function companyCreate(userid: string, name: string): ActionResponse<stri
 	if (getCompany(name) !== void 0) return fail("# Já existe uma empresa com esse nome!");
 	if (getCompany(user) !== void 0) return fail("# Você já está em uma empresa!");
 	if (user.money < 50000) return fail("# Você não tem dinheiro o suficiente para fundar uma empresa!");
+	user.money -= 50000;
+	updateUser(user);
 
 	const company: Company = {
 		level: 1,
