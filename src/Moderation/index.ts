@@ -13,9 +13,9 @@ interface MuteJson {
 }
 
 function autoUnmute(client: Client): void {
-	let raw: string = fs.readFileSync(Files.mutes, 'utf8');
+	let raw = fs.readFileSync(Files.mutes, 'utf8');
 	let json: MuteJson = JSON.parse(raw);
-	const now: number = Date.now();
+	const now = Date.now();
 
 	for (let i = 0; i < json.mutes.length;) {
 		const userid = json.mutes[i].userid;
@@ -33,7 +33,7 @@ function autoUnmute(client: Client): void {
 			const member = guild.members.find(a => a.id === userid);
 			if (member) {
 				member.removeRole(Roles.Muted).catch(console.log);
-				if (member.voiceChannelID !== undefined) member.setMute(false).catch(console.log);
+				if (member.voiceChannel !== undefined) member.setMute(false).catch(console.log);
 			}
 
 			json.mutes = json.mutes.filter((a, ind) => ind !== i);
@@ -52,12 +52,12 @@ function autoUnmute(client: Client): void {
 export default {
 	autoUnmute,
 	unmute(client: Client, userid: string): boolean {
-		let raw: string = fs.readFileSync(Files.mutes, 'utf8');
+		let raw = fs.readFileSync(Files.mutes, 'utf8');
 		let json: MuteJson = JSON.parse(raw);
 
 		const guild = client.guilds.get(Server.id);
 
-		if (guild == undefined) {
+		if (guild === undefined) {
 			console.error("WTF");
 			return false;
 		}
@@ -82,7 +82,7 @@ export default {
 
 		const guild = client.guilds.get(Server.id);
 
-		if (guild == undefined) {
+		if (guild === undefined) {
 			console.error("WTF");
 			return false;
 		}
@@ -90,7 +90,7 @@ export default {
 		const member = guild.members.find(a => a.id === userid);
 		if (member) {
 			member.addRole(Roles.Muted).catch(console.log);
-			if (member.voiceChannelID !== undefined) member.setMute(true).catch(console.log);
+			if (member.voiceChannel !== undefined) member.setMute(true).catch(console.log);
 
 			json.mutes.push(<Muted>{ userid: userid, duration: duration === undefined ? -1 : duration, time: Date.now() });
 			const _m = JSON.stringify(json);
@@ -113,14 +113,14 @@ export default {
 	ban(client: Client, userid: string): boolean {
 		const guild = client.guilds.get(Server.id);
 
-		if (guild == undefined) {
+		if (guild === undefined) {
 			console.error("WTF");
 			return false;
 		}
 
 		const member = guild.members.find(a => a.id === userid);
 		if (member && member.bannable) {
-			member.ban();
+			member.ban().catch(console.log);
 			return true;
 		}
 

@@ -92,6 +92,8 @@ const consts: any = {
 
 let expr: string[];
 
+const errorExp = (exp: string, got: string) => { throw `Era esperado um '${exp}', mas foi encontrado um '${got}'!` };
+
 function nextToken(): string {
 	let r = expr.shift();
 	if (isUndefined(r)) return '';
@@ -103,17 +105,20 @@ function currentToken(): string {
 }
 
 function parseFactor(): number {
-	if (currentToken() === ')') return NaN;
+	if (currentToken() === ')') errorExp("NUMBER", ')');
 	let t = nextToken();
 
 	if (t === '-') {
-		return -parseFactor();
+		return -parsePot();
 	} else if (t === '~') {
-		return ~parseFactor();
+		return ~parsePot();
 	}
 
 	if (t === '(') { // Parênteses
-		return parse();
+		let r = parse();
+		let oo: string;
+		if ((oo = nextToken()) !== ')') errorExp(')', oo);
+		return r;
 	} else { // Número, constante ou função
 		let a = rules[rules.length - 1].re.exec(t);
 
@@ -164,13 +169,14 @@ function parsePot(): number {
 function parseMult(): number {
 	let result = parsePot();
 
-	while (currentToken() === '*' || currentToken() === '/') {
-		if (currentToken() === '*') {
-			nextToken();
+	while (currentToken() === '*' || currentToken() === '/' || currentToken() === '%') {
+		let tok = nextToken();
+		if (tok === '*') {
 			result *= parsePot();
-		} else {
-			nextToken();
+		} else if (tok === '/') {
 			result /= parsePot();
+		} else {
+			result %= parsePot();
 		}
 	}
 
@@ -194,27 +200,16 @@ function parseSum(): number {
 	return result;
 }
 
-function parseMod(): number {
-	let result = parseSum();
-
-	while (currentToken() === '%') {
-		nextToken();
-		result = result % parseSum();
-	}
-
-	return result;
-}
-
 function parseShift(): number {
-	let result = parseMod();
+	let result = parseSum();
 
 	while (currentToken() === '<<' || currentToken() === '>>') {
 		if (currentToken() === '<<') {
 			nextToken();
-			result = result << parseMod();
+			result = result << parseSum();
 		} else {
 			nextToken();
-			result = result >> parseMod();
+			result = result >> parseSum();
 		}
 	}
 
