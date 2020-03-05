@@ -53,8 +53,8 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 	if (Moderation.isMuted(member.user.id))
 		member.addRole(Roles.Muted);
 
-	try {
-		member.guild.fetchInvites().then(guildInvites => {
+	member.guild.fetchInvites().then(guildInvites => {
+		try {
 			const ei = invites[member.guild.id];
 			invites[member.guild.id] = guildInvites;
 			const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
@@ -65,10 +65,10 @@ client.on("guildMemberAdd", (member: GuildMember) => {
 			} else {
 				member.addRole(Roles.Default);
 			}
-		});
-	} catch (e) {
-		member.addRole(Roles.Default);
-	}
+		} catch (e) {
+			member.addRole(Roles.Default);
+		}
+	});
 });
 
 client.on("voiceStateUpdate", (oldMember, newMember) => {
@@ -124,17 +124,17 @@ client.on("message", (msg: Message) => {
 
 	if ((run.permissions & Permission.Dev) && msg.author.id !== "373670846792990720") return;
 
-	try {
-		if (typing++ === 0) msg.channel.startTyping();
-		setTimeout(() => {
+	setTimeout(() => {
+		try {
+			if (typing++ === 0) msg.channel.startTyping();
 			(<Command>run).run(msg, args);
 			if (--typing === 0) msg.channel.stopTyping(true);
-		}, 300);
-	} catch (e) {
-		console.log("======================= ERRO =======================");
-		console.log(e);
-		msg.channel.send(`${msg.author} Algo deu beeeeeem errado... Peça para o <@373670846792990720> dar uma averiguada no console!`);
-	}
+		} catch (e) {
+			console.log("======================= ERRO =======================");
+			console.log(e);
+			msg.channel.send(`${msg.author} Algo deu beeeeeem errado... Peça para o <@373670846792990720> dar uma averiguada no console!`);
+		}
+	}, 300);
 });
 
 client.login(fs.readFileSync("./botkey.txt", "utf8")); // A token não tá no repositório (obviamente)
