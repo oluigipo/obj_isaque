@@ -37,10 +37,10 @@ export default <Command>{
 		final.title = "Resultado";
 		final.description = "Estas são as representações desse número em diferentes bases:";
 
-		final.addField("Decimal", num.toString(10));
-		final.addField("Octal", num.toString(8));
-		final.addField("Hexadecimal", num.toString(16));
-		final.addField("Binário", num.toString(2));
+		final.addField("Decimal", num.toString(10), true);
+		final.addField("Octal", num.toString(8), true);
+		final.addField("Hexadecimal", num.toString(16), true);
+		final.addField("Binário", num.toString(2), true);
 
 		msg.channel.send(final);
 	},

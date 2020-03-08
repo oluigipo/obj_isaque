@@ -9,5 +9,6 @@ import calc from "./calc";
 import color from "./color";
 import docs from "./docs";
 import curso from "./curso";
+import megasorteio from "./megasorteio";
 
-export default <Command[]>[ping, help, nt, github, num, calc, color, docs, curso];
+export default <Command[]>[ping, help, nt, github, num, calc, color, docs, curso, megasorteio];
