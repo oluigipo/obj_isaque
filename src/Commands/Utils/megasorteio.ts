@@ -8,10 +8,38 @@ export default <Command>{
 			return;
 		}
 
+		let duration = -1;
+		let _t: number;
+		let _d: string;
+		if (args.length > 2 && args[1][0] !== '<') {
+			_t = parseInt(args[1]);
+			_d = args[1][String(_t).length];
+
+			duration = 1;
+			switch (_d) {
+				case 'w': duration *= 7;
+				case 'd': duration *= 24;
+				case 'h': duration *= 60;
+				case 'm': duration *= 60;
+				case 's': break;
+				default:
+					msg.channel.send(`${_t + _d} não é uma duração válida`);
+					return;
+			}
+
+			duration *= _t;
+			duration *= 1000;
+		}
+
+		if (isNaN(duration)) {
+			msg.channel.send(`${msg.author} Tempo inválido!`);
+			return;
+		}
+
 		let opcoes = {
 			everton: false,
 			qnt: Number(args[2]),
-			duracao: Number(args[1])
+			duracao: duration
 		};
 
 		if (isNaN(opcoes.qnt) || opcoes.qnt < 1 || Math.abs(opcoes.qnt) === Infinity) {
@@ -19,8 +47,12 @@ export default <Command>{
 			return;
 		}
 
-		const premio = args.slice(2).join(' ');
+		const premio = args.slice(3).join(' ');
 		let message = await msg.channel.send("...");
+
+		await message.react('🔘');
+		await message.react('❌');
+		await message.react('✅');
 
 		async function update() {
 			let confirmacao = new RichEmbed();
@@ -38,55 +70,66 @@ export default <Command>{
 			confirmacao.addField("Opções", `🔘 Marcar everyone: ${opcoes.everton ? "Ativado" : "Desativado"}\n❌ Cancelar MegaSorteio\n✅ Iniciar MegaSorteio`);
 
 			await message.edit(confirmacao);
-			message.createReactionCollector((reaction: MessageReaction, user: User) => ['🔘', '❌', '✅'].includes(reaction.emoji.name) && user.id === msg.author.id, { max: 1 })
-				.once("collect", (element) => {
-					switch (element.emoji.name) {
-						case '🔘':
-							opcoes.everton = !opcoes.everton;
-							update();
-							break;
-						case '❌':
-							message.delete();
-							msg.channel.send(`${msg.author} Sorteio Cancelado!`);
-							break;
-						case '✅':
-							let final = new RichEmbed();
+			async function __aee() {
+				message.awaitReactions((reaction: MessageReaction, user: User) => ['🔘', '❌', '✅'].includes(reaction.emoji.name) && user.id === msg.author.id, { max: 1 })
+					.then((elements) => {
+						let reaction = elements.first();
+						if (reaction === void 0) return __aee();;
 
-							final.color = Server.botcolor;
-							final.author = { name: msg.member.displayName, icon_url: msg.author.avatarURL };
-							final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
-							final.title = "MegaSorteio!";
-							final.description = `Para participar, reaja com ✅ nessa mensagem!`;
-							final.addField("Prêmio", premio, true);
-							final.addField("Organizador(a)", msg.author, true);
-							final.addField("Quantidade de vencedores", opcoes.qnt, true);
+						switch (reaction.emoji.name) {
+							case '🔘':
+								opcoes.everton = !opcoes.everton;
+								reaction.remove(msg.author);
+								update();
+								break;
+							case '❌':
+								message.delete();
+								msg.channel.send(`${msg.author} Sorteio Cancelado!`);
+								break;
+							case '✅':
+								let final = new RichEmbed();
 
-							message.channel.send("MegaSorteio!" + (opcoes.everton ? " @everyone" : ""), final)
-								.then((mess) => {
-									mess.createReactionCollector((reaction: MessageReaction, user: User) => reaction.emoji.name === '✅' && !user.bot, { time: 10 })
-										.once("collect", (el) => {
-											let arr = el.users.array();
-											let winners = <User[]>[];
+								final.color = Server.botcolor;
+								final.author = { name: msg.member.displayName, icon_url: msg.author.avatarURL };
+								final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
+								final.title = "MegaSorteio!";
+								final.description = `Para participar, reaja com ✅ nessa mensagem!`;
+								final.addField("Prêmio", premio, true);
+								final.addField("Organizador(a)", msg.author, true);
+								final.addField("Quantidade de vencedores", opcoes.qnt, true);
 
-											if (arr.length <= opcoes.qnt) {
-												winners = arr;
-											} else {
-												do {
-													let w: User;
+								message.delete();
+								msg.channel.send("MegaSorteio!" + (opcoes.everton ? " @everyone" : ""), final)
+									.then((mess) => {
+										mess.react('✅');
+										mess.awaitReactions((reaction: MessageReaction, user: User) => reaction.emoji.name === '✅' && !user.bot, { time: opcoes.duracao })
+											.then((el) => {
+												let arr = el.first().users.array().filter(u => !u.bot);
+												let winners = <User[]>[];
+
+												if (arr.length <= opcoes.qnt) {
+													winners = arr;
+												} else {
 													do {
-														w = arr[Math.floor(Math.random() * arr.length)];
-													} while (winners.includes(w));
+														let w: User;
+														do {
+															w = arr[Math.floor(Math.random() * arr.length)];
+														} while (winners.includes(w));
 
-													winners.push(w);
-												} while (winners.length < opcoes.qnt);
-											}
+														winners.push(w);
+													} while (winners.length < opcoes.qnt);
+												}
 
-											msg.channel.send(`O MegaSorteio acabou! Os vencedores são:\n${winners.reduce((s, c, i) => s + `\n\`${i + 1} - \` ${c}`, "")}`);
-										});
-								});
-							break;
-					}
-				});
+												mess.delete();
+												msg.channel.send(`O MegaSorteio acabou! Os seguintes usuários ganharam \`${premio}\`:\n${winners.reduce((s, c) => s + `\n${c}`, "")}`);
+											});
+									});
+								break;
+						}
+					});
+			}
+
+			await __aee();
 		}
 
 		await update();
