@@ -76,9 +76,9 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
 	if (newMember.voiceChannelID === oldMember.voiceChannelID) return;
 
 	if (Moderation.isMuted(newMember.user.id)) {
-		if (!newMember.mute) newMember.setMute(true);
+		if (!newMember.mute) newMember.setMute(true).catch(() => 0);
 	} else {
-		if (newMember.mute) newMember.setMute(false);
+		if (newMember.mute) newMember.setMute(false).catch(() => 0);
 	}
 });
 
