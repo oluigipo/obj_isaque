@@ -1,6 +1,5 @@
 import { Client, Message, GuildMember, TextChannel } from "discord.js";
 import { Command, Arguments, Roles, Server, Time, Channels, Permission } from "./definitions";
-import { Bank } from "./Cassino";
 import Moderation from "./Moderation";
 import cmds from './Commands';
 import fs from "fs";
@@ -14,16 +13,6 @@ const invites: any = {};
 const prefix = "!!";
 
 let typing = 0;
-
-function onUserMessage(msg: Message) {
-	let chn: TextChannel = <TextChannel>msg.channel;
-	if (chn.id === Channels.shitpost || chn.id === Channels.music || chn.name.startsWith("jogos-bot")) return;
-	const result = Bank.userMessage(msg.author.id);
-	if (result > 0) {
-		let c = (<TextChannel>msg.guild.channels.find(a => a.id === Channels.shitpost));
-		if (c !== null) c.send(`${msg.author} Parabéns! Você ganhou \`$${result}\``);
-	}
-}
 
 client.on("ready", () => {
 	wait(3000);
@@ -84,7 +73,6 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
 
 client.on("message", (msg: Message) => {
 	if (msg.author.id === client.user.id || msg.author.bot || msg.channel.type !== "text") return;
-	onUserMessage(msg);
 	if (msg.content.slice(0, prefix.length) !== prefix) {
 		let m = msg.mentions.members.first();
 		if (m !== undefined && m.user.id === client.user.id && msg.content[msg.content.length - 1] === '?') {
