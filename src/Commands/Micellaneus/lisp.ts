@@ -132,11 +132,11 @@ const SYMBOL_RE = /^[a-zA-Z_@#\$´.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$´.:?+\-\
 
 
 const native_scope = new Map([
-	["*", (arr: Expr[]) => Expr.NUM(arr[0]?.as_num ?? 0 * arr[1]?.as_num ?? 0)],
-	["+", (arr: Expr[]) => Expr.NUM(arr[0]?.as_num ?? 0 + arr[1]?.as_num ?? 0)],
+	["*", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) * (arr[1]?.as_num ?? 0))],
+	["+", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) + (arr[1]?.as_num ?? 0))],
 	["-", (arr: Expr[]) => arr.length >= 2 ? Expr.NUM(arr[0].as_num - arr[1].as_num) : Expr.NUM(-(arr[0]?.as_num ?? NaN))],
-	["/", (arr: Expr[]) => Expr.NUM(arr[0]?.as_num ?? 0 / arr[1]?.as_num ?? 0)],
-	["//", (arr: Expr[]) => Expr.NUM( Math.trunc(arr[0]?.as_num / arr[1]?.as_num) )],
+	["/", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) / (arr[1]?.as_num ?? 0))],
+	["//", (arr: Expr[]) => Expr.NUM(Math.trunc(arr[0]?.as_num / arr[1]?.as_num) )],
 	["%", (arr: Expr[]) => Expr.NUM(arr[0]?.as_num % arr[1]?.as_num)],
 	["<", (arr: Expr[]) => (arr[0].as_num < arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
 	[">", (arr: Expr[]) => (arr[0].as_num > arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
