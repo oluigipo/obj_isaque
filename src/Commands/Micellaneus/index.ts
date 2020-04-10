@@ -6,5 +6,6 @@ import sonbra from "./sonbra";
 import brainfuck from "./brainfuck";
 import ulon from "./ulon";
 import ph from "./ph";
+import lisp from "./lisp";
 
-export default <Command[]>[emoji, danki, sonbra, brainfuck, ulon, ph];
+export default <Command[]>[emoji, danki, sonbra, brainfuck, ulon, ph, lisp];
