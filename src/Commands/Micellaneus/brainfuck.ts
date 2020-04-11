@@ -8,7 +8,7 @@ export default <Command>{
 			return;
 		}
 
-		const code: string = args[1];
+		const code: string = args.slice(1).join(' ');
 		const result: string[] = interpret(code);
 
 		msg.channel.send(`${msg.author} Output: \`\`\` ${result[0]}\`\`\`\nMemory: \`\`\`${result[1]}\`\`\``);
