@@ -8,5 +8,6 @@ import ulon from "./ulon";
 import ph from "./ph";
 import lisp from "./lisp";
 import bfpp from "./bfpp";
+import dolar from "./dolar";
 
-export default <Command[]>[emoji, danki, sonbra, brainfuck, ulon, ph, lisp, bfpp];
+export default <Command[]>[emoji, danki, sonbra, brainfuck, ulon, ph, lisp, bfpp, dolar];
