@@ -1,12 +1,15 @@
 import { Command, Arguments, Server, Permission } from "../../definitions";
 import { Message } from "discord.js";
 
-enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, EOF }
+enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, EOF }
 
 class Token {
 	constructor(public kind: TokenType, public num_val: number | null, public str_val: string | null){}
 	static LPAREN() {return new Token(TokenType.LPAREN, null, null);}
 	static RPAREN() {return new Token(TokenType.RPAREN, null, null);}
+	static LBRACK() {return new Token(TokenType.LBRACK, null, null);}
+	static RBRACK() {return new Token(TokenType.RBRACK, null, null);}
+	static QUOTE() {return new Token(TokenType.QUOTE, null, null);}
 	static EOF() {return new Token(TokenType.EOF, null, null);}
 	static NUMBER(num_val: number){return new Token(TokenType.NUMBER, num_val, null);}
 	static SYMBOL(str_val: string){return new Token(TokenType.ID, null, str_val);}
@@ -112,7 +115,7 @@ class Expr {
 			case ExprType.STR:
 				return `"${this.str_val}"`;
 			case ExprType.SYM:
-				return `${this.str_val}`;
+				return `'${this.str_val}`;
 			case ExprType.LIST:
 				if (this.list_val == null) return `'null`;
 				return `\'(${this.list_val.map((a) => a.toDebug()).join(" ")})`;
@@ -131,25 +134,33 @@ const STRING_RE = /^"[^"]*"/;
 const SYMBOL_RE = /^[a-zA-Z_@#\$´.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$´.:?+\-\*/\\%><&\^~|=!]*/;
 
 
-const native_scope = new Map([
-	["*", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) * (arr[1]?.as_num ?? 0))],
-	["+", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) + (arr[1]?.as_num ?? 0))],
-	["-", (arr: Expr[]) => arr.length >= 2 ? Expr.NUM(arr[0].as_num - arr[1].as_num) : Expr.NUM(-(arr[0]?.as_num ?? NaN))],
-	["/", (arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) / (arr[1]?.as_num ?? 0))],
-	["//", (arr: Expr[]) => Expr.NUM(Math.trunc(arr[0]?.as_num / arr[1]?.as_num) )],
-	["%", (arr: Expr[]) => Expr.NUM(arr[0]?.as_num % arr[1]?.as_num)],
-	["<", (arr: Expr[]) => (arr[0].as_num < arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
-	[">", (arr: Expr[]) => (arr[0].as_num > arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
-	["<=", (arr: Expr[]) => (arr[0].as_num <= arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
-	[">=", (arr: Expr[]) => (arr[0].as_num >= arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
-	["..", (arr: Expr[]) => Expr.STR(arr[0].as_str + arr[1].as_str)],
-	["str.len", (arr: Expr[]) => Expr.NUM(arr[0]?.as_str.length)],
-	["str.slice", (arr: Expr[]) => Expr.STR(arr[0].as_str.substring(arr[1].as_num,arr[2].as_num))],
-	["str.tail", (arr: Expr[]) => Expr.STR(arr[0].as_str.substring(arr[1].as_num))],
-	["str.charat", (arr: Expr[]) => Expr.STR(arr[0].as_str[arr[1].as_num])],
-	["str.explode", (arr: Expr[]) => Expr.LIST(arr[0].as_str.split('').map(s => Expr.STR(s)))],
-	["==", (arr: Expr[]) => arr[0]?.equals(arr[1]) ? Expr.SYM("t") : Expr.LIST([])],
-	["!=", (arr: Expr[]) => !(arr[0]?.equals(arr[1])) ? Expr.SYM("t") : Expr.LIST([])],
+const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
+	["*", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.reduce((acc,n) => acc + n.as_num, 1))],
+	["+", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.reduce((acc,n) => acc + n.as_num, 0))],
+	["-", (vm: LispVM, arr: Expr[]) => arr.length >= 2 ? Expr.NUM(arr[0].as_num - arr[1].as_num) : Expr.NUM(-(arr[0]?.as_num ?? NaN))],
+	["/", (vm: LispVM, arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) / (arr[1]?.as_num ?? 0))],
+	["//", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.trunc(arr[0]?.as_num / arr[1]?.as_num) )],
+	["%", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr[0]?.as_num % arr[1]?.as_num)],
+	["<", (vm: LispVM, arr: Expr[]) => (arr[0].as_num < arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
+	[">", (vm: LispVM, arr: Expr[]) => (arr[0].as_num > arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
+	["<=", (vm: LispVM, arr: Expr[]) => (arr[0].as_num <= arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
+	[">=", (vm: LispVM, arr: Expr[]) => (arr[0].as_num >= arr[1].as_num)? Expr.SYM('t') : LispVM.nil],
+	["..", (vm: LispVM, arr: Expr[]) => Expr.STR(arr.map(e => e.toString()).join(''))],
+	["str.len", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr[0]?.as_str.length)],
+	["str.slice", (vm: LispVM, arr: Expr[]) => Expr.STR(arr[0].as_str.substring(arr[1].as_num,arr[2].as_num))],
+	["str.tail", (vm: LispVM, arr: Expr[]) => Expr.STR(arr[0].as_str.substring(arr[1].as_num))],
+	["str.charat", (vm: LispVM, arr: Expr[]) => Expr.STR(arr[0].as_str[arr[1].as_num])],
+	["str.explode", (vm: LispVM, arr: Expr[]) => Expr.LIST(arr[0].as_str.split('').map(s => Expr.STR(s)))],
+	["==", (vm: LispVM, arr: Expr[]) => arr[0]?.equals(arr[1]) ? Expr.SYM("t") : Expr.LIST([])],
+	["!=", (vm: LispVM, arr: Expr[]) => !(arr[0]?.equals(arr[1])) ? Expr.SYM("t") : Expr.LIST([])],
+	["random", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.random())],
+	["first", (vm: LispVM, arr: Expr[]) => arr[0].as_list[0] ?? LispVM.nil],
+	["second", (vm: LispVM, arr: Expr[]) => arr[0].as_list[1] ?? LispVM.nil],
+	["third", (vm: LispVM, arr: Expr[]) => arr[0].as_list[2] ?? LispVM.nil],
+	["fourth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[3] ?? LispVM.nil],
+	["fifth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[4] ?? LispVM.nil],
+	["enum", (vm: LispVM, arr: Expr[]) => arr[0]? Expr.LIST(arr[0].as_list.map((e,i) => Expr.LIST([e, Expr.NUM(i)]))) : LispVM.nil],
+	["map", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC? Expr.LIST(arr.slice(1).map(arg => arg.as_list.map(e => vm.evaluate(Expr.LIST([arr[0], Expr.LIST([Expr.SYM("quote"),e])])))).flat(1)) : LispVM.nil],
 ]);
 
 
@@ -182,6 +193,18 @@ class LispVM{
 			this.source = this.source.substring(1);
 			this.source = this.source.trimLeft();
 			return Token.RPAREN();
+		}else if (this.source[0] == "[") {
+			this.source = this.source.substring(1);
+			this.source = this.source.trimLeft();
+			return Token.LBRACK();
+		} else if (this.source[0] == "]") {
+			this.source = this.source.substring(1);
+			this.source = this.source.trimLeft();
+			return Token.RBRACK();
+		} else if (this.source[0] == "'") {
+			this.source = this.source.substring(1);
+			this.source = this.source.trimLeft();
+			return Token.QUOTE();
 		} else if ((match = NUMBER_RE.exec(this.source)) != null) {
 			const n = match[0];
 			this.source = this.source.substring(n.length);
@@ -213,6 +236,22 @@ class LispVM{
 					list_val.push(this.parseExpr(tok));
 				}
 				return Expr.LIST(list_val);
+			}
+			case TokenType.LBRACK:{
+				let list_val: Expr[] = [];
+				let tok : Token;
+				while ((tok = this.nextToken())?.kind != TokenType.RBRACK) {
+					if (tok == null) throw "ParseError: Invalid Syntax";
+					if (tok.kind == TokenType.EOF) throw "ParseError: Unexpected End of Input";
+					list_val.push(this.parseExpr(tok));
+				}
+				return Expr.LIST([Expr.SYM("list")].concat(list_val));
+			}
+			case TokenType.QUOTE:{
+				let val: Expr;
+				let tok = this.nextToken();
+				val = this.parseExpr(tok);
+				return Expr.LIST([Expr.SYM("quote"), val]);
 			}
 			case TokenType.NUMBER:
 				return Expr.NUM(look.num_val ?? 0);
@@ -246,14 +285,14 @@ class LispVM{
 						return list[1];
 					case "head":
 						if(list[1] == null) throw `EvalError: \`head\` requires one argument`;
-						l = list[1].as_list;
+						l = this.evaluate(list[1]).as_list;
 						return l[0];
 					case "tail":
 						if(list[1] == null) throw `EvalError: \`tail\` requires one argument`;
-						l = list[1].as_list;
+						l = this.evaluate(list[1]).as_list;
 						return Expr.LIST(l.slice(1));
 					case "if":
-						if(list.length < 4) throw "EvalError: \`if\` requires four arguments";
+						if(list.length < 4) throw "EvalError: \`if\` requires three arguments";
 						return this.evaluate(list[1]).isNil() ? this.evaluate(list[3]) : this.evaluate(list[2]);
 					case "cond":
 						for(let cond of list.slice(1)){
@@ -276,6 +315,9 @@ class LispVM{
 						}
 						return e;
 					}
+					case "list":{
+						return Expr.LIST(list.slice(1).map(e => this.evaluate(e)));
+					}
 					case "atom?":
 						if(list.length < 2) throw "EvalError: \`atom?\` requires one argument";
 						return this.evaluate(list[1]).kind != ExprType.LIST? Expr.SYM('t') : LispVM.nil;
@@ -297,6 +339,28 @@ class LispVM{
 								}),
 								[list[2]],this.stack.length == 0? null : this.stack[this.stack.length-1]
 							);
+					case "apply":{
+						if(list.length < 3) throw "EvalError: \`apply\` requires two arguments";
+						let func = this.evaluate(list[1]);
+						let args = this.evaluate(list[2]).as_list;
+						if(func.kind != ExprType.FUNC || func.args == null || func.list_val == null){
+							let nat = native_scope.get(func.as_str);
+							if(nat != null)
+								return nat(this,args);
+							throw `TypeError: Expression \`${func.toDebug()}\` is not a function`;
+						}else{
+							let local_scope = new CallFrame(func.access,new Map());
+							let argn = 0;
+							for (const arg of func.args) {
+								local_scope.add(arg,this.evaluate(args[argn]));
+								argn++;
+							}
+							this.stack.push(local_scope);
+							let result = this.evaluate(func.list_val[0]);
+							this.stack.pop();
+							return result;
+						}
+					}
 					case "global":
 						if(list.length < 3) throw "CallError: Not enough arguments";
 						l = list[1].as_list;
@@ -331,6 +395,7 @@ class LispVM{
 							let local_scope = new CallFrame(loc.access,new Map());
 							let argn = 1;
 							for (const arg of loc.args) {
+								if(list[argn] == undefined) throw `EvalError: Function requires ${loc.args.length} arguments`;
 								local_scope.add(arg,this.evaluate(list[argn]));
 								argn++;
 							}
@@ -347,6 +412,7 @@ class LispVM{
 							let argn = 1;
 							if(glob.args == null || glob.list_val == null) throw "unreachable";
 							for (const arg of glob.args) {
+								if(list[argn] == undefined) throw `EvalError: Function requires ${glob.args.length} arguments`;
 								local_scope.add(arg,this.evaluate(list[argn]));
 								argn++;
 							}
@@ -357,7 +423,7 @@ class LispVM{
 						}
 						let nat = native_scope.get(list[0].str_val);
 						if(nat != null)
-							return nat(list.slice(1).map((e) => this.evaluate(e)));
+							return nat(this,list.slice(1).map((e) => this.evaluate(e)));
 						throw `TypeError: Expression \`${list[0].toDebug()}\` is not a function`;
 				}
 			} else {
