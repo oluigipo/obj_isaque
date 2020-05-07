@@ -177,7 +177,7 @@ export default <Command>{
 		final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
 
 		final.addField("RGB", `${color >> 16}, ${(color >> 8) & 0xff}, ${color & 0xff} (#${_format(color.toString(16))})`, true);
-		final.addField("BGR", `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(String(RGB2BGR(color)))})`, true);
+		final.addField("BGR", `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(RGB2BGR(color).toString(16))})`, true);
 		let temp = rgbToHsv(color >> 16, (color >> 8) & 0xff, color & 0xff);
 		final.addField("HSV / HSB", `${temp[0]}, ${temp[1]}, ${temp[2]}`, true);
 		temp = rgbToHsl(color >> 16, (color >> 8) & 0xff, color & 0xff);
