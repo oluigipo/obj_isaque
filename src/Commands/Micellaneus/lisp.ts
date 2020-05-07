@@ -65,6 +65,19 @@ class Expr {
 		return this.list_val;
 	}
 
+	get head(): Expr {
+		if(!(this.kind == ExprType.LIST || this.kind == ExprType.PAIR)) throw `TypeError: Expression \`${this.toDebug()}\` is not a list`;
+		return this.list_val?.[0] ?? LispVM.nil;
+	}
+
+	get tail(): Expr {
+		if(this.kind == ExprType.LIST) 
+			return Expr.LIST(this.list_val?.slice(1) ?? []);
+		if(this.kind == ExprType.PAIR && this.list_val) 
+			return this.list_val[1];
+		throw `TypeError: Expression \`${this.toDebug()}\` is not a list`;
+	}
+
 	equals(e: Expr): boolean{
 		if(this.kind != e.kind) return false;
 		switch (this.kind) {
@@ -135,7 +148,7 @@ const SYMBOL_RE = /^[a-zA-Z_@#\$´.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$´.:?+\-\
 
 
 const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
-	["*", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.reduce((acc,n) => acc + n.as_num, 1))],
+	["*", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.reduce((acc,n) => acc * n.as_num, 1))],
 	["+", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.reduce((acc,n) => acc + n.as_num, 0))],
 	["-", (vm: LispVM, arr: Expr[]) => arr.length >= 2 ? Expr.NUM(arr[0].as_num - arr[1].as_num) : Expr.NUM(-(arr[0]?.as_num ?? NaN))],
 	["/", (vm: LispVM, arr: Expr[]) => Expr.NUM((arr[0]?.as_num ?? 0) / (arr[1]?.as_num ?? 0))],
@@ -154,6 +167,8 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["==", (vm: LispVM, arr: Expr[]) => arr[0]?.equals(arr[1]) ? Expr.SYM("t") : Expr.LIST([])],
 	["!=", (vm: LispVM, arr: Expr[]) => !(arr[0]?.equals(arr[1])) ? Expr.SYM("t") : Expr.LIST([])],
 	["random", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.random())],
+	["head", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].head : LispVM.nil],
+	["tail", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].tail : LispVM.nil],
 	["first", (vm: LispVM, arr: Expr[]) => arr[0].as_list[0] ?? LispVM.nil],
 	["second", (vm: LispVM, arr: Expr[]) => arr[0].as_list[1] ?? LispVM.nil],
 	["third", (vm: LispVM, arr: Expr[]) => arr[0].as_list[2] ?? LispVM.nil],
@@ -161,6 +176,9 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["fifth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[4] ?? LispVM.nil],
 	["enum", (vm: LispVM, arr: Expr[]) => arr[0]? Expr.LIST(arr[0].as_list.map((e,i) => Expr.LIST([e, Expr.NUM(i)]))) : LispVM.nil],
 	["map", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC? Expr.LIST(arr.slice(1).map(arg => arg.as_list.map(e => vm.evaluate(Expr.LIST([arr[0], Expr.LIST([Expr.SYM("quote"),e])])))).flat(1)) : LispVM.nil],
+	["list", (vm: LispVM, arr: Expr[]) => Expr.LIST(arr)],
+	["atom?", (vm: LispVM, arr: Expr[]) => arr[0].kind != ExprType.LIST ? Expr.SYM("t") : LispVM.nil],
+	["nil?", (vm: LispVM, arr: Expr[]) => arr[0].isNil() ? Expr.SYM("t") : LispVM.nil],
 ]);
 
 
@@ -275,7 +293,7 @@ class LispVM{
 
 	evaluate(e: Expr) : Expr {
 		if(this.stack.length > 30) throw `EvalError: Stack overflow, stack reached limit of 30`;
-		if (e.kind == ExprType.LIST && e.list_val != null) {
+		if (e.kind == ExprType.LIST && e.list_val?.[0]) {
 			const list = e.list_val;
 			if (list[0].kind == ExprType.SYM && list[0].str_val) {
 				let l: Expr[];
@@ -283,14 +301,6 @@ class LispVM{
 					case "quote":
 						if(list[1] == null) throw `EvalError: \`quote\` requires one argument`;
 						return list[1];
-					case "head":
-						if(list[1] == null) throw `EvalError: \`head\` requires one argument`;
-						l = this.evaluate(list[1]).as_list;
-						return l[0];
-					case "tail":
-						if(list[1] == null) throw `EvalError: \`tail\` requires one argument`;
-						l = this.evaluate(list[1]).as_list;
-						return Expr.LIST(l.slice(1));
 					case "if":
 						if(list.length < 4) throw "EvalError: \`if\` requires three arguments";
 						return this.evaluate(list[1]).isNil() ? this.evaluate(list[3]) : this.evaluate(list[2]);
@@ -315,12 +325,6 @@ class LispVM{
 						}
 						return e;
 					}
-					case "list":{
-						return Expr.LIST(list.slice(1).map(e => this.evaluate(e)));
-					}
-					case "atom?":
-						if(list.length < 2) throw "EvalError: \`atom?\` requires one argument";
-						return this.evaluate(list[1]).kind != ExprType.LIST? Expr.SYM('t') : LispVM.nil;
 					case "cons":{
 						if(list.length < 3) throw "EvalError: \`cons\` requires two arguments";
 						let left: Expr = this.evaluate(list[1]);
@@ -488,7 +492,32 @@ Atoms são numeros e strings.
 
 O primeiro item de uma lista é chamado como uma função com o resto da lista sendo seus argumentos.
 Algumas funções são primitivas:
-<TODO>`,
+
+Operadores numericos:
+	* + - / // % < > <= >=
+
+Operador de concatenação:
+	..
+
+Operações de string:
+	str.len
+	str.slice
+	str.tail
+	str.charat
+	str.explode
+
+Operadores de igualdade:
+	== !=
+
+Outros:
+	random
+	head
+	tail
+	enum
+	list
+	atom?
+	nil?
+`,
 	example: `${Server.prefix}lisp (block
 	(def fib (n) (
 		if (< n 2)
