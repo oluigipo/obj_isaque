@@ -53,12 +53,12 @@ function hsvToRgb(h: number, s: number, v: number) {
 	return makeRGB(r * 255, g * 255, b * 255);
 }
 
-function RGB2BGR(rgb: string): string {
-	let r = rgb.slice(0, 2);
-	let g = rgb.slice(2, 4);
-	let b = rgb.slice(4, 6);
+function RGB2BGR(rgb: number): number {
+	let r = rgb >> 16;
+	let g = (rgb >> 8) & 0xff;
+	let b = rgb & 0xff;
 
-	return b + g + r;
+	return (b << 16) | (g << 8) | (r);
 }
 
 function rgbToHsv(r: number, g: number, b: number): number[] {
@@ -141,7 +141,7 @@ export default <Command>{
 					if (args.length > 3) {
 						color = makeRGB(parseInt(args[4]), parseInt(args[3]), parseInt(args[2]));
 					} else {
-						color = parseInt(RGB2BGR(args[2][0] === '#' ? args[2].slice(1) : args[2]), 16);
+						color = RGB2BGR(parseInt(args[2][0] === '#' ? args[2].slice(1) : args[2]));
 					}
 					break;
 				case 'hsv':
@@ -177,7 +177,7 @@ export default <Command>{
 		final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
 
 		final.addField("RGB", `${color >> 16}, ${(color >> 8) & 0xff}, ${color & 0xff} (#${_format(color.toString(16))})`, true);
-		final.addField("BGR", `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(RGB2BGR(color.toString(16)))})`, true);
+		final.addField("BGR", `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(String(RGB2BGR(color)))})`, true);
 		let temp = rgbToHsv(color >> 16, (color >> 8) & 0xff, color & 0xff);
 		final.addField("HSV / HSB", `${temp[0]}, ${temp[1]}, ${temp[2]}`, true);
 		temp = rgbToHsl(color >> 16, (color >> 8) & 0xff, color & 0xff);

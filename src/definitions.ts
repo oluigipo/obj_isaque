@@ -65,7 +65,7 @@ export const Emojis = {
 };
 
 export const CommonMessages = {
-	syntaxError: "Sintaxe incorreta. Tente ver como esse comando funciona usando o comando `" + Server.prefix + "help comando`",
+	syntaxError: "Sintaxe incorreta. Tente ver como esse comando funciona usando o comando `" + Server.prefix + "help <comando>`",
 };
 
 // Functions

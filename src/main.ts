@@ -14,6 +14,15 @@ const prefix = "!!";
 
 let typing = 0;
 
+function predictResponse(msg: Message): boolean {
+	if (msg.content.toLowerCase().includes("sentido da vida")) {
+		msg.channel.send(`${msg.author} Simples: 42.`);
+		return true;
+	}
+
+	return false;
+}
+
 client.on("ready", () => {
 	wait(3000);
 
@@ -76,7 +85,11 @@ client.on("message", (msg: Message) => {
 	if (msg.content.slice(0, prefix.length) !== prefix) {
 		let m = msg.mentions.members.first();
 		if (m !== undefined && m.user.id === client.user.id && msg.content[msg.content.length - 1] === '?') {
-			msg.channel.send(`${msg.author} ${Math.random() >= 0.5 ? "Sim" : "Não"}`);
+			const respostas = ["Sim.", "Não.", "Depende.", "Obviamente.", "Talvez...", `Depende se ${msg.guild.members.random().displayName} quer.`, "Não quero falar contigo.", "Hmmmm..."];
+			if (!predictResponse(msg))
+				msg.channel.send(`${msg.author} ${respostas[Math.floor(Math.random() * respostas.length)]}`);
+		} else if (msg.content.startsWith('!')) {
+			msg.channel.send(`${msg.author} Meu prefixo aqui é \`!!\`, e não \`!\`.`);
 		}
 		return;
 	}

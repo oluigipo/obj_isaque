@@ -54,7 +54,7 @@ function closest(fn: string): Item[] {
 export default <Command>{
 	run: (msg: Message, args: Arguments): void => {
 		if (args.length < 2) {
-			msg.channel.send(`${msg.author} ${CommonMessages.syntaxError}`);
+			msg.channel.send(`${msg.author} https://docs2.yoyogames.com/`);
 			return;
 		}
 

@@ -1,6 +1,6 @@
 import { Command, Arguments, Server, Permission, Time } from "../../definitions";
 import cmds from "../index";
-import { Message, RichEmbed, ReactionEmoji, User, Collection, MessageReaction, Emoji } from "discord.js";
+import { Message, RichEmbed, User, Collection, MessageReaction } from "discord.js";
 import Moderation from "../../Moderation";
 
 export default <Command>{
@@ -21,7 +21,7 @@ export default <Command>{
 
 		let message: Message;
 
-		function showPage(page: number): void {
+		function showPage(page: number) {
 			function collectedF(collected: Collection<string, MessageReaction>) {
 				let reaction = collected.first();
 
@@ -30,7 +30,7 @@ export default <Command>{
 				}
 
 				if (reaction.emoji.name === '➡️') {
-					showPage(page + 1 % pagesCount);
+					showPage((page + 1) % pagesCount);
 				} else {
 					let p = page - 1;
 					if (p < 0) p = pagesCount - 1;
@@ -46,26 +46,27 @@ export default <Command>{
 			final.title = `Lista de comandos (${page + 1}/${pagesCount})`;
 
 			let count = 0;
-			for (let i = page * 10; count < 10; i++) {
+			for (let i = page * 9; count < 9; i++) {
 				let cmd = commands[i];
 				if (cmd === undefined) break;
-				final.addField(cmd.aliases[0], cmd.shortHelp);
+				final.addField(cmd.aliases[0], cmd.shortHelp, true);
 				++count;
 			}
 
 			if (message !== undefined) {
 				message.edit(final).then(m => {
 					message = m;
-					m.clearReactions().then(() => {
+					m.clearReactions().then(async () => {
 						let f: any;
 						if (page === pagesCount - 1) {
-							m.react('⬅️');
+							await m.react('⬅️');
 							f = filter('⬅️');
 						} else if (page > 0) {
-							m.react('⬅️').then(() => m.react('➡️'));
+							await m.react('⬅️')
+							await m.react('➡️');
 							f = filter('⬅️', '➡️');
 						} else {
-							m.react('➡️');
+							await m.react('➡️');
 							f = filter('➡️');
 						}
 
@@ -73,18 +74,19 @@ export default <Command>{
 					});
 				});
 			} else {
-				(<Promise<Message>>msg.channel.send(final)).then((m) => {
+				msg.channel.send(final).then(async (m) => {
 					message = m;
 
 					let f: any;
 					if (page === pagesCount - 1) {
-						m.react('⬅️');
+						await m.react('⬅️');
 						f = filter('⬅️');
 					} else if (page > 0) {
-						m.react('⬅️').then(() => m.react('➡️'));
+						await m.react('⬅️')
+						await m.react('➡️');
 						f = filter('⬅️', '➡️');
 					} else {
-						m.react('➡️');
+						await m.react('➡️');
 						f = filter('➡️');
 					}
 
