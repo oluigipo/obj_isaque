@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, Permission, Time } from "../../definitions";
+import { Command, Arguments, Server, Permission, Time, formatTime } from "../../definitions";
 import { Message, RichEmbed, User, MessageReaction } from "discord.js";
 
 export default <Command>{
@@ -94,9 +94,9 @@ export default <Command>{
 								final.footer = { text: msg.client.user.username, icon_url: msg.client.user.avatarURL };
 								final.title = "MegaSorteio!";
 								final.description = `Para participar, reaja com ✅ nessa mensagem!`;
-								final.addField("Prêmio", premio, true);
+								final.addField("Prêmio", `${opcoes.qnt} ${premio}`, true);
 								final.addField("Organizador(a)", msg.author, true);
-								final.addField("Quantidade de vencedores", opcoes.qnt, true);
+								final.addField("Duração", formatTime(opcoes.duracao), true);
 
 								message.delete();
 								msg.channel.send("MegaSorteio!" + (opcoes.everton ? " @everyone" : ""), final)

@@ -23,6 +23,14 @@ export interface Command {
 }
 
 // Constants
+export const Time = {
+	second: 1000,
+	minute: 1000 * 60,
+	hour: 1000 * 60 * 60,
+	day: 1000 * 60 * 60 * 24,
+	week: 1000 * 60 * 60 * 24 * 7
+};
+
 export const Roles = {
 	Aluno: "585871344718184458",
 	Default: "630202297716178964",
@@ -35,7 +43,8 @@ export const Server = {
 	specialInvite: "p9WN6Rx",
 	id: "507550989629521922",
 	prefix: "!!",
-	botcolor: 0x30a246
+	botcolor: 0x30a246,
+	timeout: Time.second * 5
 };
 
 export const Channels = {
@@ -48,14 +57,6 @@ export const Channels = {
 export const Files = {
 	mutes: "./data/mutes.json",
 	cassino: "./data/usersdata.json"
-};
-
-export const Time = {
-	second: 1000,
-	minute: 1000 * 60,
-	hour: 1000 * 60 * 60,
-	day: 1000 * 60 * 60 * 24,
-	week: 1000 * 60 * 60 * 24 * 7
 };
 
 export const Emojis = {
