@@ -104,12 +104,12 @@ client.on("message", (msg: Message) => {
 			const respostas = [
 				"Sim.",
 				"Não.",
-				"Depende.",
-				"Obviamente.",
-				"Talvez...",
-				`Depende se ${msg.guild.members.random().displayName} quer.`,
-				"Não quero falar contigo.",
-				"Hmmmm...",
+				"depende.",
+				"obviamente.",
+				"talvez...",
+				`não sei. Pergunta pro(a) ${msg.guild.members.random().displayName}!`,
+				"não quero falar contigo. sai",
+				"hmmmm... Já tentou apagar a system32?",
 			];
 			if (!predictResponse(msg)) {
 				msg.channel.send(

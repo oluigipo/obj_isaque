@@ -8,7 +8,7 @@ interface UsersJSON {
 	lastUpdate: number;
 }
 
-const json: UsersJSON = JSON.parse(fs.readFileSync("./data/usersshop.json", "utf8"));
+const json: UsersJSON = { users: [], companies: [], lastUpdate: 0 }; // JSON.parse(fs.readFileSync("./data/usersshop.json", "utf8"));
 const fail = (reason: string): __fail => { return { success: false, reason: `${Emojis.no} **|** ${reason}` }; };
 const success = <T>(extra: T): __succ<T> => { return { success: true, extra: extra }; };
 
