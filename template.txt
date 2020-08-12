@@ -1,0 +1,14 @@
+import { Command, Arguments, Permission } from "../../defs";
+import { Message } from "discord.js";
+
+export default <Command>{
+	async run(msg: Message, args: Arguments, raw: string[]) {
+
+	},
+	aliases: ["cmd"],
+	syntaxes: [""],
+	description: "",
+	help: "",
+	examples: [""],
+	permissions: Permission.NONE
+}

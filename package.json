@@ -1,0 +1,23 @@
+{
+  "name": "obj_isaque",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jsdom": "^16.2.3",
+    "@types/mongodb": "^3.5.25",
+    "@types/request": "^2.48.5",
+    "@types/string-similarity": "^3.0.0",
+    "@types/ws": "^7.2.6",
+    "discord.js": "^12.2.0",
+    "jsdom": "^16.4.0",
+    "mongodb": "^3.6.0",
+    "request": "^2.88.2",
+    "string-similarity": "^4.0.2"
+  }
+}
