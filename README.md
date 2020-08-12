@@ -10,13 +10,9 @@
 > **Argumentos:**
 > * `msg: Message`: Mensagem que chamou o comando;
 > * `args: Arguments`: Argumentos do comando;
-> * `raw: string[]`: Argumentos apenas separados por strings. Uso não recomendado.
+> * `raw: string[]`: Argumentos apenas separados por espaço. Uso não recomendado.
 * `permissions: Permission`: Permissões necessárias para o uso do comando;
 * `aliases:  string[]`: Todos os *aliases* do comando (Ao menos 1 alias é obrigatório);
 * `description:  string`: Breve resumo do comando (chamada quando `!!help`);
 * `help:  string`: Mensagem de ajuda do comando (chamada quando `!!help seuComando`);
 * `examples:  string[]`: Exemplo de uso do comando ou suas sintaxes.
-## Banco
-* Está declarado e inicializado em `src/Cassino/index.ts`;
-* Para importá-lo, use `import { Bank } from "relative path";`
-* Se quiser saber as funções dele, apenas digite `Bank.` e deixe a Intellisense fazer o trabalho dela :kappa:.

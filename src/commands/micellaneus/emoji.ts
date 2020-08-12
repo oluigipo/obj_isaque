@@ -34,7 +34,7 @@ export default <Command>{
 				if (!ww)
 					ww = await channel.createWebhook("emoji");
 
-				ww.send(`${e}`.repeat(qnt)).catch(discordErrorHandler);;
+				ww.send(`${e.toString()}`.repeat(qnt), { avatarURL: image, username: name }).catch(discordErrorHandler);;
 			}).catch(discordErrorHandler);
 
 		msg.delete().catch(discordErrorHandler);;

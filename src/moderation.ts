@@ -25,7 +25,7 @@ export function autoUnmute() {
 
 	for (let i = 0; i < mutes.length;) {
 		const mute = mutes[i];
-		if (mute.time + mute.duration > now) {
+		if (mute.time + mute.duration < now) {
 			unmute(mute.id);
 			changed = true;
 			continue;
