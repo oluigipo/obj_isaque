@@ -4,7 +4,7 @@
  * Este parser é um recursive-descent parser
  */
 
-import { Command, Arguments, Server, Permission, MsgTemplates } from "../../defs";
+import { Command, Arguments, Server, Permission, MsgTemplates, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import { isUndefined, isNull } from "util";
 
@@ -254,7 +254,8 @@ function parse(): number {
 export default <Command>{
 	run(msg: Message, _: Arguments, args: string[]) {
 		if (args.length < 2) {
-			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0]));
+			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0]))
+				.catch(discordErrorHandler);
 			return;
 		}
 
@@ -265,9 +266,11 @@ export default <Command>{
 			expr = tokenize(source);
 			let result = parse();
 
-			msg.channel.send(`${msg.author} O resultado é: \`${result}\``);
+			msg.channel.send(`<@${msg.author}> O resultado é: \`${result}\``)
+				.catch(discordErrorHandler);
 		} catch (e) {
-			msg.channel.send(`${msg.author} ${e}`);
+			msg.channel.send(`<@${msg.author}> ${e}`)
+				.catch(discordErrorHandler);
 		}
 	},
 	syntaxes: ["expr"],

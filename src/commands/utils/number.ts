@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull, MsgTemplates } from "../../defs";
+import { Command, Arguments, Server, Permission, defaultEmbed, notNull, MsgTemplates, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 function makeRGB(r: number, g: number, b: number): number {
@@ -39,7 +39,8 @@ export default <Command>{
 		final.addField("Hexadecimal", num.toString(16), true);
 		final.addField("Binário", num.toString(2), true);
 
-		msg.channel.send(final);
+		msg.channel.send(final)
+			.catch(discordErrorHandler);
 	},
 	syntaxes: ["<base> <numero>", "<numero>"],
 	permissions: Permission.NONE,

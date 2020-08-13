@@ -6,5 +6,6 @@ import lisp from "./lisp";
 import ph from "./ph";
 import sonbra from "./sonbra";
 import ulon from "./ulon";
+import fake from "./fake";
 
-export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon];
+export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake];

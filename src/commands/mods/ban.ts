@@ -16,7 +16,7 @@ export default <Command>{
 				const result = Moderation.ban(arg.value);
 
 				if (!result.success) {
-					final += `Não deu pra kickar o(a) <@${arg.value}>. ${result.error}\n`;
+					final += `infelizmente eu não possuo o poder para banir o(a) <@${arg.value}>. ${result.error}\n`;
 					continue;
 				}
 
@@ -36,5 +36,5 @@ export default <Command>{
 	aliases: ["ban", "banir"],
 	description: "Banir usuários",
 	help: "Bane um ou mais usuários do servidor",
-	examples: [`${Server.prefix}ban @user`, `${Server.prefix}ban @user1 @user2...`]
+	examples: [`@user`, `@user1 @user2...`]
 };

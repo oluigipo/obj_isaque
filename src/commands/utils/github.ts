@@ -1,9 +1,10 @@
-import { Command, Arguments, Server, Permission } from "../../defs";
+import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
-		msg.channel.send(`${msg.author} https://github.com/Luig1B/obj_isaque`);
+		msg.channel.send(`<@${msg.author}> https://github.com/Luig1B/obj_isaque`)
+			.catch(discordErrorHandler);
 	},
 	syntaxes: [""],
 	permissions: Permission.NONE,

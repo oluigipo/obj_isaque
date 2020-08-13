@@ -1,12 +1,13 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Permission } from "../../defs";
+import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
 		if (args.length < 2) {
-			msg.reply("e o código?");
+			msg.reply("e o código?")
+				.catch(discordErrorHandler);
 			return;
 		}
 
@@ -14,9 +15,11 @@ export default <Command>{
 		const result = interpret(code);
 
 		if (result.success)
-			msg.channel.send(`${msg.author} Output: \`\`\` ${result.output}\`\`\`\nMemory: \`\`\`${result.memory}\`\`\``);
+			msg.channel.send(`<@${msg.author}> Output: \`\`\` ${result.output}\`\`\`\nMemory: \`\`\`${result.memory}\`\`\``)
+				.catch(discordErrorHandler);
 		else
-			msg.channel.send(`${msg.author} ${result.error}\nMemory: \`\`\`${result.memory}\`\`\``);
+			msg.channel.send(`<@${msg.author}> ${result.error}\nMemory: \`\`\`${result.memory}\`\`\``)
+				.catch(discordErrorHandler);
 
 
 		type Result = { success: true, output: string, memory: string } | { success: false, error: string, memory: string };

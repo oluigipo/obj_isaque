@@ -37,7 +37,7 @@ export interface Command {
 }
 
 // Constants
-export const dev = "373670846792990720";
+export const devs = ["373670846792990720", "330403904992837632"];
 
 export const Time = {
 	second: 1000,
@@ -88,22 +88,26 @@ export function formatTime(ms: number): string {
 		case ms > Time.day:
 			const days = Math.trunc(ms / Time.day);
 			ms = ms % Time.day;
-			str.push(`${days} dia${days > 1 ? 's' : ''}`);
+			if (days > 0)
+				str.push(`${days} dia${days > 1 ? 's' : ''}`);
 
 		case ms > Time.hour:
 			const hours = Math.trunc(ms / Time.hour);
 			ms = ms % Time.hour;
-			str.push(`${hours} hora${hours > 1 ? 's' : ''}`);
+			if (hours > 0)
+				str.push(`${hours} hora${hours > 1 ? 's' : ''}`);
 
 		case ms > Time.minute:
 			const minutes = Math.trunc(ms / Time.minute);
 			ms = ms % Time.minute;
-			str.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+			if (minutes > 0)
+				str.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
 
 		case ms > Time.second:
 			const seconds = Math.trunc(ms / Time.second);
 			ms = ms % Time.second;
-			str.push(`${seconds} segundo${seconds > 1 ? 's' : ''}`);
+			if (seconds > 0)
+				str.push(`${seconds} segundo${seconds > 1 ? 's' : ''}`);
 			break;
 	}
 	if (str.length === 0) {
@@ -191,7 +195,6 @@ export function parseTime(s: string): Response<number> {
 
 	}
 
-	console.log(result);
 	return { success: true, data: result };
 }
 
@@ -225,4 +228,10 @@ function sleep(ms: number) {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms);
 	});
+}
+
+export function dateOf(time: number) {
+	const d = new Date(time + (new Date().getTimezoneOffset() - 180));
+	return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${
+		d.getHours().toString().padStart(2, '0')}h${d.getMinutes().toString().padStart(2, '0')}`;
 }

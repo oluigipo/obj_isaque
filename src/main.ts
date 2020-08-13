@@ -1,5 +1,9 @@
-import { Client, Message, User, ClientUser, GuildMember, GuildChannel, TextChannel } from "discord.js";
-import { Server, Command, dev, Arguments, ASCII, Argument, ArgumentKind, parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler, notNull } from "./defs";
+import { Client, Message, GuildMember, TextChannel } from "discord.js";
+import {
+	Server, Command, devs, Arguments, ASCII, Argument, ArgumentKind,
+	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
+	notNull
+} from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
 import * as fs from "fs";
@@ -56,7 +60,7 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 
 		// parse as number or time
 		if (code >= ASCII('0') && code <= ASCII('9')) {
-			const v = parseInt(str, 10);
+			const v = parseFloat(str);
 
 			// parse as time if the length doesn't match
 			if (String(v).length !== str.length) {
@@ -77,7 +81,7 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 }
 
 function validadePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
-	if (perms & Permission.DEV && member.id !== dev)
+	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
 	if (member.hasPermission("ADMINISTRATOR"))
@@ -96,7 +100,7 @@ function validadePermissions(member: GuildMember, channel: TextChannel, perms: P
 
 function predictResponse(msg: Message) {
 	if (msg.content.toLowerCase().includes("sentido da vida")) {
-		msg.channel.send(`${msg.author} é simples: 42`);
+		msg.channel.send(`${msg.author} é simples: 42`).catch(defaultErrorHandler);
 		return true;
 	}
 
@@ -111,8 +115,6 @@ client.on("ready", async () => {
 		.catch(discordErrorHandler);
 
 	console.log("Online!");
-
-	// @NOTE(luigi): maybe fetch all users & guilds? idk how discord.js 12 deals with it
 });
 
 // @TODO(luigi): fix "User is not Connected to Voice Channel"
@@ -135,18 +137,17 @@ client.on("message", (message) => {
 		return;
 
 	// timeout
-	if (Date.now() - (timeout[message.author.id] ?? 0) < Server.timeout)
+	if ((timeout[message.author.id] ?? 0) + Server.timeout > Date.now())
 		return;
-
-	timeout[message.author.id] = Date.now();
 
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
+		timeout[message.author.id] = Date.now();
 		const respostas = [
-			"Sim.",
-			"Não.",
-			"depende.",
-			"obviamente.",
+			"Sim",
+			"Não",
+			"depende",
+			"obviamente",
 			"talvez...",
 			`não sei. Pergunta pro(a) ${message.guild?.members.cache.random().displayName}!`,
 			"não quero falar contigo. sai",
@@ -157,7 +158,7 @@ client.on("message", (message) => {
 				`<@${message.author}> ${
 				respostas[Math.floor(Math.random() * respostas.length)]
 				}`,
-			);
+			).catch(defaultErrorHandler);
 		}
 	}
 
@@ -179,11 +180,13 @@ client.on("message", (message) => {
 
 	const args = parseArgs(rawArgs, message);
 
-	try {
-		command.run(message, args, rawArgs);
-	} catch (e) {
-		message.channel.send(`${dev} algo de errado, dá uma olhadinha no console aí`);
-	}
+	timeout[message.author.id] = Date.now();
+
+	command.run(message, args, rawArgs).catch(e => {
+		console.log(e);
+		message.channel.send(`<@${devs[0]}> aconteceu algo de errado, dá uma olhadinha no console aí`)
+			.catch(discordErrorHandler);
+	});
 });
 
 process.on("beforeExit", async () => {

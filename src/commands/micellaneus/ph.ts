@@ -1,6 +1,6 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Time, Channels, Permission, defaultEmbed, notNull } from "../../defs";
+import { Command, Arguments, Server, Time, Channels, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import request from 'request';
 
@@ -20,7 +20,8 @@ function sendMeme(msg: Message) {
 	final.url = `https://www.reddit.com${post.data.permalink}`;
 	final.image = { url: post.data.url };
 
-	msg.channel.send(final);
+	msg.channel.send(final)
+		.catch(discordErrorHandler);
 }
 
 export default <Command>{
@@ -31,7 +32,8 @@ export default <Command>{
 			request("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100", {}, (error, response) => {
 				if (error) {
 					console.log(error);
-					msg.channel.send(`${msg.author} Algo deu errado ao fazer a request para o Reddit...`);
+					msg.channel.send(`<@${msg.author}> Algo deu errado ao fazer a request para o Reddit...`)
+						.catch(discordErrorHandler);
 					return;
 				}
 

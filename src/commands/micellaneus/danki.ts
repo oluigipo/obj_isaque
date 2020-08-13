@@ -1,6 +1,6 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull } from "../../defs";
+import { Command, Arguments, Server, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 interface Item {
@@ -92,7 +92,8 @@ export default <Command>{
 		final.description = curr.description;
 		final.color = Server.botcolor;
 
-		msg.channel.send(final);
+		msg.channel.send(final)
+			.catch(discordErrorHandler);
 	},
 	permissions: Permission.SHITPOST,
 	aliases: ["danki", "dankicode"],

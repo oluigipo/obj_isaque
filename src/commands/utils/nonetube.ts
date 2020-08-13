@@ -1,4 +1,4 @@
-import { Command, Arguments, Server, Permission, ArgumentKind } from "../../defs";
+import { Command, Arguments, Server, Permission, ArgumentKind, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 // Variáveis que serão usadas só nesse comando
@@ -23,7 +23,8 @@ export default <Command>{
 			link = playlists[args[1].value] ?? link;
 		}
 
-		msg.channel.send(`${msg.author} ${link}`);
+		msg.channel.send(`${msg.author} ${link}`)
+			.catch(discordErrorHandler);
 	},
 	syntaxes: ["", "<nome da playlist>"],
 	permissions: Permission.NONE,

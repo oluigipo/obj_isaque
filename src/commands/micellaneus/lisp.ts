@@ -1,6 +1,6 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Permission } from "../../defs";
+import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, EOF }
@@ -477,10 +477,12 @@ export default <Command>{
 			let vm = new LispVM(args.slice(1).join(' '));
 			let e = vm.eval();
 			let secure = e.toString().replace(/@everyone|@here/, (m) => m.substr(1));
-			msg.channel.send(`Resultado: ${secure}`);
+			msg.channel.send(`Resultado: ${secure}`)
+				.catch(discordErrorHandler);
 		} catch (error) {
 			let secure = String(error).replace(/@everyone|@here/, (m) => m.substr(1));
-			msg.channel.send(`Erro: ${secure}`);
+			msg.channel.send(`Erro: ${secure}`)
+				.catch(discordErrorHandler);
 		}
 	},
 	syntaxes: ["<code>"],

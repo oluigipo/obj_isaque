@@ -1,7 +1,7 @@
 // @NOTE(luigi): not checked
 
 import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
-import { Message, TextChannel } from "discord.js";
+import { Message, TextChannel, Webhook } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
@@ -9,7 +9,8 @@ export default <Command>{
 			return;
 		}
 		if (args.length < 2) {
-			msg.reply("qual emoji e´ pra mandar?");
+			msg.reply("qual emoji e´ pra mandar?")
+				.catch(discordErrorHandler);
 			return;
 		}
 
@@ -17,9 +18,10 @@ export default <Command>{
 		if (args.length > 2 && Number(args[2]) !== NaN)
 			qnt = Math.max(Math.min(Number(args[2]), 68), 1);
 
-		const e = msg.guild.emojis.cache.find(a => a.name === args[1]);
+		const e = msg.client.emojis.cache.find(a => a.name === args[1]);
 		if (e === null || e === undefined) {
-			msg.channel.send(`O emoji \`${args[1]}\` é inválido.`);
+			msg.channel.send(`O emoji \`${args[1]}\` é inválido.`)
+				.catch(discordErrorHandler);
 			return;
 		}
 
@@ -32,7 +34,7 @@ export default <Command>{
 			.then(async w => {
 				let ww = w.first();
 				if (!ww)
-					ww = await channel.createWebhook("emoji");
+					ww = <Webhook>await channel.createWebhook("emoji").catch(discordErrorHandler);
 
 				ww.send(`${e.toString()}`.repeat(qnt), { avatarURL: image, username: name }).catch(discordErrorHandler);;
 			}).catch(discordErrorHandler);

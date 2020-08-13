@@ -1,4 +1,4 @@
-import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time } from "./defs";
+import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf } from "./defs";
 import { Client, GuildMember } from "discord.js";
 import { collections } from "./database";
 
@@ -16,7 +16,7 @@ let client: Client;
 export async function init(c: Client) {
 	client = c;
 	await loadDB();
-	autoUnmute();
+	setTimeout(autoUnmute, Time.minute);
 }
 
 export function autoUnmute() {
@@ -166,11 +166,6 @@ export function isMuted(userid: string): number | undefined {
 	}
 
 	return undefined;
-}
-
-function dateOf(time: number) {
-	const d = new Date(time);
-	return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${d.getHours()}h${d.getMinutes()}`;
 }
 
 export function kick(user: string | GuildMember): Response<undefined> {
