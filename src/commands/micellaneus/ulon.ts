@@ -11,5 +11,5 @@ export default <Command>{
 	aliases: ["ulon", "ul0n"],
 	description: "ULOOOOON",
 	help: "ULOOOOOOOOOOOOOOOOOON",
-	examples: [`${Server.prefix}ulon`]
+	examples: []
 };

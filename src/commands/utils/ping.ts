@@ -12,5 +12,5 @@ export default <Command>{
 	aliases: ["ping", "pong"],
 	description: "Ping!",
 	help: "Pong!",
-	examples: [`${Server.prefix}ping`]
+	examples: []
 };

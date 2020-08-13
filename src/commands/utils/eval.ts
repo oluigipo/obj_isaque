@@ -20,9 +20,9 @@ export default <Command>{
 		msg.channel.send(result).catch(discordErrorHandler);
 	},
 	aliases: ["eval"],
-	syntaxes: ["eval expr"],
+	syntaxes: ["expr"],
 	description: "eval do javascript",
 	help: "por que quer saber?",
-	examples: ["eval process.exit(1)"],
+	examples: ["process.exit(1)"],
 	permissions: Permission.DEV
 }

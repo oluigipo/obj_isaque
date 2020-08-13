@@ -1,4 +1,4 @@
-import { Message, GuildMember, GuildChannel, User, MessageEmbed } from "discord.js";
+import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel } from "discord.js";
 
 export enum ArgumentKind { STRING, MEMBER, CHANNEL, NUMBER, TIME }
 export type Argument =
@@ -52,23 +52,30 @@ export const Server = {
 	id: "507550989629521922",
 	prefix: "!!",
 	botcolor: 0x30a246,
-	timeout: Time.second * 3
+	timeout: Time.second * 3,
+	rolepickMsg: "743559874734063626"
 };
 
 export const Channels = {
 	shitpost: ["553933292542361601", "671327942420201492"],
-	music: "621805258519216130"
+	music: "621805258519216130",
+	rules: "517857905051959348"
 }
 
 export const Emojis = {
 	yes: '✅',
 	no: '<:error:666740656483467274>',
 	horse: '🏇',
-	surrender: '<:peepo_surrender:743070678349119609>'
+	surrender: '<:peepo_surrender:743070678349119609>',
+	unity: "743241304405967020",
+	gamemaker: "556607844208869386"
 };
 
 export const Roles = {
-	muted: "568171976556937226"
+	muted: "568171976556937226",
+	aluno: "585871344718184458",
+	unity: "730818777998032967",
+	gamemaker: "630202297716178964"
 };
 
 export const MsgTemplates = {
@@ -234,4 +241,22 @@ export function dateOf(time: number) {
 	const d = new Date(time + (new Date().getTimezoneOffset() - 180));
 	return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${
 		d.getHours().toString().padStart(2, '0')}h${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+export function validadePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
+	if (perms & Permission.DEV && !devs.includes(member.id))
+		return false;
+
+	if (member.hasPermission("ADMINISTRATOR"))
+		return true;
+
+	if (perms & Permission.MOD)
+		return false;
+
+	if (perms & Permission.SHITPOST && !Channels.shitpost.some(id => id === channel.id))
+		return false;
+
+	// @NOTE(luigi): need more permissions?
+
+	return true;
 }

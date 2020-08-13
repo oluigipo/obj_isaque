@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
-		msg.channel.send(`<@${msg.author}> https://github.com/Luig1B/obj_isaque`)
+		msg.channel.send(`<@${msg.author}> https://github.com/oluigipo/obj_isaque`)
 			.catch(discordErrorHandler);
 	},
 	syntaxes: [""],
@@ -11,5 +11,5 @@ export default <Command>{
 	aliases: ["github", "repo"],
 	description: "O link do meu repositório.",
 	help: "O link do meu repositório.",
-	examples: [`${Server.prefix}github`]
+	examples: []
 };

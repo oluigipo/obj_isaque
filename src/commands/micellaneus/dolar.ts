@@ -45,7 +45,8 @@ export default <Command>{
 		args.shift(); // consume command
 
 		if (args.length > 0 && args[0].kind === ArgumentKind.STRING) {
-			moeda = moedas_cambio[args[0].value] ? args[0].value : "USD";
+			const m = args[0].value.toUpperCase();
+			moeda = moedas_cambio[m] ? m : "USD";
 			args.shift();
 		}
 
@@ -78,6 +79,6 @@ export default <Command>{
 	permissions: Permission.SHITPOST,
 	aliases: ["dolar"],
 	description: "Mostra o valor do dolar, feito por <@310480160640073729>",
-	help: "Mostra o valor do dolar (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>",
-	examples: [`${Server.prefix}dolar`, `${Server.prefix}dolar 25`]
+	help: "Mostra o valor do dolar (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>\nMoedas conhecidas: `" + Object.keys(moedas_cambio).join("`, `") + '`',
+	examples: [``, `25`, "CAD", "EUR 15"]
 };

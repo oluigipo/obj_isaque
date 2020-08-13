@@ -523,7 +523,7 @@ Outros:
 	atom?
 	nil?
 `,
-	examples: [`${Server.prefix}lisp (block
+	examples: [`(block
 	(def fib (n) (
 		if (< n 2)
 			n

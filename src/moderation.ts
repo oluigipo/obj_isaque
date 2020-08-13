@@ -23,16 +23,21 @@ export function autoUnmute() {
 	let changed = false;
 	const now = Date.now();
 
+	// console.log("autoUnmute Begin");
+	// console.log(mutes);
 	for (let i = 0; i < mutes.length;) {
 		const mute = mutes[i];
-		if (mute.time + mute.duration < now) {
-			unmute(mute.id);
+		if (mute.duration !== -1 && mute.time + mute.duration < now) {
+			weakunmute(mute.id);
 			changed = true;
 			continue;
 		}
 
 		++i;
 	}
+
+	// console.log("autoUnmute End" + (changed ? " (changed)" : ""));
+	// console.log(mutes);
 
 	if (changed)
 		updateDB();

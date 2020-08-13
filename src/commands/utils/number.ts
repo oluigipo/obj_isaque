@@ -47,5 +47,5 @@ export default <Command>{
 	aliases: ["number", "numero"],
 	description: "Mostra como um número é representado em diferentes sistemas numéricos",
 	help: "Mostra como um número é representado no sistema decimal, octal, hexadecimal e binário.",
-	examples: [`${Server.prefix}number base numero`, `${Server.prefix}number 16 ff`, `${Server.prefix}number 8 107`]
+	examples: [`999`, `16 ff`, `8 107`]
 };

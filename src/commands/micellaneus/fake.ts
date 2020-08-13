@@ -3,6 +3,9 @@ import { Message, GuildChannel, TextChannel } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments, raw: string[]) {
+		if (msg.channel.id === Server.id)
+			return;
+
 		const text = raw.slice(1).join(' ');
 		const guild = msg.client.guilds.cache.get(Server.id);
 		if (!guild)
@@ -21,5 +24,5 @@ export default <Command>{
 	description: "...",
 	help: "...",
 	examples: ["..."],
-	permissions: Permission.DEV
+	permissions: Permission.MOD
 }

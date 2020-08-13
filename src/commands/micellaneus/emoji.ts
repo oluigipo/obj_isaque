@@ -36,7 +36,11 @@ export default <Command>{
 				if (!ww)
 					ww = <Webhook>await channel.createWebhook("emoji").catch(discordErrorHandler);
 
-				ww.send(`${e.toString()}`.repeat(qnt), { avatarURL: image, username: name }).catch(discordErrorHandler);;
+				let text = `${e.toString()}`.repeat(qnt);
+				if (text.length > 2000)
+					text = `\\*tantos ${e.toString()} que quebra o limite do discord\\*`;
+
+				ww.send(text, { avatarURL: image, username: name }).catch(discordErrorHandler);;
 			}).catch(discordErrorHandler);
 
 		msg.delete().catch(discordErrorHandler);;
@@ -46,5 +50,5 @@ export default <Command>{
 	aliases: ["emoji"],
 	description: "Envia um emoji por ti",
 	help: "Envia um emoji por ti usando webhooks (Número máximo de emojis por comando: 68)",
-	examples: [`${Server.prefix}emoji kappa`, `${Server.prefix}emoji jotaro 5`]
+	examples: [`kappa`, `jotaro 5`, "peepo_surrender"]
 };

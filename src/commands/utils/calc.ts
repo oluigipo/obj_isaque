@@ -278,5 +278,5 @@ export default <Command>{
 	aliases: ["calc"],
 	description: "Sua calculadora do discord!",
 	help: "Esta calculadora possui as seguintes operações: `+`, `-`, `*`, `/` e `**` (potência). Também é possível usar constantes e funções matemáticas nela, como por exemplo `sin(x)`, `random()` e `atan2(0,-1)`. Se quiser conferir quais funções e constantes eu possuo ou até mesmo ver como isso funciona, você pode entrar no meu repositório usando o comando `" + Server.prefix + "github`!",
-	examples: [`${Server.prefix}calc expr\n${Server.prefix}calc 15 + 15 * 10 / 20 ^ 2 - 7`]
+	examples: [`15 + 15 * 10 / 20 ^ 2 - 7`]
 };

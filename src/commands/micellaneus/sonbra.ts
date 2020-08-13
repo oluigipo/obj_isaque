@@ -11,5 +11,5 @@ export default <Command>{
 	aliases: ["sonbra", "screenshake"],
 	description: "Sonbra e seu glorioso ScreenShake",
 	help: "Sonbra e seu glorioso ScreenShake",
-	examples: [`${Server.prefix}sonbra`]
+	examples: []
 };

@@ -154,5 +154,5 @@ export default <Command>{
 	syntaxes: ["func"],
 	description: "A documentação do GMS2",
 	help: "Este comando pesquisa uma palavra na documentação do GMS2 e te diz o resultado da pesquisa. Use a vontade!",
-	examples: [`${Server.prefix}docs algumaCoisa\n${Server.prefix}docs lengthdir_x\n${Server.prefix}docs instance_destroy\n${Server.prefix}docs image_index`]
+	examples: [`lengthdir_x`, `instance_destroy`, `image_index`]
 };

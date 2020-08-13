@@ -16,7 +16,7 @@ export default <Command>{
 				const result = Moderation.ban(arg.value);
 
 				if (!result.success) {
-					final += `infelizmente eu não possuo o poder para banir o(a) <@${arg.value}>. ${result.error}\n`;
+					final += `o(a) <@${arg.value}> é muito forte para mim. ${result.error}\n`;
 					continue;
 				}
 

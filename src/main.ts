@@ -1,8 +1,8 @@
-import { Client, Message, GuildMember, TextChannel } from "discord.js";
+import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
 	Server, Command, devs, Arguments, ASCII, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull
+	notNull, validadePermissions, Roles, Emojis
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
@@ -11,6 +11,8 @@ import commands from "./commands";
 
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 const client = new Client();
+type Invites = { [key: string]: number };
+let invites: Invites = {};
 
 const timeout = <{ [key: string]: number }>{};
 
@@ -80,24 +82,6 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 	return result;
 }
 
-function validadePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
-	if (perms & Permission.DEV && !devs.includes(member.id))
-		return false;
-
-	if (member.hasPermission("ADMINISTRATOR"))
-		return true;
-
-	if (perms & Permission.MOD)
-		return false;
-
-	if (perms & Permission.SHITPOST && !Channels.shitpost.some(id => id === channel.id))
-		return false;
-
-	// @NOTE(luigi): need more permissions?
-
-	return true;
-}
-
 function predictResponse(msg: Message) {
 	if (msg.content.toLowerCase().includes("sentido da vida")) {
 		msg.channel.send(`${msg.author} é simples: 42`).catch(defaultErrorHandler);
@@ -107,14 +91,75 @@ function predictResponse(msg: Message) {
 	return false;
 }
 
+async function fetchInvites(guild?: Guild) {
+	const inv = await (guild ?? client.guilds.cache.get(Server.id))?.fetchInvites()
+	if (inv) {
+		const invites: Invites = {};
+		inv.forEach((value) => invites[value.code] = value.uses ?? 0);
+		return invites;
+	}
+
+	return undefined;
+}
+
 client.on("ready", async () => {
 	await Database.init(auth.mongo).catch(defaultErrorHandler);
 	await Moderation.init(client).catch(defaultErrorHandler);
 
+	// @NOTE(luigi): what?
+	invites = (<Invites | undefined>await fetchInvites().catch(discordErrorHandler)) ?? {};
+
 	notNull(client.user).setPresence({ activity: { name: "o curso do NoNe!", type: "WATCHING" }, status: "online" })
 		.catch(discordErrorHandler);
 
+	// @NOTE(luigi): what?²
+	(<TextChannel>client.guilds.cache.get(Server.id)?.channels.cache.get(Channels.rules)).messages.fetch().catch(discordErrorHandler);
+
 	console.log("Online!");
+});
+
+client.on("messageReactionAdd", (reaction, user) => {
+	if (reaction.message.id !== Server.rolepickMsg)
+		return;
+
+	const member = reaction.message.guild?.members.cache.get(user.id);
+
+	if (!member)
+		return;
+
+	if (reaction.emoji.id === Emojis.unity && !member.roles.cache.has(Roles.unity)) // unity
+		member.roles.add(Roles.unity).catch(discordErrorHandler);
+	else if (reaction.emoji.id === Emojis.gamemaker && !member.roles.cache.has(Roles.gamemaker)) // game maker
+		member.roles.add(Roles.gamemaker).catch(discordErrorHandler);
+});
+
+client.on("messageReactionRemove", (reaction, user) => {
+	if (reaction.message.id !== Server.rolepickMsg)
+		return;
+
+	const member = reaction.message.guild?.members.cache.get(user.id);
+
+	if (!member)
+		return;
+
+	if (reaction.emoji.id === Emojis.unity && member.roles.cache.has(Roles.unity)) // unity
+		member.roles.remove(Roles.unity).catch(discordErrorHandler);
+	else if (reaction.emoji.id === Emojis.gamemaker && member.roles.cache.has(Roles.gamemaker)) // game maker
+		member.roles.remove(Roles.gamemaker).catch(discordErrorHandler);
+});
+
+client.on("guildMemberAdd", async member => {
+	if (member.guild.id !== Server.id) return;
+	if (Moderation.isMuted(member.id))
+		member.roles.add(Roles.muted).catch(discordErrorHandler);
+
+	const newInvites = (<Invites>await fetchInvites().catch(discordErrorHandler));
+
+	if (newInvites[Server.specialInvite] > invites[Server.specialInvite]) {
+		member.roles.add(Roles.aluno).catch(discordErrorHandler);
+	}
+
+	invites = newInvites;
 });
 
 // @TODO(luigi): fix "User is not Connected to Voice Channel"

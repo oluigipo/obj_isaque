@@ -10,36 +10,34 @@ export default <Command>{
 		}
 		args.shift(); // consume command
 
-		let duration: number;
-		if (args[0].kind === ArgumentKind.TIME) {
-			duration = args[0].value;
-			args.shift(); // consume duration
-		} else {
-			duration = -1;
-		}
-
+		let duration = -1;
 		let finalmsg = "";
 		for (const arg of args) {
-			if (arg.kind === ArgumentKind.MEMBER) {
-				const member = arg.value;
-				// @NOTE(luigi): we don't need to update the db every iteration of the loop
-				const result = Moderation.weakmute(member.id, duration, arg.value);
+			switch (arg.kind) {
+				case ArgumentKind.MEMBER: {
+					const member = arg.value;
+					// @NOTE(luigi): we don't need to update the db every iteration of the loop
+					const result = Moderation.weakmute(member.id, duration, arg.value);
 
-				if (!result.success) {
-					finalmsg += `Algo deu errado ao mutar <@${member.id}>. \`${result.error}\`\n`;
-					continue;
-				}
+					if (!result.success) {
+						finalmsg += `Algo deu errado ao mutar <@${member.id}>. \`${result.error}\`\n`;
+						continue;
+					}
 
-				finalmsg += `Sinta o peso do mute <@${member}>! Mutado `;
-				if (duration === -1)
-					finalmsg += `até alguém quiser te desmutar.`;
-				else
-					finalmsg += `por \`${formatTime(duration)}\`.`;
+					finalmsg += `Sinta o peso do mute <@${member}>! Mutado `;
+					if (duration === -1)
+						finalmsg += `até alguém quiser te desmutar.`;
+					else
+						finalmsg += `por \`${formatTime(duration)}\`.`;
 
-				if (result.warning)
-					finalmsg += ` Nota: ${result.warning}`;
+					if (result.warning)
+						finalmsg += ` Nota: ${result.warning}`;
 
-				finalmsg += '\n';
+					finalmsg += '\n';
+				} break;
+				case ArgumentKind.TIME:
+					duration = arg.value;
+					break;
 			}
 		}
 
@@ -58,6 +56,6 @@ export default <Command>{
 	description: "Muta um ou mais membros por um tempo (in)determinado.",
 	help: "Muta um ou mais membros por um tempo (in)determinado.",
 	permissions: Permission.MOD,
-	syntaxes: ["[tempo] @user..."],
+	syntaxes: ["[tempo...] @user..."],
 	examples: ["3h @usuario", "365d @SG @Urlake"]
 }

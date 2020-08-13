@@ -129,5 +129,5 @@ export default <Command>{
 	aliases: ["brainfuck++", "bfpp", "bf++", "bf"],
 	description: "Um interpretador de BF",
 	help: "Um interpretador de Brainfuck com subrotinas (Limite de iterações: 10000000)",
-	examples: [`${Server.prefix}bfpp +++[>+++++<-]>[>+++++<-]>+++.+.-.---------.`]
+	examples: [`+++[>+++++<-]>[>+++++<-]>+++.+.-.---------.`]
 };

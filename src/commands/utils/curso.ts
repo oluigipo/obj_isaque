@@ -18,5 +18,5 @@ export default <Command>{
 	aliases: ["curso"],
 	description: "Link do curso.",
 	help: "Link do curso do NoNe.",
-	examples: [`${Server.prefix}curso`]
+	examples: []
 };

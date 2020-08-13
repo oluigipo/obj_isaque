@@ -95,9 +95,10 @@ export default <Command>{
 		msg.channel.send(final)
 			.catch(discordErrorHandler);
 	},
+	syntaxes: ["", "<nome>"],
 	permissions: Permission.SHITPOST,
 	aliases: ["danki", "dankicode"],
 	description: "Envia um meme da danki",
 	help: "Envia um meme da danki",
-	examples: [`${Server.prefix}danki`]
+	examples: []
 };

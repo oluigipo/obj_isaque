@@ -14,5 +14,5 @@ export default <Command>{
 	help: "Lista de membros mutados.",
 	permissions: Permission.MOD,
 	syntaxes: [""],
-	examples: [""]
+	examples: []
 }

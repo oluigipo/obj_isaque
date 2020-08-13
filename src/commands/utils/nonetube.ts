@@ -3,7 +3,6 @@ import { Message } from "discord.js";
 
 // Variáveis que serão usadas só nesse comando
 const playlists: any = {
-	primeiro: "https://www.youtube.com/watch?v=lak9iTwvN8Q&list=PLKTRv0drNjJ-6bglGqfgBe7YlCstCa2wx",
 	"primeiro-jogo": "https://www.youtube.com/watch?v=lak9iTwvN8Q&list=PLKTRv0drNjJ-6bglGqfgBe7YlCstCa2wx",
 	rpg: "https://www.youtube.com/watch?v=WvbqpY9CsR8&list=PLKTRv0drNjJ8zkzW9IeJknzDi6E5kjlwL",
 	plataforma: "https://www.youtube.com/watch?v=dWKQQfM5l0I&list=PLKTRv0drNjJ_hnDslZnr2N8MXoe1r37N8",
@@ -30,6 +29,6 @@ export default <Command>{
 	permissions: Permission.NONE,
 	aliases: ["nonetube", "youtube"],
 	description: "Links do canal do NoNe",
-	help: "Enviará um link de uma playlist ou o próprio canal do none",
-	examples: [`${Server.prefix}nonetube\n${Server.prefix}nonetube primeiro-jogo`]
+	help: "Enviará um link de uma playlist ou o próprio canal do none\nPlaylists conhecidas: `" + Object.keys(playlists).join("`, `") + '`',
+	examples: [`primeiro-jogo`]
 };

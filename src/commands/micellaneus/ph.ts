@@ -51,5 +51,5 @@ export default <Command>{
 	aliases: ["ph", "programmerhumor"],
 	description: "/r/ProgrammerHumor",
 	help: "Pega um meme no top 100 do [/r/ProgrammerHumor](https://reddit.com/r/ProgrammerHumor).",
-	examples: [`${Server.prefix}ph`]
+	examples: []
 };

@@ -194,5 +194,5 @@ export default <Command>{
 	syntaxes: ["rgb RRGGBB", "hsv H S V", "rgb R G B", "#RRGGBB"],
 	description: "Veja uma cor em diferentes formatos (incluindo BGR).",
 	help: "Converta uma cor para outros formatos de um jeito fácil. Os formatos disponíveis são: \`rgb\`, \`bgr\`, \`hsv\`/\`hsb\` e \`hsl\`",
-	examples: [`${Server.prefix}color rgb RRGGBB\n${Server.prefix}color hsv H S V\n${Server.prefix}color rgb R G B\n${Server.prefix}color #RRGGBB`]
+	examples: [`255 255 255`, "3f3f3f", "hsv 280 90 100"]
 };
