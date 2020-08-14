@@ -252,7 +252,7 @@ function parse(): number {
 }
 
 export default <Command>{
-	run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Arguments, args: string[]) {
 		if (args.length < 2) {
 			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0]))
 				.catch(discordErrorHandler);

@@ -117,7 +117,7 @@ function _format(s: string): string {
 }
 
 export default <Command>{
-	run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Arguments, args: string[]) {
 		if (!msg.member) {
 			console.log("=============\n=====\nn===");
 			return;
