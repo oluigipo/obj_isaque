@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler } from "../../defs";
+import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler, defaultEmbed, notNull, emptyEmbed } from "../../defs";
 import { Message } from "discord.js";
 import * as Moderation from "../../moderation";
 
@@ -40,7 +40,9 @@ export default <Command>{
 				finalmsg = `caraca, tá tão bonzinho que a mensagem passou do limite de 2000 chars do discord ${Emojis.surrender.repeat(3)}`
 		}
 
-		msg.channel.send(finalmsg).catch(discordErrorHandler);
+		let embed = emptyEmbed();
+		embed.description = finalmsg;
+		msg.channel.send(embed).catch(discordErrorHandler);
 	},
 	aliases: ["unmute"],
 	syntaxes: ["@users..."],

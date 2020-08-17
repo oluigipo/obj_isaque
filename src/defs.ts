@@ -277,3 +277,7 @@ export function time() {
 
 	return result;
 }
+
+export function emptyEmbed() {
+	return new MessageEmbed();
+}

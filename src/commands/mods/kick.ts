@@ -1,11 +1,11 @@
-import { Command, Arguments, Server, Permission, ArgumentKind, Emojis } from "../../defs";
+import { Command, Arguments, Server, Permission, ArgumentKind, Emojis, defaultEmbed, notNull, discordErrorHandler, emptyEmbed } from "../../defs";
 import * as Moderation from "../../moderation";
 import { Message } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
 		if (args.length < 2) {
-			msg.channel.send("é pra kickar quem?");
+			msg.channel.send("é pra kickar quem?").catch(discordErrorHandler);
 			return;
 		}
 		args.shift(); // consume command
@@ -29,7 +29,9 @@ export default <Command>{
 		else if (final.length > 2000)
 			final = `eita, você kickou tanta gente que passou do limite de 2000 chars do discord ${Emojis.surrender.repeat(3)}`;
 
-		msg.channel.send(final);
+		let embed = emptyEmbed();
+		embed.description = final;
+		msg.channel.send(embed).catch(discordErrorHandler);
 	},
 	syntaxes: ["<@user...>"],
 	permissions: Permission.MOD,
