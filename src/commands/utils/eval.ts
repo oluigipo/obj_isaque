@@ -1,5 +1,6 @@
 import { Command, Arguments, Permission, discordErrorHandler } from "../../defs";
 import * as Defs from "../../defs";
+import * as Moderation from "../../moderation";
 import { Message } from "discord.js";
 
 export default <Command>{
@@ -9,6 +10,7 @@ export default <Command>{
 		// @NOTE(luigi): don't remove.
 		// Typescript will optimize and remove import
 		Defs;
+		Moderation;
 
 		let result: any;
 		try {

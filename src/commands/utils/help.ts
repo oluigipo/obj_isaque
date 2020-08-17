@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, ArgumentKind, discordErrorHandler, defaultEmbed, notNull, Server, validadePermissions, Time, defaultErrorHandler } from "../../defs";
+import { Command, Arguments, Permission, ArgumentKind, discordErrorHandler, defaultEmbed, notNull, Server, validatePermissions, Time, defaultErrorHandler } from "../../defs";
 import { Message, GuildMember, TextChannel, CollectorFilter } from "discord.js";
 import cmds from "../index";
 
@@ -120,7 +120,7 @@ export default <Command>{
 		} else {
 			const m = <Message>await msg.channel.send('.').catch(discordErrorHandler);
 			const member = <GuildMember>msg.member;
-			const commands = cmds.filter(c => validadePermissions(member, <TextChannel>msg.channel, c.permissions))
+			const commands = cmds.filter(c => validatePermissions(member, <TextChannel>msg.channel, c.permissions))
 				.sort((a, b) => b.description.length - a.description.length);
 			showPage(m, 0, commands, member).catch(defaultErrorHandler);
 		}

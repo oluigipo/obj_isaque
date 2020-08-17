@@ -63,7 +63,7 @@ export default <Command>{
 		let final = defaultEmbed(notNull(msg.member));
 
 		try {
-			let fn = args[1];
+			let fn = args.slice(1).join(' ');
 			let ind = exists(fn);
 			if (ind === -1) {
 				let items = closest(fn);
@@ -80,7 +80,7 @@ export default <Command>{
 				const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
 
 				if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
-					msg.channel.send(`${msg.author} Aqui está o link: ${link}`);
+					msg.channel.send(`<@${msg.author}> Aqui está o link: ${link}`);
 					return;
 				}
 
@@ -137,10 +137,14 @@ export default <Command>{
 					}
 
 					const codes = page.getElementsByClassName("code");
+					if (codes.length < 3) {
+						msg.channel.send(`<@${msg.author}> aqui está o link: ${link}`);
+						return;
+					}
 					final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
 
 					final.addField("Returns", codes[codes.length - 2].textContent);
-					final.addField("Example", `\`\`\`js\n${codes[codes.length - 1].textContent}\`\`\``);
+					final.addField("Example", `\`\`\`gml\n${codes[codes.length - 1].textContent}\`\`\``);
 					msg.channel.send(final);
 				});
 			}

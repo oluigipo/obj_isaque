@@ -1,4 +1,4 @@
-import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf } from "./defs";
+import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf, time, formatTime } from "./defs";
 import { Client, GuildMember } from "discord.js";
 import { collections } from "./database";
 
@@ -6,6 +6,7 @@ interface Mute {
 	id: string;
 	time: number;
 	duration: number;
+	reason?: string;
 }
 
 export type Mutes = Mute[];
@@ -21,7 +22,7 @@ export async function init(c: Client) {
 
 export function autoUnmute() {
 	let changed = false;
-	const now = Date.now();
+	const now = time();
 
 	// console.log("autoUnmute Begin");
 	// console.log(mutes);
@@ -64,7 +65,7 @@ export function updateDB() {
  * @param userid Id of the user
  * @param duration Mute duration. -1 if undefined
  */
-export function weakmute(userid: string, duration: number = -1, member?: GuildMember): Response<number> {
+export function weakmute(userid: string, duration: number = -1, reason?: string, member?: GuildMember): Response<number> {
 	let index = mutes.length;
 	let warning: string | undefined;
 
@@ -86,11 +87,13 @@ export function weakmute(userid: string, duration: number = -1, member?: GuildMe
 		member = c;
 	}
 
+	if (member.voice.channelID)
+		member.voice.setMute(true);
+
 	member.roles.add(Roles.muted).catch(discordErrorHandler);
 
-	const now = Date.now();
-	mutes[index] = { id: userid, time: now, duration };
-	updateDB();
+	const now = time();
+	mutes[index] = { id: userid, time: now, duration, reason };
 	return { success: true, data: now + duration, warning };
 }
 
@@ -100,8 +103,8 @@ export function weakmute(userid: string, duration: number = -1, member?: GuildMe
  * @param userid Id of the user
  * @param duration Mute duration. -1 if undefined
  */
-export function mute(userid: string, duration: number = -1, member?: GuildMember) {
-	const result = weakmute(userid, duration, member);
+export function mute(userid: string, duration: number = -1, reason?: string, member?: GuildMember) {
+	const result = weakmute(userid, duration, reason, member);
 	if (result.success)
 		updateDB();
 	return result;
@@ -116,18 +119,19 @@ export function weakunmute(userid: string, member?: GuildMember): Response<numbe
 	for (let i = 0; i < mutes.length; ++i)
 		if (mutes[i].id === userid) {
 			const mute = mutes[i];
-
 			mutes = mutes.filter((_, index) => index !== i);
 
 			if (!member) {
 				const c = client.guilds.cache.get(Server.id)?.members.cache.get(userid);
-
 				if (c === undefined) {
 					return { success: false, error: "Membro desconhecido" }
 				}
 
 				member = c;
 			}
+
+			if (member.voice.channelID)
+				member.voice.setMute(false);
 
 			member.roles.remove(Roles.muted).catch(discordErrorHandler);
 
@@ -149,15 +153,20 @@ export function unmute(userid: string, member?: GuildMember) {
 	return result;
 }
 
+type FormatedMute = { user: string, ends: string, begins: string, duration: string, reason?: string };
 /**
  * @returns A formatted string containing every mute in the database
  * @warning The output's length CAN be greater than 2000 chars (Discord's message's limit size)
  */
-export function formatedMuteList() {
-	return mutes.reduce((acc: string, curr: Mute, index) =>
-		acc + `${index + 1} - <@${curr.id}> acaba \`${curr.duration === -1 ? "nunca" : dateOf(curr.time + curr.duration)}\`\n`,
-		""
-	);
+export function getMutes() {
+	return mutes.reduce((acc: FormatedMute[], curr: Mute, index) =>
+		(acc.push({
+			user: `<@${curr.id}>`,
+			ends: curr.duration === -1 ? "nunca" : dateOf(curr.time + curr.duration),
+			begins: dateOf(curr.time),
+			duration: curr.duration === -1 ? "infinito" : formatTime(curr.duration),
+			reason: curr.reason
+		}), acc), []);
 }
 
 /**

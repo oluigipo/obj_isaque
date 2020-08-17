@@ -52,7 +52,7 @@ export const Server = {
 	id: "507550989629521922",
 	prefix: "!!",
 	botcolor: 0x30a246,
-	timeout: Time.second * 3,
+	timeout: Time.second * 5,
 	rolepickMsg: "743559874734063626"
 };
 
@@ -64,7 +64,7 @@ export const Channels = {
 
 export const Emojis = {
 	yes: '✅',
-	no: '<:error:666740656483467274>',
+	no: '666740656483467274',
 	horse: '🏇',
 	surrender: '<:peepo_surrender:743070678349119609>',
 	unity: "743241304405967020",
@@ -79,7 +79,7 @@ export const Roles = {
 };
 
 export const MsgTemplates = {
-	error: (user: User, command: string) => `${Emojis.no} | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
+	error: (user: User, command: string) => `<:error:${Emojis.no}> | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
 };
 
 // Functions
@@ -238,12 +238,13 @@ function sleep(ms: number) {
 }
 
 export function dateOf(time: number) {
-	const d = new Date(time + (new Date().getTimezoneOffset() - 180));
-	return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${
-		d.getHours().toString().padStart(2, '0')}h${d.getMinutes().toString().padStart(2, '0')}`;
+	const d = new Date(time - Time.hour * 3);
+	const date = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+	const hour = `${d.getHours()}h${d.getMinutes()}`;
+	return `${date} - ${hour}`;
 }
 
-export function validadePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
+export function validatePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
 	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
@@ -259,4 +260,20 @@ export function validadePermissions(member: GuildMember, channel: TextChannel, p
 	// @NOTE(luigi): need more permissions?
 
 	return true;
+}
+
+// @NOTE(luigi): oof
+export function time() {
+	const now = new Date();
+	const result = new Date(
+		now.getUTCFullYear(),
+		now.getUTCMonth(),
+		now.getUTCDate(),
+		now.getUTCHours(),
+		now.getUTCMinutes(),
+		now.getUTCSeconds(),
+		now.getUTCMilliseconds()
+	).getTime();
+
+	return result;
 }

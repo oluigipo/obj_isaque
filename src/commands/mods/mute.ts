@@ -1,6 +1,8 @@
 import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler } from "../../defs";
-import { Message } from "discord.js";
+import { Message, GuildMember } from "discord.js";
 import * as Moderation from "../../moderation";
+
+// @TODO(luigi): embed
 
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
@@ -12,33 +14,48 @@ export default <Command>{
 
 		let duration = -1;
 		let finalmsg = "";
+		let reasonList: string[] | undefined;
+		let toMute: { duration: number, member: GuildMember }[] = [];
 		for (const arg of args) {
+			if (reasonList)
+				reasonList.push(arg.value.toString());
+
 			switch (arg.kind) {
 				case ArgumentKind.MEMBER: {
-					const member = arg.value;
-					// @NOTE(luigi): we don't need to update the db every iteration of the loop
-					const result = Moderation.weakmute(member.id, duration, arg.value);
-
-					if (!result.success) {
-						finalmsg += `Algo deu errado ao mutar <@${member.id}>. \`${result.error}\`\n`;
-						continue;
-					}
-
-					finalmsg += `Sinta o peso do mute <@${member}>! Mutado `;
-					if (duration === -1)
-						finalmsg += `até alguém quiser te desmutar.`;
-					else
-						finalmsg += `por \`${formatTime(duration)}\`.`;
-
-					if (result.warning)
-						finalmsg += ` Nota: ${result.warning}`;
-
-					finalmsg += '\n';
+					toMute.push({ duration, member: arg.value });
 				} break;
 				case ArgumentKind.TIME:
 					duration = arg.value;
 					break;
+				default:
+					if (!reasonList)
+						reasonList = [arg.value.toString()];
+					break;
 			}
+		}
+
+		const reason = reasonList?.join(' ');
+
+		for (const e of toMute) {
+			const member = e.member;
+			// @NOTE(luigi): we don't need to update the db every iteration of the loop
+			const result = Moderation.weakmute(member.id, duration, reason, member);
+
+			if (!result.success) {
+				finalmsg += `Algo deu errado ao mutar <@${member.id}>. \`${result.error}\`\n`;
+				continue;
+			}
+
+			finalmsg += `Sinta o peso do mute <@${member}>! Mutado `;
+			if (duration === -1)
+				finalmsg += `até alguém quiser desmutar.`;
+			else
+				finalmsg += `por \`${formatTime(duration)}\`.`;
+
+			if (result.warning)
+				finalmsg += ` Nota: ${result.warning}`;
+
+			finalmsg += '\n';
 		}
 
 		if (finalmsg === "")

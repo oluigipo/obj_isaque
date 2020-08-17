@@ -2,7 +2,7 @@ import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
 	Server, Command, devs, Arguments, ASCII, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull, validadePermissions, Roles, Emojis
+	notNull, validatePermissions, Roles, Emojis, time
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
@@ -163,31 +163,27 @@ client.on("guildMemberAdd", async member => {
 });
 
 // @TODO(luigi): fix "User is not Connected to Voice Channel"
-// client.on("voiceStateUpdate", (state0, state1) => {
-// 	if (state1.channelID === undefined) return;
-// 	if (state1.channelID === state0.channelID) return;
+client.on("voiceStateUpdate", (state0, state1) => {
+	if (!state1.channelID) return;
+	if (state1.channelID === state0.channelID) return;
 
-// 	if (!state1.member)
-// 		return;
+	if (!state1.member || state1.guild.id !== Server.id)
+		return;
 
-// 	if (Moderation.isMuted(state1.member.id)) {
-// 		if (!state1.mute) state1.setMute(true).catch(discordErrorHandler);
-// 	} else {
-// 		if (state1.mute) state1.setMute(false).catch(discordErrorHandler);
-// 	}
-// });
+	if (Moderation.isMuted(state1.member.id)) {
+		if (!state1.mute) state1.setMute(true).catch(discordErrorHandler);
+	} else {
+		if (state1.mute) state1.setMute(false).catch(discordErrorHandler);
+	}
+});
 
 client.on("message", (message) => {
 	if (message.author.bot || message.channel.type !== "text")
 		return;
 
-	// timeout
-	if ((timeout[message.author.id] ?? 0) + Server.timeout > Date.now())
-		return;
-
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
-		timeout[message.author.id] = Date.now();
+		timeout[message.author.id] = time();
 		const respostas = [
 			"Sim",
 			"Não",
@@ -210,6 +206,12 @@ client.on("message", (message) => {
 	if (!message.content.startsWith(Server.prefix))
 		return;
 
+	// timeout
+	if (!message.member?.hasPermission("ADMINISTRATOR") && (timeout[message.author.id] ?? 0) + Server.timeout > time()) {
+		message.react(Emojis.no).catch(discordErrorHandler);
+		return;
+	}
+
 	const rawArgs = message.content.slice(Server.prefix.length).split(' ').filter(s => s !== "");
 
 	let command: Command | undefined;
@@ -220,12 +222,12 @@ client.on("message", (message) => {
 		}
 	}
 
-	if (command === undefined || !message.member || !validadePermissions(message.member, message.channel, command.permissions))
+	if (command === undefined || !message.member || !validatePermissions(message.member, message.channel, command.permissions))
 		return;
 
 	const args = parseArgs(rawArgs, message);
 
-	timeout[message.author.id] = Date.now();
+	timeout[message.author.id] = time();
 
 	command.run(message, args, rawArgs).catch(e => {
 		console.log(e);

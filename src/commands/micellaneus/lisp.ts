@@ -489,7 +489,7 @@ export default <Command>{
 	permissions: Permission.SHITPOST,
 	aliases: ['lisp'],
 	description: "um interpretador de isaque-lisp, feito por <@310480160640073729>",
-	help: `Documentação do isaque-lisp:
+	help: `Documentação do isaque-lisp (feito por <@310480160640073729>):
 
 isaque-lisp tem dois tipos de expressões listas e atoms.
 Listas são feitas com a forma \`(a b c d)\` sendo a, b, c e d outras expressões.
