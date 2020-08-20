@@ -162,7 +162,6 @@ client.on("guildMemberAdd", async member => {
 	invites = newInvites;
 });
 
-// @TODO(luigi): fix "User is not Connected to Voice Channel"
 client.on("voiceStateUpdate", (state0, state1) => {
 	if (!state1.channelID) return;
 	if (state1.channelID === state0.channelID) return;

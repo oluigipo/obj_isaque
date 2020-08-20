@@ -2,8 +2,6 @@ import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime,
 import { Message, GuildMember } from "discord.js";
 import * as Moderation from "../../moderation";
 
-// @TODO(luigi): embed
-
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
 		if (args.length < 2) {

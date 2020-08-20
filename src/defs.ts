@@ -44,7 +44,9 @@ export const Time = {
 	minute: 1000 * 60,
 	hour: 1000 * 60 * 60,
 	day: 1000 * 60 * 60 * 24,
-	week: 1000 * 60 * 60 * 24 * 7
+	week: 1000 * 60 * 60 * 24 * 7,
+	month: 1000 * 60 * 60 * 24 * 7 * 30,
+	year: 1000 * 60 * 60 * 24 * 7 * 365
 };
 
 export const Server = {
@@ -79,7 +81,7 @@ export const Roles = {
 };
 
 export const MsgTemplates = {
-	error: (user: User, command: string) => `<:error:${Emojis.no}> | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
+	error: (user: User, command: string) => `<:error:${Emojis.no}> | <@${user}> Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
 };
 
 // Functions
@@ -87,30 +89,42 @@ export function formatTime(ms: number): string {
 	let str: string[] = [];
 
 	switch (true) {
-		case ms > Time.week:
+		case ms >= Time.year:
+			const years: number = Math.trunc(ms / Time.year);
+			ms = ms % Time.week;
+			str.push(`${years} ano${years > 1 ? 's' : ''}`);
+
+		case ms >= Time.month:
+			const months: number = Math.trunc(ms / Time.month);
+			ms = ms % Time.week;
+			if (months > 0)
+				str.push(`${months} m${months > 1 ? 'eses' : 'ês'}`);
+
+		case ms >= Time.week:
 			const weeks: number = Math.trunc(ms / Time.week);
 			ms = ms % Time.week;
-			str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
+			if (weeks > 0)
+				str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
 
-		case ms > Time.day:
+		case ms >= Time.day:
 			const days = Math.trunc(ms / Time.day);
 			ms = ms % Time.day;
 			if (days > 0)
 				str.push(`${days} dia${days > 1 ? 's' : ''}`);
 
-		case ms > Time.hour:
+		case ms >= Time.hour:
 			const hours = Math.trunc(ms / Time.hour);
 			ms = ms % Time.hour;
 			if (hours > 0)
 				str.push(`${hours} hora${hours > 1 ? 's' : ''}`);
 
-		case ms > Time.minute:
+		case ms >= Time.minute:
 			const minutes = Math.trunc(ms / Time.minute);
 			ms = ms % Time.minute;
 			if (minutes > 0)
 				str.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
 
-		case ms > Time.second:
+		case ms >= Time.second:
 			const seconds = Math.trunc(ms / Time.second);
 			ms = ms % Time.second;
 			if (seconds > 0)
@@ -191,6 +205,8 @@ export function parseTime(s: string): Response<number> {
 			return { success: false, error: "Tempo inválido" };
 
 		switch (k) {
+			case 'y': t *= Time.year; break;
+			case 't': t *= Time.month; break;
 			case 'w': t *= Time.week; break;
 			case 'd': t *= Time.day; break;
 			case 'h': t *= Time.hour; break;

@@ -1,62 +1,45 @@
-// @NOTE(luigi): not checked
+// @NOTE(luigi): still checkin
 
-import { Command, Arguments, Server, Permission, Time, formatTime, defaultEmbed, notNull } from "../../defs";
+import { Command, Arguments, Server, Permission, Time, formatTime, defaultEmbed, notNull, ArgumentKind, discordErrorHandler, defaultErrorHandler } from "../../defs";
 import { Message, User, MessageReaction } from "discord.js";
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, args: Arguments) {
 		if (args.length < 4) {
-			msg.channel.send(`${msg.author} Informações insuficientes! \`${Server.prefix}megasorteio <tempo> <quantidade> <prêmio>\``);
+			msg.reply(`Informações insuficientes! \`${Server.prefix}megasorteio <tempo> <quantidade> <prêmio>\``)
+				.catch(discordErrorHandler);
 			return;
 		}
+		args.shift();
 
-		let duration = -1;
-		let _t: number;
-		let _d: string;
-		if (args.length > 2 && args[1][0] !== '<') {
-			_t = parseInt(args[1]);
-			_d = args[1][String(_t).length];
-
-			duration = 1;
-			switch (_d) {
-				case 'w': duration *= 7;
-				case 'd': duration *= 24;
-				case 'h': duration *= 60;
-				case 'm': duration *= 60;
-				case 's': break;
-				default:
-					msg.channel.send(`${_t + _d} não é uma duração válida`);
-					return;
-			}
-
-			duration *= _t;
-			duration *= 1000;
-		}
-
-		if (isNaN(duration)) {
-			msg.channel.send(`${msg.author} Tempo inválido!`);
+		if (args[0].kind !== ArgumentKind.TIME) {
+			msg.reply(`${args[0].value.toString()} não serve. Me diga um tempo válido`)
+				.catch(discordErrorHandler);
 			return;
 		}
+		const duration = args[0].value;
+
+		if (args[1].kind !== ArgumentKind.NUMBER) {
+			msg.reply(`me diz a quantidade de vencedores que vai ter, mesmo que seja só 1`)
+				.catch(discordErrorHandler);
+			return;
+		}
+		const qnt = args[1].value;
 
 		let opcoes = {
 			everton: false,
-			qnt: Number(args[2]),
+			qnt: qnt,
 			duracao: duration
 		};
 
-		if (isNaN(opcoes.qnt) || opcoes.qnt < 1 || Math.abs(opcoes.qnt) === Infinity) {
-			msg.channel.send(`${msg.author} Quantidade de Vencedores inválida!`);
-			return;
-		}
-
-		const premio = args.slice(3).join(' ');
-		let message = await msg.channel.send("...");
-
-		await message.react('🔘');
-		await message.react('❌');
-		await message.react('✅');
+		const premio = args.slice(2).reduce((arr, arg) => (arr.push(arg.value.toString()), arr), <string[]>[]).join(' ');
+		let message = <Message>await msg.channel.send("...").catch(discordErrorHandler);
 
 		async function update() {
+			await message.react('🔘').catch(discordErrorHandler);
+			await message.react('❌').catch(discordErrorHandler);
+			await message.react('✅').catch(discordErrorHandler);
+
 			let confirmacao = defaultEmbed(notNull(msg.member));
 
 			confirmacao.title = `MegaSorteio!`;
@@ -67,40 +50,42 @@ export default <Command>{
 			confirmacao.addField("Quantidade de vencedores", opcoes.qnt, true);
 			confirmacao.addField("Opções", `🔘 Marcar everyone: ${opcoes.everton ? "Ativado" : "Desativado"}\n❌ Cancelar MegaSorteio\n✅ Iniciar MegaSorteio`);
 
-			await message.edit(confirmacao);
+			await message.edit(confirmacao).catch(discordErrorHandler);
 			async function __aee() {
-				message.awaitReactions((reaction: MessageReaction, user: User) => ['🔘', '❌', '✅'].includes(reaction.emoji.name) && user.id === msg.author.id, { max: 1 })
+				message.awaitReactions((reaction: MessageReaction, user: User) => ['🔘', '❌', '✅'].includes(reaction.emoji.name) && user.id === msg.author.id, { maxUsers: 1 })
 					.then((elements) => {
 						let reaction = elements.first();
-						if (reaction === void 0) return __aee();;
+						if (reaction === void 0) return __aee();
 
 						switch (reaction.emoji.name) {
 							case '🔘':
 								opcoes.everton = !opcoes.everton;
-								reaction.remove();
+								message.reactions.removeAll();
 								update();
 								break;
 							case '❌':
 								message.delete();
-								msg.channel.send(`${msg.author} Sorteio Cancelado!`);
+								msg.channel.send(`<@${msg.author}> Sorteio Cancelado!`);
 								break;
 							case '✅':
 								let final = defaultEmbed(notNull(msg.member));
 								final.title = "MegaSorteio!";
 								final.description = `Para participar, reaja com ✅ nessa mensagem!`;
 								final.addField("Prêmio", `${opcoes.qnt} ${premio}`, true);
-								final.addField("Organizador(a)", msg.author, true);
+								final.addField("Organizador(a)", msg.author.toString(), true);
 								final.addField("Duração", formatTime(opcoes.duracao), true);
 
 								message.delete();
 								msg.channel.send("MegaSorteio!" + (opcoes.everton ? " @everyone" : ""), final)
 									.then((mess) => {
 										mess.react('✅');
-										mess.awaitReactions((reaction: MessageReaction, user: User) => reaction.emoji.name === '✅' && !user.bot, { time: opcoes.duracao })
+										mess.awaitReactions((reaction: MessageReaction, user: User) => (reaction.emoji.name === '✅' && !user.bot), { time: opcoes.duracao })
 											.then((el) => {
 												let arr = el.first()?.users.cache.array().filter(u => !u.bot);
-												if (arr === undefined)
-													throw confirmacao;
+												if (arr === undefined) {
+													msg.channel.send("ninguém participou do sorteio " + "<:life:746046636743983134>".repeat(4));
+													return;
+												}
 												let winners = <User[]>[];
 
 												if (arr.length <= opcoes.qnt) {
@@ -116,19 +101,20 @@ export default <Command>{
 													} while (winners.length < opcoes.qnt);
 												}
 
-												mess.delete();
-												msg.channel.send(`O MegaSorteio acabou! Os seguintes usuários ganharam \`${premio}\`:\n${winners.reduce((s, c) => s + `\n${c}`, "")}`);
-											});
-									});
+												mess.delete().catch(discordErrorHandler);
+												msg.channel.send(`O MegaSorteio acabou! Os seguintes usuários ganharam \`${premio}\`:\n${winners.reduce((s, c) => s + `\n<@${c}>`, "")}`)
+													.catch(discordErrorHandler);
+											}).catch(discordErrorHandler);
+									}).catch(discordErrorHandler);
 								break;
 						}
-					});
+					}).catch(discordErrorHandler);
 			}
 
-			await __aee();
+			await __aee().catch(defaultErrorHandler);
 		}
 
-		await update();
+		await update().catch(defaultErrorHandler);
 	},
 	syntaxes: ["<tempo> <quantidade> <prêmio...>"],
 	permissions: Permission.MOD,
