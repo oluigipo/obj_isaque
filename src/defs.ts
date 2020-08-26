@@ -12,7 +12,7 @@ export type Arguments = Argument[];
 
 export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4 }
 
-export type Response<T> = Success<T> | Failure;
+export type Response<T = undefined> = Success<T> | Failure;
 
 export interface Success<T> {
 	success: true;
@@ -50,12 +50,13 @@ export const Time = {
 };
 
 export const Server = {
-	specialInvite: "p9WN6Rx",
+	specialInvite: "",
 	id: "507550989629521922",
 	prefix: "!!",
 	botcolor: 0x30a246,
 	timeout: Time.second * 5,
-	rolepickMsg: "743559874734063626"
+	rolepickMsg: "743559874734063626",
+	defaultImage: "https://cdn.discordapp.com/attachments/431273314049327104/743175664798007367/unknown.png"
 };
 
 export const Channels = {
@@ -77,7 +78,8 @@ export const Roles = {
 	muted: "568171976556937226",
 	aluno: "585871344718184458",
 	unity: "730818777998032967",
-	gamemaker: "630202297716178964"
+	gamemaker: "630202297716178964",
+	mod: "507553894310608899"
 };
 
 export const MsgTemplates = {
@@ -254,7 +256,7 @@ function sleep(ms: number) {
 }
 
 export function dateOf(time: number) {
-	const d = new Date(time - Time.hour * 3);
+	const d = new Date(time - Time.minute * (new Date().getTimezoneOffset() - 180));
 	const date = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 	const hour = `${d.getHours()}h${d.getMinutes()}`;
 	return `${date} - ${hour}`;
@@ -264,13 +266,13 @@ export function validatePermissions(member: GuildMember, channel: TextChannel, p
 	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
-	if (member.hasPermission("ADMINISTRATOR"))
+	if (member.hasPermission("ADMINISTRATOR") || member.roles.cache.has(Roles.mod))
 		return true;
 
 	if (perms & Permission.MOD)
 		return false;
 
-	if (perms & Permission.SHITPOST && !Channels.shitpost.some(id => id === channel.id))
+	if (perms & Permission.SHITPOST && !(Channels.shitpost.some(id => id === channel.id) || channel.guild.id === "630891905852506123")) // server secreto
 		return false;
 
 	// @NOTE(luigi): need more permissions?

@@ -1,6 +1,4 @@
-// @NOTE(luigi): no revision
-
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull } from "../../defs";
+import { Command, Arguments, Server, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import * as stringSimilarity from 'string-similarity';
 import request from 'request';
@@ -20,11 +18,19 @@ interface Item {
 	name: string;
 }
 
-let docs: DocsJson = JSON.parse(fs.readFileSync("./docs.json", "utf8"));
-
-function makeRGB(r: number, g: number, b: number): number {
-	return (r << 16) | (g << 8) | (b);
+interface Page {
+	title: string;
+	link: string;
+	image?: string; // url
+	description?: string;
+	note?: string;
+	params?: string;
+	returns?: string;
+	example?: string;
 }
+
+let docs: DocsJson = JSON.parse(fs.readFileSync("./docs.json", "utf8"));
+const cache = <{ [key: string]: Page | undefined }>{};
 
 function exists(fn: string): number {
 	return docs.SearchTitles.indexOf(fn);
@@ -53,19 +59,110 @@ function closest(fn: string): Item[] {
 	return final.reverse();
 }
 
+async function makeRequest(url: string) {
+	return new Promise<{ error: any, body: any }>((resolve, reject) => {
+		request(url, {}, (error, res) => {
+			resolve({ error, body: res.body });
+		});
+	});
+}
+
+type FetchPageResult = { page: Page, error: 0 } | { link: string, error: 1 } | { error: 2 } | undefined;
+async function fetchPage(fn: string): Promise<FetchPageResult> {
+	const ind = exists(fn);
+	if (ind === -1) return;
+
+	const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
+
+	if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
+		return { link, error: 1 };
+	}
+
+	const final = <Page>{};
+	final.title = docs.SearchTitles[ind];
+	final.description = "";
+	final.link = link;
+
+	const { error, body } = await makeRequest(link);
+
+	if (error) {
+		console.log(error);
+		return { error: 2 };
+	}
+
+	const { document } = new JSDOM(body).window;
+
+	const page = document.getElementsByClassName("body-scroll")[0];
+	const image = page.getElementsByTagName("img");
+	if (image.length > 0) {
+		final.image = `${link.slice(0, link.lastIndexOf('/') + 1)}${image[0].getAttribute("src")}`;
+	}
+
+	const descriptionEle = page.getElementsByTagName("blockquote")[0];
+	const noteEle = descriptionEle.getElementsByClassName("note")[0];
+
+	let description: any = descriptionEle.getElementsByTagName("p");
+
+	if (description.length === 0) {
+		let mmmmmm = Math.max(
+			(<string>descriptionEle.textContent).indexOf("NOTES"),
+			(<string>descriptionEle.textContent).indexOf("IMPORTANT"),
+			(<string>descriptionEle.textContent).indexOf("WARNING")
+		);
+		description = (<string>descriptionEle.textContent).slice(0, mmmmmm !== -1 ? mmmmmm : undefined);
+	} else {
+		description = description[0].textContent;
+	}
+
+	if (description !== null) final.description += description;
+	if (noteEle !== undefined) {
+		final.note = (<string>noteEle.textContent).replace("NOTE: ", '');
+	}
+
+	const params = page.getElementsByClassName("param")[0];
+	if (params !== undefined) {
+		const ppp = params.getElementsByTagName("tr");
+		let f = "";
+
+		for (let i = 1; i < ppp.length; i++) {
+			const eee = ppp[i].getElementsByTagName("td");
+
+			f += `\`${eee[0].textContent}\`: ${eee[1].textContent}\n`;
+		}
+
+		final.params = f;
+	}
+
+	const codes = page.getElementsByClassName("code");
+	if (codes.length < 3) {
+		return { link, error: 1 };
+	}
+	final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
+
+	final.returns = codes[codes.length - 2].textContent ?? undefined;
+	final.example = `\`\`\`gml\n${codes[codes.length - 1].textContent}\`\`\``;
+	return { page: final, error: 0 };
+}
+
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
 		if (args.length < 2) {
-			msg.channel.send(`${msg.author} https://docs2.yoyogames.com/`);
+			msg.channel.send(`<@${msg.author}> https://docs2.yoyogames.com/`).catch(discordErrorHandler);
 			return;
 		}
 
 		let final = defaultEmbed(notNull(msg.member));
+		let fn = args.slice(1).join(' ');
+		let page: Page;
 
-		try {
-			let fn = args.slice(1).join(' ');
-			let ind = exists(fn);
-			if (ind === -1) {
+		// find in the cache
+		const cached = cache[fn];
+		if (cached) {
+			page = cached;
+		} else {
+			let result = await fetchPage(fn);
+
+			if (result === undefined) {
 				let items = closest(fn);
 
 				final.title = "Erro: nome não encontrado!";
@@ -75,83 +172,34 @@ export default <Command>{
 				});
 				//msg.channel.send(`${msg.author} A função/variável/constante \`${fn}\` não existe. Ela pode ser do GMS1, e este comando funciona somente com o GMS2`);
 
-				msg.channel.send(final);
-			} else {
-				const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
-
-				if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
-					msg.channel.send(`<@${msg.author}> Aqui está o link: ${link}`);
-					return;
-				}
-
-				final.title = docs.SearchTitles[ind];
-				final.description = "";
-				final.url = link;
-				request(link, {}, (error, response) => {
-					if (error) {
-						msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
-						console.log(error);
-						return;
-					}
-					const { document } = new JSDOM(response.body).window;
-
-					const page = document.getElementsByClassName("body-scroll")[0];
-					const image = page.getElementsByTagName("img");
-					if (image.length > 0) {
-						final.image = { url: `${link.slice(0, link.lastIndexOf('/') + 1)}${image[0].getAttribute("src")}` };
-					}
-
-					const descriptionEle = page.getElementsByTagName("blockquote")[0];
-					const noteEle = descriptionEle.getElementsByClassName("note")[0];
-
-					let description: any = descriptionEle.getElementsByTagName("p");
-
-					if (description.length === 0) {
-						let mmmmmm = Math.max(
-							(<string>descriptionEle.textContent).indexOf("NOTES"),
-							(<string>descriptionEle.textContent).indexOf("IMPORTANT"),
-							(<string>descriptionEle.textContent).indexOf("WARNING")
-						);
-						description = (<string>descriptionEle.textContent).slice(0, mmmmmm !== -1 ? mmmmmm : undefined);
-					} else {
-						description = description[0].textContent;
-					}
-
-					if (description !== null) final.description += description;
-					if (noteEle !== undefined) {
-						final.addField("Note", (<string>noteEle.textContent).replace("NOTE: ", ''));
-					}
-
-					const params = page.getElementsByClassName("param")[0];
-					if (params !== undefined) {
-						const ppp = params.getElementsByTagName("tr");
-						let f = "";
-
-						for (let i = 1; i < ppp.length; i++) {
-							const eee = ppp[i].getElementsByTagName("td");
-
-							f += `\`${eee[0].textContent}\`: ${eee[1].textContent}\n`;
-						}
-
-						final.addField("Parameters (name: desc)", f);
-					}
-
-					const codes = page.getElementsByClassName("code");
-					if (codes.length < 3) {
-						msg.channel.send(`<@${msg.author}> aqui está o link: ${link}`);
-						return;
-					}
-					final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
-
-					final.addField("Returns", codes[codes.length - 2].textContent);
-					final.addField("Example", `\`\`\`gml\n${codes[codes.length - 1].textContent}\`\`\``);
-					msg.channel.send(final);
-				});
+				msg.channel.send(final).catch(discordErrorHandler);
+				return;
 			}
-		} catch (e) {
-			msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`);
-			console.log(e);
+
+			switch (result.error) {
+				case 0:
+					page = result.page;
+					cache[fn] = page;
+					break;
+				case 1:
+					msg.channel.send(`<@${msg.author}> Aqui está o link: ${result.link}`).catch(discordErrorHandler);
+					return;
+				case 2:
+					msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`)
+						.catch(discordErrorHandler);
+					return;
+			}
 		}
+
+		final.title = page.title;
+		final.description = page.description;
+		if (page.image) final.image = { url: page.image };
+		if (page.note) final.addField("Note", page.note);
+		if (page.params) final.addField("Parameters", page.params);
+		if (page.returns) final.addField("Returns", page.returns);
+		if (page.example) final.addField("Example", page.example);
+
+		msg.channel.send(final).catch(discordErrorHandler);
 	},
 	permissions: Permission.NONE,
 	aliases: ["docs"],

@@ -3,12 +3,13 @@ import { MongoClient, Collection } from "mongodb";
 export let db: MongoClient;
 export const dbname = "maindb";
 export const collections = {
-	"mutes": <Collection>{}
+	"mutes": <Collection>{},
+	"balance": <Collection>{}
 };
 
-export async function init(password: string) {
+export async function init(uriTemplate: string, password: string) {
 	let success = true;
-	const uri = `mongodb+srv://mainbot:${password}@objisaquedb.ogmij.mongodb.net/${dbname}?retryWrites=true&w=majority`;
+	const uri = uriTemplate.replace("{password}", password).replace("{dbname}", dbname);
 
 	db = new MongoClient(uri, { useUnifiedTopology: true });
 	await db.connect().catch(err => {
@@ -25,7 +26,15 @@ export async function init(password: string) {
 		}
 	});
 
+	let balance = dbo.collection("balance", {}, err => {
+		if (err) {
+			console.log(err);
+			success = false;
+		}
+	});
+
 	collections.mutes = mutes;
+	collections.balance = balance;
 
 	return success;
 }

@@ -8,7 +8,8 @@ const playlists: any = {
 	plataforma: "https://www.youtube.com/watch?v=dWKQQfM5l0I&list=PLKTRv0drNjJ_hnDslZnr2N8MXoe1r37N8",
 	dialogo: "https://www.youtube.com/watch?v=hd0M6FhX2XQ&list=PLKTRv0drNjJ_wQAPjzYOp2aaCq11XELHh",
 	animacao: "https://www.youtube.com/watch?v=dIQ_SIXzpzk&list=PLKTRv0drNjJ8KpDQcJu1kKHG8igpb6hjn",
-	tiro: "https://www.youtube.com/watch?v=TOX9goFTqes&list=PLKTRv0drNjJ_aA8ft5-y8Ok2wJfY4n4vj"
+	tiro: "https://www.youtube.com/watch?v=TOX9goFTqes&list=PLKTRv0drNjJ_aA8ft5-y8Ok2wJfY4n4vj",
+	"space-shooter": "https://www.youtube.com/watch?v=iRPrja28xw0&list=PLKTRv0drNjJ94fSGpbw2bLX7IU8fdzB22"
 };
 
 type __index = "primeiro-jogo" | "rpg" | "plataforma" | "dialogo" | "animacao" | "tiro";

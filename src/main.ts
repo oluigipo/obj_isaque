@@ -6,10 +6,14 @@ import {
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
+import * as Balance from "./balance";
 import * as fs from "fs";
 import commands from "./commands";
 
+// @TODO(luigi): !!curse invite
+
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
+Server.specialInvite = auth.invite;
 const client = new Client();
 type Invites = { [key: string]: number };
 let invites: Invites = {};
@@ -103,8 +107,9 @@ async function fetchInvites(guild?: Guild) {
 }
 
 client.on("ready", async () => {
-	await Database.init(auth.mongo).catch(defaultErrorHandler);
+	await Database.init(auth.mongoURI, auth.mongo).catch(defaultErrorHandler);
 	await Moderation.init(client).catch(defaultErrorHandler);
+	await Balance.init().catch(defaultErrorHandler);
 
 	// @NOTE(luigi): what?
 	invites = (<Invites | undefined>await fetchInvites().catch(discordErrorHandler)) ?? {};
@@ -177,8 +182,10 @@ client.on("voiceStateUpdate", (state0, state1) => {
 });
 
 client.on("message", (message) => {
-	if (message.author.bot || message.channel.type !== "text")
+	if (message.author.bot || message.channel.type !== "text" || message.guild === null)
 		return;
+
+	Balance.onMessage(message);
 
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {

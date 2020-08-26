@@ -27,7 +27,7 @@ export default <Command>{
 
 		let name = msg.member.displayName;
 		if (msg.author.id === "338717274032701460" /* ID do luxuria */) name = "raquel";
-		const image = msg.author.avatarURL() ?? "https://cdn.discordapp.com/attachments/431273314049327104/743175664798007367/unknown.png";
+		const image = msg.author.avatarURL() ?? Server.defaultImage;
 
 		let channel = <TextChannel>msg.channel;
 		channel.fetchWebhooks()
