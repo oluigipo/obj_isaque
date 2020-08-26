@@ -1,9 +1,9 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
+import { Command, Arguments, Permission, discordErrorHandler, formatTime, time } from "../../defs";
 import { Message } from "discord.js";
 
-enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, EOF }
+enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, LCURLY, RCURLY, MENTION, EOF }
 
 class Token {
 	constructor(public kind: TokenType, public num_val: number | null, public str_val: string | null) { }
@@ -11,20 +11,17 @@ class Token {
 	static RPAREN() { return new Token(TokenType.RPAREN, null, null); }
 	static LBRACK() { return new Token(TokenType.LBRACK, null, null); }
 	static RBRACK() { return new Token(TokenType.RBRACK, null, null); }
+	static LCURLY() { return new Token(TokenType.LCURLY, null, null); }
+	static RCURLY() { return new Token(TokenType.RCURLY, null, null); }
 	static QUOTE() { return new Token(TokenType.QUOTE, null, null); }
 	static EOF() { return new Token(TokenType.EOF, null, null); }
 	static NUMBER(num_val: number) { return new Token(TokenType.NUMBER, num_val, null); }
 	static SYMBOL(str_val: string) { return new Token(TokenType.ID, null, str_val); }
 	static STRING(str_val: string) { return new Token(TokenType.STRING, null, str_val); }
-
-	toString() {
-		const names = ["(", ")", "NUM", "ID", "STR", "EOF"];
-		return `Token[${names[this.kind]}]: ${this.num_val ?? ''}${this.str_val ?? ''}`;
-	}
+	static MENTION(str_val: string) { return new Token(TokenType.MENTION, null, str_val); }
 }
 
-
-enum ExprType { NUM, STR, SYM, LIST, PAIR, FUNC }
+enum ExprType { NUM, STR, SYM, LIST, PAIR, FUNC, MENTION }
 
 class Expr {
 	args: string[] | null = null;
@@ -101,6 +98,8 @@ class Expr {
 				return this.list_val[0].equals(this.list_val[1]);
 			case ExprType.FUNC:
 				return false;
+			case ExprType.MENTION:
+				return this.str_val == e.str_val;
 		}
 	}
 
@@ -120,6 +119,9 @@ class Expr {
 			case ExprType.FUNC:
 				if (this.list_val == null) return `null -> null`;
 				return `${this.args} -> ${this.list_val[0]}`;
+			case ExprType.MENTION:
+				// if (this.list_val == null) return `null.null`;
+				return `${this.num_val}`;
 		}
 	}
 
@@ -140,13 +142,17 @@ class Expr {
 			case ExprType.FUNC:
 				if (this.list_val == null) return `'null`;
 				return `${this.args} -> ${this.list_val[0].toDebug()}`;
+			case ExprType.MENTION:
+				// if (this.list_val == null) return `null.null`;
+				return `${this.num_val}`;
 		}
 	}
 }
 
 const NUMBER_RE = /^[0-9]+(\.[0-9]+)?/;
 const STRING_RE = /^"[^"]*"/;
-const SYMBOL_RE = /^[a-zA-Z_@#\$´.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$´.:?+\-\*/\\%><&\^~|=!]*/;
+const SYMBOL_RE = /^[a-zA-Z_@#\$.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$.:?+\-\*/\\%><&\^~|=!]*/;
+const MENTION_RE = /^<@&?!?\d{18}>/;
 
 
 const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
@@ -168,21 +174,61 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["str.explode", (vm: LispVM, arr: Expr[]) => Expr.LIST(arr[0].as_str.split('').map(s => Expr.STR(s)))],
 	["==", (vm: LispVM, arr: Expr[]) => arr[0]?.equals(arr[1]) ? Expr.SYM("t") : Expr.LIST([])],
 	["!=", (vm: LispVM, arr: Expr[]) => !(arr[0]?.equals(arr[1])) ? Expr.SYM("t") : Expr.LIST([])],
+	["format-time", (vm: LispVM, arr: Expr[]) => Expr.STR(formatTime(arr[0].as_num))],
+	["randint", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(Math.random() * arr[0].as_num))],
 	["random", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.random())],
-	["head", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].head : LispVM.nil],
-	["tail", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].tail : LispVM.nil],
-	["first", (vm: LispVM, arr: Expr[]) => arr[0].as_list[0] ?? LispVM.nil],
+	["sin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sin(arr[0].as_num))],
+    ["cos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.cos(arr[0].as_num))],
+    ["tan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.tan(arr[0].as_num))],
+    ["asin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.asin(arr[0].as_num))],
+    ["acos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.acos(arr[0].as_num))],
+    ["atan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.atan(arr[0].as_num))],
+    ["exp", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.exp(arr[0].as_num))],
+    ["log_e", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log(arr[0].as_num))],
+    ["log_2", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log2(arr[0].as_num))],
+    ["log_10", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log10(arr[0].as_num))],
+    ["floor", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(arr[0].as_num))],
+    ["ceil", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.ceil(arr[0].as_num))],
+    ["round", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.round(arr[0].as_num))],
+    ["trunc", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.trunc(arr[0].as_num))],
+    ["sqrt", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sqrt(arr[0].as_num))],
+    ["sign", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sign(arr[0].as_num))],
+    ["abs", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.abs(arr[0].as_num))],
+    ["min", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.min(a, b)))],
+    ["max", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.max(a, b)))],
+	["first", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].head : LispVM.nil],
+	["rest", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].tail : LispVM.nil],
 	["second", (vm: LispVM, arr: Expr[]) => arr[0].as_list[1] ?? LispVM.nil],
 	["third", (vm: LispVM, arr: Expr[]) => arr[0].as_list[2] ?? LispVM.nil],
 	["fourth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[3] ?? LispVM.nil],
 	["fifth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[4] ?? LispVM.nil],
-	["enum", (vm: LispVM, arr: Expr[]) => arr[0] ? Expr.LIST(arr[0].as_list.map((e, i) => Expr.LIST([e, Expr.NUM(i)]))) : LispVM.nil],
+	["sixth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[5] ?? LispVM.nil],
+	["seventh", (vm: LispVM, arr: Expr[]) => arr[0].as_list[6] ?? LispVM.nil],
+	["eighth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[7] ?? LispVM.nil],
+	["nineth", (vm: LispVM, arr: Expr[]) => arr[0].as_list[8] ?? LispVM.nil],
+	["enumerate", (vm: LispVM, arr: Expr[]) => arr[0] ? Expr.LIST(arr[0].as_list.map((e, i) => Expr.LIST([e, Expr.NUM(i)]))) : LispVM.nil],
 	["map", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC ? Expr.LIST(arr.slice(1).map(arg => arg.as_list.map(e => vm.evaluate(Expr.LIST([arr[0], Expr.LIST([Expr.SYM("quote"), e])])))).flat(1)) : LispVM.nil],
+	["filter", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC ? Expr.LIST(arr[1].as_list.filter(e => vm.evaluate(Expr.LIST([arr[0], Expr.LIST([Expr.SYM("quote"), e])])))) : LispVM.nil],
 	["list", (vm: LispVM, arr: Expr[]) => Expr.LIST(arr)],
 	["atom?", (vm: LispVM, arr: Expr[]) => arr[0].kind != ExprType.LIST ? Expr.SYM("t") : LispVM.nil],
 	["nil?", (vm: LispVM, arr: Expr[]) => arr[0].isNil() ? Expr.SYM("t") : LispVM.nil],
+	["str?", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.STR ? Expr.SYM("t") : LispVM.nil],
+	["sym?", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.SYM ? Expr.SYM("t") : LispVM.nil],
+	["num?", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.NUM ? Expr.SYM("t") : LispVM.nil],
+	["func?", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC ? Expr.SYM("t") : LispVM.nil],
+	["make-pair", (vm: LispVM, arr: Expr[]) => Expr.PAIR([arr[0], arr[1]])],
+	["repeat", (vm: LispVM, arr: Expr[]) => Expr.LIST(new Array(arr[0].as_num).fill(arr[1] ?? LispVM.nil))],
+	["time.now", (vm: LispVM, arr: Expr[]) => Expr.NUM(time())],
+	["time.list", (vm: LispVM, arr: Expr[]) => { const now = new Date(); return Expr.LIST([
+		Expr.NUM(now.getUTCFullYear()),
+		Expr.NUM(now.getUTCMonth()), 
+		Expr.NUM(now.getUTCDate()), 
+		Expr.NUM(now.getUTCHours()), 
+		Expr.NUM(now.getUTCMinutes()), 
+		Expr.NUM(now.getUTCSeconds()), 
+		Expr.NUM(now.getUTCMilliseconds())])
+	}],
 ]);
-
 
 class LispVM {
 
@@ -221,6 +267,14 @@ class LispVM {
 			this.source = this.source.substring(1);
 			this.source = this.source.trimLeft();
 			return Token.RBRACK();
+		} else if (this.source[0] == "{") {
+			this.source = this.source.substring(1);
+			this.source = this.source.trimLeft();
+			return Token.LCURLY();
+		} else if (this.source[0] == "}") {
+			this.source = this.source.substring(1);
+			this.source = this.source.trimLeft();
+			return Token.RCURLY();
 		} else if (this.source[0] == "'") {
 			this.source = this.source.substring(1);
 			this.source = this.source.trimLeft();
@@ -235,6 +289,11 @@ class LispVM {
 			this.source = this.source.substring(n.length);
 			this.source = this.source.trimLeft();
 			return Token.STRING(n.slice(1, -1));
+		} else if ((match = MENTION_RE.exec(this.source)) != null) {
+			const n = match[0];
+			this.source = this.source.substring(n.length);
+			this.source = this.source.trimLeft();
+			return Token.MENTION(n);
 		} else if ((match = SYMBOL_RE.exec(this.source)) != null) {
 			const n = match[0];
 			this.source = this.source.substring(n.length);
@@ -266,6 +325,25 @@ class LispVM {
 					list_val.push(this.parseExpr(tok));
 				}
 				return Expr.LIST([Expr.SYM("list")].concat(list_val));
+			}
+			case TokenType.LCURLY: {
+				let list_val: Expr[] = [];
+				let tok: Token;
+				let params: Expr[] = [];
+				while ((tok = this.nextToken())?.kind != TokenType.RCURLY) {
+					if (tok == null) throw "ParseError: Invalid Syntax";
+					if (tok.kind == TokenType.EOF) throw "ParseError: Unexpected End of Input";
+					if (tok.kind == TokenType.ID) {
+						if (tok.str_val == '->'){
+							params = list_val;
+							list_val = [];
+							continue;
+						}
+					}
+					list_val.push(this.parseExpr(tok));
+				}
+				list_val.unshift(Expr.LIST(params));
+				return Expr.LIST([Expr.SYM("lambda")].concat(list_val));
 			}
 			case TokenType.QUOTE: {
 				let val: Expr;
@@ -350,7 +428,7 @@ class LispVM {
 						let func = this.evaluate(list[1]);
 						let args = this.evaluate(list[2]).as_list;
 						if (func.kind != ExprType.FUNC || func.args == null || func.list_val == null) {
-							let nat = native_scope.get(func.as_str);
+							let nat = native_scope.get(func.as_sym);
 							if (nat != null)
 								return nat(this, args);
 							throw `TypeError: Expression \`${func.toDebug()}\` is not a function`;
@@ -449,6 +527,9 @@ class LispVM {
 				throw `TypeError: Expression \`${callee.toDebug()}\` is not a function`;
 			}
 		} else if (e.kind == ExprType.SYM) {
+			// let val = this.getSymbol(e.as_sym);
+			// if (val) return val;
+			// throw `BindError: Symbol \`${e.as_sym}\` not bound`
 			return this.getSymbol(e.as_sym) ?? e;
 		} else
 			return e;
@@ -474,7 +555,8 @@ class CallFrame {
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
 		try {
-			let vm = new LispVM(args.slice(1).join(' '));
+			let code = args.slice(1).join(' ');
+			let vm = new LispVM(code);
 			let e = vm.eval();
 			let secure = e.toString().replace(/@everyone|@here/, (m) => m.substr(1));
 			msg.channel.send(`Resultado: ${secure}`)
@@ -500,28 +582,20 @@ Algumas funções são primitivas:
 
 Operadores numericos:
 	* + - / // % < > <= >=
-
-Operador de concatenação:
-	..
+	sin cos tan atan floor ceil 
+	round trunc sign abs sqrt
 
 Operações de string:
+	.. 
 	str.len
-	str.slice
-	str.tail
-	str.charat
-	str.explode
+	str.slice str.tail
+	str.charat str.explode
 
 Operadores de igualdade:
-	== !=
+	== != atom? nil? sym? str? num?
 
 Outros:
-	random
-	head
-	tail
-	enum
-	list
-	atom?
-	nil?
+	first rest map filter repeat
 `,
 	examples: [`(block
 	(def fib (n) (
