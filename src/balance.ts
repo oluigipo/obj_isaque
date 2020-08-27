@@ -249,7 +249,7 @@ export function multiplierOf(roles?: GuildMemberRoleManager | string): number {
 export const userCount = () => users.length;
 
 export function onMessage(msg: Message) {
-	if (Channels.shitpost.includes(<string>msg.channel?.id))
+	if (msg.guild?.id !== Server.id || Channels.shitpost.includes(<string>msg.channel?.id))
 		return;
 
 	const index = users.findIndex(u => u.id === msg.author.id);

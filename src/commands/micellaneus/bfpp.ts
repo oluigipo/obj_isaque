@@ -126,7 +126,7 @@ export default <Command>{
 	},
 	syntaxes: ["<code>"],
 	permissions: Permission.SHITPOST,
-	aliases: ["brainfuck++", "bfpp", "bf++", "bf"],
+	aliases: ["brainfuck++", "brainfuck", "bfpp", "bf++", "bf"],
 	description: "Um interpretador de BF",
 	help: "Um interpretador de Brainfuck com subrotinas (Limite de iterações: 10000000)",
 	examples: [`+++[>+++++<-]>[>+++++<-]>+++.+.-.---------.`]

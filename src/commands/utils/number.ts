@@ -11,14 +11,14 @@ export default <Command>{
 
 		let num: number, base: number;
 		if (args.length < 2) {
-			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0]));
+			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0])).catch(discordErrorHandler);
 			return;
 		}
 
 		if (args.length >= 3) {
 			base = parseInt(args[1]);
 			if (isNaN(base) || base < 2 || base > 36) {
-				msg.channel.send(`${msg.author} Base inválida!`);
+				msg.reply(`Base inválida!`).catch(discordErrorHandler);
 				return;
 			}
 		} else {
@@ -27,7 +27,7 @@ export default <Command>{
 
 		num = parseInt(args[1 + Number(args.length >= 3)], base);
 		if (isNaN(num)) {
-			msg.channel.send(`${msg.author} Número inválido!`);
+			msg.reply(`Número inválido!`).catch(discordErrorHandler);
 			return;
 		}
 
