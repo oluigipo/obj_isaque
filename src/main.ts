@@ -2,7 +2,7 @@ import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
 	Server, Command, devs, Arguments, ASCII, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull, validatePermissions, Roles, Emojis, time
+	notNull, validatePermissions, Roles, Emojis
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
@@ -189,7 +189,7 @@ client.on("message", (message) => {
 
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
-		timeout[message.author.id] = time();
+		timeout[message.author.id] = Date.now();
 		const respostas = [
 			"Sim",
 			"Não",
@@ -213,7 +213,7 @@ client.on("message", (message) => {
 		return;
 
 	// timeout
-	if (!message.member?.hasPermission("ADMINISTRATOR") && (timeout[message.author.id] ?? 0) + Server.timeout > time()) {
+	if (!message.member?.hasPermission("ADMINISTRATOR") && (timeout[message.author.id] ?? 0) + Server.timeout > Date.now()) {
 		message.react(Emojis.no).catch(discordErrorHandler);
 		return;
 	}
@@ -233,7 +233,7 @@ client.on("message", (message) => {
 
 	const args = parseArgs(rawArgs, message);
 
-	timeout[message.author.id] = time();
+	timeout[message.author.id] = Date.now();
 
 	command.run(message, args, rawArgs).catch(e => {
 		console.log(e);

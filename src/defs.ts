@@ -256,9 +256,9 @@ function sleep(ms: number) {
 }
 
 export function dateOf(time: number) {
-	const d = new Date(time - Time.minute * (new Date().getTimezoneOffset() - 180));
-	const date = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-	const hour = `${d.getHours()}h${d.getMinutes()}`;
+	const d = new Date(time - Time.hour * 3);
+	const date = `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`;
+	const hour = `${d.getUTCHours()}h${d.getUTCMinutes()}`;
 	return `${date} - ${hour}`;
 }
 
@@ -281,20 +281,20 @@ export function validatePermissions(member: GuildMember, channel: TextChannel, p
 }
 
 // @NOTE(luigi): oof
-export function time() {
-	const now = new Date();
-	const result = new Date(
-		now.getUTCFullYear(),
-		now.getUTCMonth(),
-		now.getUTCDate(),
-		now.getUTCHours(),
-		now.getUTCMinutes(),
-		now.getUTCSeconds(),
-		now.getUTCMilliseconds()
-	).getTime();
+// export function time() {
+// 	const now = new Date();
+// 	const result = new Date(
+// 		now.getUTCFullYear(),
+// 		now.getUTCMonth(),
+// 		now.getUTCDate(),
+// 		now.getUTCHours(),
+// 		now.getUTCMinutes(),
+// 		now.getUTCSeconds(),
+// 		now.getUTCMilliseconds()
+// 	).getTime();
 
-	return result;
-}
+// 	return result;
+// }
 
 export function emptyEmbed() {
 	return new MessageEmbed();

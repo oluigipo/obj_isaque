@@ -1,6 +1,6 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Permission, discordErrorHandler, formatTime, time } from "../../defs";
+import { Command, Arguments, Permission, discordErrorHandler, formatTime } from "../../defs";
 import { Message } from "discord.js";
 
 enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, LCURLY, RCURLY, MENTION, EOF }
@@ -178,24 +178,24 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["randint", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(Math.random() * arr[0].as_num))],
 	["random", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.random())],
 	["sin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sin(arr[0].as_num))],
-    ["cos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.cos(arr[0].as_num))],
-    ["tan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.tan(arr[0].as_num))],
-    ["asin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.asin(arr[0].as_num))],
-    ["acos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.acos(arr[0].as_num))],
-    ["atan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.atan(arr[0].as_num))],
-    ["exp", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.exp(arr[0].as_num))],
-    ["log_e", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log(arr[0].as_num))],
-    ["log_2", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log2(arr[0].as_num))],
-    ["log_10", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log10(arr[0].as_num))],
-    ["floor", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(arr[0].as_num))],
-    ["ceil", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.ceil(arr[0].as_num))],
-    ["round", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.round(arr[0].as_num))],
-    ["trunc", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.trunc(arr[0].as_num))],
-    ["sqrt", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sqrt(arr[0].as_num))],
-    ["sign", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sign(arr[0].as_num))],
-    ["abs", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.abs(arr[0].as_num))],
-    ["min", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.min(a, b)))],
-    ["max", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.max(a, b)))],
+	["cos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.cos(arr[0].as_num))],
+	["tan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.tan(arr[0].as_num))],
+	["asin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.asin(arr[0].as_num))],
+	["acos", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.acos(arr[0].as_num))],
+	["atan", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.atan(arr[0].as_num))],
+	["exp", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.exp(arr[0].as_num))],
+	["log_e", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log(arr[0].as_num))],
+	["log_2", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log2(arr[0].as_num))],
+	["log_10", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.log10(arr[0].as_num))],
+	["floor", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(arr[0].as_num))],
+	["ceil", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.ceil(arr[0].as_num))],
+	["round", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.round(arr[0].as_num))],
+	["trunc", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.trunc(arr[0].as_num))],
+	["sqrt", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sqrt(arr[0].as_num))],
+	["sign", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sign(arr[0].as_num))],
+	["abs", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.abs(arr[0].as_num))],
+	["min", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.min(a, b)))],
+	["max", (vm: LispVM, arr: Expr[]) => Expr.NUM(arr.map(n => n.as_num).reduce((a, b) => Math.max(a, b)))],
 	["first", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].head : LispVM.nil],
 	["rest", (vm: LispVM, arr: Expr[]) => arr[0] ? arr[0].tail : LispVM.nil],
 	["second", (vm: LispVM, arr: Expr[]) => arr[0].as_list[1] ?? LispVM.nil],
@@ -218,15 +218,16 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["func?", (vm: LispVM, arr: Expr[]) => arr[0].kind == ExprType.FUNC ? Expr.SYM("t") : LispVM.nil],
 	["make-pair", (vm: LispVM, arr: Expr[]) => Expr.PAIR([arr[0], arr[1]])],
 	["repeat", (vm: LispVM, arr: Expr[]) => Expr.LIST(new Array(arr[0].as_num).fill(arr[1] ?? LispVM.nil))],
-	["time.now", (vm: LispVM, arr: Expr[]) => Expr.NUM(time())],
-	["time.list", (vm: LispVM, arr: Expr[]) => { const now = new Date(); return Expr.LIST([
-		Expr.NUM(now.getUTCFullYear()),
-		Expr.NUM(now.getUTCMonth()), 
-		Expr.NUM(now.getUTCDate()), 
-		Expr.NUM(now.getUTCHours()), 
-		Expr.NUM(now.getUTCMinutes()), 
-		Expr.NUM(now.getUTCSeconds()), 
-		Expr.NUM(now.getUTCMilliseconds())])
+	["time.now", (vm: LispVM, arr: Expr[]) => Expr.NUM(Date.now())],
+	["time.list", (vm: LispVM, arr: Expr[]) => {
+		const now = new Date(); return Expr.LIST([
+			Expr.NUM(now.getUTCFullYear()),
+			Expr.NUM(now.getUTCMonth()),
+			Expr.NUM(now.getUTCDate()),
+			Expr.NUM(now.getUTCHours()),
+			Expr.NUM(now.getUTCMinutes()),
+			Expr.NUM(now.getUTCSeconds()),
+			Expr.NUM(now.getUTCMilliseconds())])
 	}],
 ]);
 
@@ -334,7 +335,7 @@ class LispVM {
 					if (tok == null) throw "ParseError: Invalid Syntax";
 					if (tok.kind == TokenType.EOF) throw "ParseError: Unexpected End of Input";
 					if (tok.kind == TokenType.ID) {
-						if (tok.str_val == '->'){
+						if (tok.str_val == '->') {
 							params = list_val;
 							list_val = [];
 							continue;

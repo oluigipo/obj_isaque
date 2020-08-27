@@ -1,4 +1,4 @@
-import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf, time, formatTime } from "./defs";
+import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf, formatTime } from "./defs";
 import { Client, GuildMember } from "discord.js";
 import { collections } from "./database";
 
@@ -22,7 +22,7 @@ export async function init(c: Client) {
 
 export function autoUnmute() {
 	let changed = false;
-	const now = time();
+	const now = Date.now();
 
 	// console.log("autoUnmute Begin");
 	// console.log(mutes);
@@ -92,7 +92,7 @@ export function weakmute(userid: string, duration: number = -1, reason?: string,
 
 	member.roles.add(Roles.muted).catch(discordErrorHandler);
 
-	const now = time();
+	const now = Date.now();
 	mutes[index] = { id: userid, time: now, duration, reason };
 	return { success: true, data: now + duration, warning };
 }

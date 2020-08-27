@@ -1,6 +1,6 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Time, Channels, Permission, defaultEmbed, notNull, discordErrorHandler, time } from "../../defs";
+import { Command, Arguments, Server, Time, Channels, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import request from 'request';
 
@@ -26,7 +26,7 @@ function sendMeme(msg: Message) {
 
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
-		let now = time();
+		let now = Date.now();
 
 		if (lastCached + timePerCache < now || index >= cache.length) {
 			request("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100", {}, (error, response) => {

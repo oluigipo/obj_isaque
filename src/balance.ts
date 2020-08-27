@@ -1,5 +1,5 @@
 import { collections } from "./database";
-import { defaultErrorHandler, Response, Time, time, Channels, Server } from "./defs";
+import { defaultErrorHandler, Response, Time, Channels, Server } from "./defs";
 import { Message, Guild, GuildMemberRoleManager, Client } from "discord.js";
 
 export enum Medal {
