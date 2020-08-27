@@ -180,10 +180,10 @@ export function medals(m: Medal) {
 	return result;
 }
 
-export function resetAll() {
-	users = [];
-	updateDB();
-}
+// export function resetAll() {
+// 	users = [];
+// 	updateDB();
+// }
 
 export function changeDesc(userid: string, desc: string): Response {
 	const index = users.findIndex(u => u.id === userid);
@@ -244,6 +244,25 @@ export function multiplierOf(roles?: GuildMemberRoleManager | string): number {
 	}
 
 	return 1;
+}
+
+export function transfer(id1: string, id2: string, qnt: number): Response<undefined> {
+	const index1 = users.findIndex(u => u.id === id1);
+	const index2 = users.findIndex(u => u.id === id2);
+
+	if (index1 === -1 || index2 === -1) {
+		return { success: false, error: "usuário/você não está registrado" };
+	}
+
+	if (users[index1].money < qnt) {
+		return { success: false, error: "usuário/você não tem dinheiro o suficiente para a transferência" };
+	}
+
+	users[index1].money -= qnt;
+	users[index2].money += qnt;
+	updateDB();
+
+	return { success: true, data: void 0 };
 }
 
 export const userCount = () => users.length;

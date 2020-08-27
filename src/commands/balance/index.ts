@@ -6,5 +6,6 @@ import richest from "./richest";
 import prize from "./prize";
 import punish from "./punish";
 import medals from "./medals";
+// import transfer from "./transfer";
 
-export default [register, balance, medal, desc, richest, prize, punish, medals];
+export default [register, balance, medal, desc, richest, prize, punish, medals]; // , transfer

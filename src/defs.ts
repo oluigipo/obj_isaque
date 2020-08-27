@@ -303,3 +303,12 @@ export function emptyEmbed() {
 export function isMember(u: any): u is GuildMember {
 	return u.roles !== undefined;
 }
+
+export function matchArguments<T extends ArgumentKind[]>(karr: Arguments, ...is: T): karr is { [I in keyof T]: Argument & { kind: T[I] }; } {
+	for (let i = 0; i < is.length; i++) {
+		if (karr[i].kind !== is[i])
+			return false;
+	}
+
+	return true;
+}

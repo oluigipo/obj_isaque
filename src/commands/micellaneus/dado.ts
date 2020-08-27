@@ -1,3 +1,5 @@
+// @NOTE(luigi): disabled
+
 import { Command, Arguments, Permission, Time, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import { mute } from "../../moderation";
@@ -31,10 +33,10 @@ export default <Command>{
 			const minutes = now.getUTCMinutes();
 			const cmd = RITUAL[hours].replace('$', minutes > 30 ? 'a' : 'o');
 
-			const tempo = Math.floor(Math.random() * 12) + 1;
+			const tempo = Math.floor(Math.random() * 26) + 5;
 			if (args[2] == cmd) {
 				if (Math.random() > 0.8) {
-					mute(msg.author.id, tempo * Time.hour, 'Usou o dado mortis');
+					mute(msg.author.id, tempo * Time.minute, 'Usou o dado mortis');
 					return msg.channel.send(`<@${msg.author.id}> foi mutado por ${tempo} horas ao usar o dado mortis!`).catch(discordErrorHandler);
 				} else {
 					return msg.channel.send(`<@${msg.author.id}> usou o dado da morte e sobreviveu!`).catch(discordErrorHandler);
