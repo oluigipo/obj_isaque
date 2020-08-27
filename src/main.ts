@@ -109,7 +109,7 @@ async function fetchInvites(guild?: Guild) {
 client.on("ready", async () => {
 	await Database.init(auth.mongoURI, auth.mongo).catch(defaultErrorHandler);
 	await Moderation.init(client).catch(defaultErrorHandler);
-	await Balance.init().catch(defaultErrorHandler);
+	await Balance.init(client).catch(defaultErrorHandler);
 
 	// @NOTE(luigi): what?
 	invites = (<Invites | undefined>await fetchInvites().catch(discordErrorHandler)) ?? {};
@@ -243,6 +243,7 @@ client.on("message", (message) => {
 });
 
 process.on("beforeExit", async () => {
+	await Balance.onExit().catch(defaultErrorHandler);
 	await Database.done().catch(defaultErrorHandler);
 });
 

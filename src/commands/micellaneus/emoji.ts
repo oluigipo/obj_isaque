@@ -2,6 +2,7 @@
 
 import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
 import { Message, TextChannel, Webhook } from "discord.js";
+import * as Balance from "../../balance";
 
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
@@ -23,6 +24,17 @@ export default <Command>{
 			msg.channel.send(`O emoji \`${args[1]}\` é inválido.`)
 				.catch(discordErrorHandler);
 			return;
+		}
+
+		if (e.animated && !msg.member.permissions.has("ADMINISTRATOR")) {
+			const r = Balance.buy(msg.author.id, 10);
+
+			if (!r.success || !r.data) {
+				msg.reply(`agora custa \`$10\` para usar emoji animado... você não tem \`$10\``).catch(discordErrorHandler);
+				return;
+			}
+
+			Balance.updateDB();
 		}
 
 		let name = msg.member.displayName;

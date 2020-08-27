@@ -299,3 +299,7 @@ export function time() {
 export function emptyEmbed() {
 	return new MessageEmbed();
 }
+
+export function isMember(u: any): u is GuildMember {
+	return u.roles !== undefined;
+}

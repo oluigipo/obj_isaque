@@ -1,26 +1,26 @@
-import { Command, Arguments, Permission, ArgumentKind, discordErrorHandler, notNull, defaultEmbed, Server } from "../../defs";
+import { Command, Arguments, Permission, ArgumentKind, discordErrorHandler, notNull, defaultEmbed, Server, isMember } from "../../defs";
 import { Message, GuildMember, User } from "discord.js";
 import * as Balance from "../../balance";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments, raw: string[]) {
-		let id = msg.author.id;
+		let user: User | GuildMember = msg.author;
 
 		if (args.length > 1 && args[1].kind === ArgumentKind.MEMBER)
-			id = args[1].value.id;
+			user = args[1].value;
 
-		const result = Balance.userData(id);
+		const result = Balance.userData(user.id);
 
 		if (!result.success) {
 			msg.reply(result.error).catch(discordErrorHandler);
 			return;
 		}
 
-		const userData = result.data;
-		let user = msg.author;
-		if (id !== msg.author.id) {
-			user = <User>msg.client.users.cache.get(id);
+		if (isMember(user)) {
+			user = user.user;
 		}
+
+		const userData = result.data;
 
 		let final = defaultEmbed(notNull(msg.member));
 
@@ -28,12 +28,12 @@ export default <Command>{
 		final.title = user.username;
 		final.description = userData.description;
 
-		final.addField("Saldo 💵", `SCB$ ${userData.money.toFixed(2)}`, true);
+		final.addField("Saldo 💵", `$${userData.money.toFixed(2)}`, true);
 		final.addField("Medalhas", Balance.medals(userData.medals).reduce((curr, m) => curr + `${m.emoji} ${m.name}\n`, ""), true);
 
 		msg.channel.send(final).catch(discordErrorHandler);
 	},
-	aliases: ["balance", "saldo", "b", "profile", "perfil"],
+	aliases: ["balance", "saldo", "b", "profile", "perfil", "p"],
 	syntaxes: ["", "@user"],
 	description: "Vê as informações de um usuário",
 	help: "Vê informações como saldo, medalhas, etc. de um usuário.",
