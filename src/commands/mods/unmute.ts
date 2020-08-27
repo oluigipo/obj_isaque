@@ -17,11 +17,11 @@ export default <Command>{
 				const result = Moderation.weakunmute(member.id, member);
 
 				if (!result.success) {
-					finalmsg += `Algo deu errado ao desmutar <@${member}>. \`${result.error}\`\n`;
+					finalmsg += `Algo deu errado ao desmutar ${member}. \`${result.error}\`\n`;
 					continue;
 				}
 
-				finalmsg += `Você está livre <@${member}>!`;
+				finalmsg += `Você está livre ${member}!`;
 
 				if (result.warning)
 					finalmsg += ` Nota: ${result.warning}`;

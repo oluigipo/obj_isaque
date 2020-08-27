@@ -26,7 +26,7 @@ export default <Command>{
 		const result = Balance.transfer(msg.author.id, member.id, qnt);
 
 		if (result.success) {
-			msg.reply(`você enviou \`$${qnt}\` para <@${member.id}>`).catch(discordErrorHandler);
+			msg.reply(`você enviou \`$${qnt}\` para ${member}`).catch(discordErrorHandler);
 		} else {
 			msg.reply(result.error).catch(discordErrorHandler);
 		}

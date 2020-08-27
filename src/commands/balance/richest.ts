@@ -45,7 +45,7 @@ export default <Command>{
 
 		msg.channel.send(final).catch(discordErrorHandler);
 	},
-	aliases: ["richest", "burgueses", "rank"],
+	aliases: ["richest", "burgueses",],
 	syntaxes: ["[página]"],
 	description: "Conheça os maiores burgueses do servidor.",
 	help: "Manda uma lista com os 10 usuários mais ricos do servidor.",

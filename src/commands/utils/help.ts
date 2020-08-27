@@ -56,7 +56,7 @@ function showCommand(msg: Message, cmd: Command) {
 	if (examples !== "")
 		final.addField("Exemplos", examples);
 
-	msg.channel.send(`<@${msg.author}>`, final).catch(discordErrorHandler);
+	msg.channel.send(`${msg.author}`, final).catch(discordErrorHandler);
 }
 
 async function showPage(msg: Message, ind: number, commands: Command[], member: GuildMember) {
@@ -73,7 +73,7 @@ async function showPage(msg: Message, ind: number, commands: Command[], member: 
 		final.addField(cmd.aliases[0], cmd.description, true);
 	}
 
-	msg.edit(`<@${member}>`, final).then(async message => {
+	msg.edit(`${member}`, final).then(async message => {
 		if (index > 0) await message.react('⬅️').catch(discordErrorHandler);
 		if (index < max) await message.react('➡️').catch(discordErrorHandler);
 

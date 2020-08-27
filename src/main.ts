@@ -202,7 +202,7 @@ client.on("message", (message) => {
 		];
 		if (!predictResponse(message)) {
 			message.channel.send(
-				`<@${message.author}> ${
+				`${message.author} ${
 				respostas[Math.floor(Math.random() * respostas.length)]
 				}`,
 			).catch(defaultErrorHandler);
@@ -237,7 +237,7 @@ client.on("message", (message) => {
 
 	command.run(message, args, rawArgs).catch(e => {
 		console.log(e);
-		message.channel.send(`<@${devs[0]}> aconteceu algo de errado, dá uma olhadinha no console aí`)
+		message.channel.send(`${devs[0]} aconteceu algo de errado, dá uma olhadinha no console aí`)
 			.catch(discordErrorHandler);
 	});
 });

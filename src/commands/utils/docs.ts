@@ -147,7 +147,7 @@ async function fetchPage(fn: string): Promise<FetchPageResult> {
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
 		if (args.length < 2) {
-			msg.channel.send(`<@${msg.author}> https://docs2.yoyogames.com/`).catch(discordErrorHandler);
+			msg.channel.send(`${msg.author} https://docs2.yoyogames.com/`).catch(discordErrorHandler);
 			return;
 		}
 
@@ -182,7 +182,7 @@ export default <Command>{
 					cache[fn] = page;
 					break;
 				case 1:
-					msg.channel.send(`<@${msg.author}> Aqui está o link: ${result.link}`).catch(discordErrorHandler);
+					msg.channel.send(`${msg.author} Aqui está o link: ${result.link}`).catch(discordErrorHandler);
 					return;
 				case 2:
 					msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`)

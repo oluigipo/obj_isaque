@@ -10,7 +10,7 @@ const links: any = {
 export default <Command>{
 	async run(msg: Message, args: Arguments) {
 		let link = links[msg.author.id] ?? "https://go.hotmart.com/P17856163O";
-		msg.channel.send(`<@${msg.author}> ${link}`)
+		msg.channel.send(`${msg.author} ${link}`)
 			.catch(discordErrorHandler);
 	},
 	syntaxes: [""],

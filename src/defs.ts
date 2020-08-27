@@ -83,7 +83,7 @@ export const Roles = {
 };
 
 export const MsgTemplates = {
-	error: (user: User, command: string) => `<:error:${Emojis.no}> | <@${user}> Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
+	error: (user: User, command: string) => `<:error:${Emojis.no}> | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
 };
 
 // Functions

@@ -266,10 +266,10 @@ export default <Command>{
 			expr = tokenize(source);
 			let result = parse();
 
-			msg.channel.send(`<@${msg.author}> O resultado é: \`${result}\``)
+			msg.channel.send(`${msg.author} O resultado é: \`${result}\``)
 				.catch(discordErrorHandler);
 		} catch (e) {
-			msg.channel.send(`<@${msg.author}> ${e}`)
+			msg.channel.send(`${msg.author} ${e}`)
 				.catch(discordErrorHandler);
 		}
 	},

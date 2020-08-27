@@ -28,10 +28,10 @@ export default <Command>{
 				const result = Balance.buy(member.id, qnt, true);
 
 				if (result.success) {
-					final.description += `<@${member.id}> perdeu \`$${qnt}\`!\n`;
+					final.description += `${member.id} perdeu \`$${qnt}\`!\n`;
 					change = true;
 				} else {
-					final.description += `<@${member.id}>: ${result.error}\n`;
+					final.description += `${member.id}: ${result.error}\n`;
 				}
 			}
 		}

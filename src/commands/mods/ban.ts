@@ -16,11 +16,11 @@ export default <Command>{
 				const result = Moderation.ban(arg.value);
 
 				if (!result.success) {
-					final += `o(a) <@${arg.value}> é muito forte para mim. ${result.error}\n`;
+					final += `o(a) ${arg.value} é muito forte para mim. ${result.error}\n`;
 					continue;
 				}
 
-				final += `SINTA O PESO DO MARTELO <@${arg.value}>!\n`;
+				final += `SINTA O PESO DO MARTELO ${arg.value}!\n`;
 			}
 		}
 

@@ -16,11 +16,11 @@ export default <Command>{
 				const result = Moderation.kick(arg.value);
 
 				if (!result.success) {
-					final += `não deu pra kickar o(a) <@${arg.value}>. ${result.error}\n`;
+					final += `não deu pra kickar o(a) ${arg.value}. ${result.error}\n`;
 					continue;
 				}
 
-				final += `KICKADO (ban para criança) <@${arg.value}>!\n`;
+				final += `KICKADO (ban para criança) ${arg.value}!\n`;
 			}
 		}
 

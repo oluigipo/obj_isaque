@@ -37,9 +37,9 @@ export default <Command>{
 			if (args[2] == cmd) {
 				if (Math.random() > 0.8) {
 					mute(msg.author.id, tempo * Time.minute, 'Usou o dado mortis');
-					return msg.channel.send(`<@${msg.author.id}> foi mutado por ${tempo} horas ao usar o dado mortis!`).catch(discordErrorHandler);
+					return msg.channel.send(`${msg.author} foi mutado por ${tempo} horas ao usar o dado mortis!`).catch(discordErrorHandler);
 				} else {
-					return msg.channel.send(`<@${msg.author.id}> usou o dado da morte e sobreviveu!`).catch(discordErrorHandler);
+					return msg.channel.send(`${msg.author} usou o dado da morte e sobreviveu!`).catch(discordErrorHandler);
 				}
 			}
 			return msg.channel.send(`Voce escolheu o dado da morte, para rolar seu destino digite \`!!dado mortis ${cmd}\``).catch(discordErrorHandler);

@@ -23,7 +23,7 @@ export default <Command>{
 			link = playlists[args[1].value] ?? link;
 		}
 
-		msg.channel.send(`<@${msg.author}> ${link}`)
+		msg.channel.send(`${msg.author} ${link}`)
 			.catch(discordErrorHandler);
 	},
 	syntaxes: ["", "<nome da playlist>"],

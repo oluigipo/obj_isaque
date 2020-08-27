@@ -54,7 +54,7 @@ function sessionToString(s: GameSession): string {
 	return `<@${(s.turn) ? s.player2 : s.player1}>\n${tableToString(s.state)}`;
 }
 
-enum Result { NONE, ALREADY_SELECTED, INVALID_PLACE, INVALID_TURN, WIN_X, WIN_O };
+enum Result { NONE, ALREADY_SELECTED, INVALID_PLACE, INVALID_TURN, WIN_X, WIN_O, END };
 function processSession(session: GameSession, userid: string, input: number): Result {
 	if ((session.turn ? session.player2 : session.player1) !== userid) {
 		return Result.INVALID_TURN;
@@ -83,7 +83,12 @@ function processSession(session: GameSession, userid: string, input: number): Re
 		return turn ? Result.WIN_O : Result.WIN_X;
 	}
 
-	return Result.NONE;
+	for (const t of session.state)
+		for (const tt of t) {
+			if (tt === Place.NONE)
+				return Result.NONE;
+		}
+	return Result.END;
 }
 
 function sessionOf(id: string) {
@@ -163,6 +168,10 @@ export default <Command>{
 					case Result.INVALID_TURN:
 						msg.reply("não é a sua vez").catch(discordErrorHandler);
 						break;
+					case Result.END:
+						msg.channel.send("deu velha\n" + tableToString(sessions[i].state)).catch(discordErrorHandler);
+						sessions = sessions.filter((_, ii) => ii !== i);
+						break;
 				}
 				break;
 			default:
@@ -170,7 +179,7 @@ export default <Command>{
 				break;
 		}
 	},
-	aliases: ["tic-tac-toe", "ttt", "velha"],
+	aliases: ["tic-tac-toe", "ttt", "velha", "velho"],
 	syntaxes: ["<@user>", "<number>"],
 	description: "Jogue Tic-Tac-Toe para passar o tempo!",
 	help: "Use esse comando marcando um membro para convidá-lo para uma partida. O mesmo terá 3 minutos para aceitá-la (clicar na reação)\n" +

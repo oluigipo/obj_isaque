@@ -161,7 +161,7 @@ type FormatedMute = { user: string, ends: string, begins: string, duration: stri
 export function getMutes() {
 	return mutes.reduce((acc: FormatedMute[], curr: Mute, index) =>
 		(acc.push({
-			user: `<@${curr.id}>`,
+			user: `${curr.id}`,
 			ends: curr.duration === -1 ? "nunca" : dateOf(curr.time + curr.duration),
 			begins: dateOf(curr.time),
 			duration: curr.duration === -1 ? "infinito" : formatTime(curr.duration),

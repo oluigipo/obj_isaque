@@ -15,10 +15,10 @@ export default <Command>{
 		const result = interpret(code);
 
 		if (result.success)
-			msg.channel.send(`<@${msg.author}> Output: \`\`\` ${result.output}\`\`\`\nMemory: \`\`\`${result.memory}\`\`\``)
+			msg.channel.send(`${msg.author} Output: \`\`\` ${result.output}\`\`\`\nMemory: \`\`\`${result.memory}\`\`\``)
 				.catch(discordErrorHandler);
 		else
-			msg.channel.send(`<@${msg.author}> ${result.error}\nMemory: \`\`\`${result.memory}\`\`\``)
+			msg.channel.send(`${msg.author} ${result.error}\nMemory: \`\`\`${result.memory}\`\`\``)
 				.catch(discordErrorHandler);
 
 

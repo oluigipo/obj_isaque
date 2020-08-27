@@ -40,11 +40,11 @@ export default <Command>{
 			const result = Moderation.weakmute(member.id, duration, reason, member);
 
 			if (!result.success) {
-				finalmsg += `Algo deu errado ao mutar <@${member.id}>. \`${result.error}\`\n`;
+				finalmsg += `Algo deu errado ao mutar ${member}. \`${result.error}\`\n`;
 				continue;
 			}
 
-			finalmsg += `Sinta o peso do mute <@${member}>! Mutado `;
+			finalmsg += `Sinta o peso do mute ${member}! Mutado `;
 			if (duration === -1)
 				finalmsg += `até alguém quiser desmutar.`;
 			else

@@ -32,7 +32,7 @@ export default <Command>{
 			request("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100", {}, (error, response) => {
 				if (error) {
 					console.log(error);
-					msg.channel.send(`<@${msg.author}> Algo deu errado ao fazer a request para o Reddit...`)
+					msg.channel.send(`${msg.author} Algo deu errado ao fazer a request para o Reddit...`)
 						.catch(discordErrorHandler);
 					return;
 				}

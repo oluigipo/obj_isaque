@@ -65,7 +65,7 @@ export default <Command>{
 								break;
 							case '❌':
 								message.delete();
-								msg.channel.send(`<@${msg.author}> Sorteio Cancelado!`);
+								msg.channel.send(`${msg.author} Sorteio Cancelado!`);
 								break;
 							case '✅':
 								let final = defaultEmbed(notNull(msg.member));
@@ -102,7 +102,7 @@ export default <Command>{
 												}
 
 												mess.delete().catch(discordErrorHandler);
-												msg.channel.send(`O MegaSorteio acabou! Os seguintes usuários ganharam \`${premio}\`:\n${winners.reduce((s, c) => s + `\n<@${c}>`, "")}`)
+												msg.channel.send(`O MegaSorteio acabou! Os seguintes usuários ganharam \`${premio}\`:\n${winners.reduce((s, c) => s + `\n${c}`, "")}`)
 													.catch(discordErrorHandler);
 											}).catch(discordErrorHandler);
 									}).catch(discordErrorHandler);
