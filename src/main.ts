@@ -1,6 +1,6 @@
 import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
-	Server, Command, devs, Arguments, ASCII, Argument, ArgumentKind,
+	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
 	notNull, validatePermissions, Roles, Emojis
 } from "./defs";
@@ -73,7 +73,7 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 		let code = str.charCodeAt(0);
 
 		// parse as number or time
-		if (code >= ASCII('0') && code <= ASCII('9')) {
+		if (code >= charCodeOf('0') && code <= charCodeOf('9')) {
 			const v = parseFloat(str);
 
 			// parse as time if the length doesn't match

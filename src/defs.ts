@@ -1,31 +1,19 @@
 import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions } from "discord.js";
 import Jimp from "jimp";
 
+// Commands
 export enum ArgumentKind { STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL", NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI" }
-export type Argument =
-	{ kind: ArgumentKind.STRING, value: string } |
+
+export type Arguments = Argument[];
+export type Argument = { kind: ArgumentKind } &
+	({ kind: ArgumentKind.STRING, value: string } |
 	{ kind: ArgumentKind.MEMBER, value: GuildMember } |
 	{ kind: ArgumentKind.CHANNEL, value: GuildChannel } |
 	{ kind: ArgumentKind.NUMBER, value: number } |
 	{ kind: ArgumentKind.TIME, value: number } |
-	{ kind: ArgumentKind.EMOJI, value: Emoji };
-
-export type Arguments = Argument[];
+	{ kind: ArgumentKind.EMOJI, value: Emoji });
 
 export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4 }
-
-export type Response<T = undefined> = Success<T> | Failure;
-
-export interface Success<T> {
-	success: true;
-	data: T;
-	warning?: string;
-}
-
-export interface Failure {
-	success: false;
-	error: string;
-}
 
 export interface Command {
 	run: (msg: Message, args: Arguments, raw: string[]) => Promise<any>;
@@ -36,6 +24,19 @@ export interface Command {
 	examples: string[];
 	permissions: Permission;
 	subcommands?: Command[];
+}
+
+// API Responses
+export type Response<T = undefined> = Success<T> | Failure;
+export interface Success<T> {
+	success: true;
+	data: T;
+	warning?: string;
+}
+
+export interface Failure {
+	success: false;
+	error: string;
 }
 
 // Constants
@@ -88,11 +89,26 @@ export const MsgTemplates = {
 	error: (user: User, command: string) => `<:error:${Emojis.no}> | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
 };
 
+// Fonts
 export let defaultFontWhite: any;
 export let defaultFontBlack: any;
 
 Jimp.loadFont(Jimp.FONT_SANS_32_WHITE).then(fnt => defaultFontWhite = fnt);
 Jimp.loadFont(Jimp.FONT_SANS_32_BLACK).then(fnt => defaultFontBlack = fnt);
+
+// Default error handling
+export function defaultErrorHandler(err: any) {
+	console.log(`====================================\n[ERROR] defaultErrorHandler(error)\n`);
+	console.log(err);
+}
+
+export async function discordErrorHandler(err: any) {
+	console.log("====================================\n[ERROR] discordErrorHandler(error)\n");
+	console.log(err);
+
+	if (err.message === "You are being rate limited.")
+		await sleep(err.retry_after ?? (Time.second * 10));
+}
 
 // Functions
 export function formatTime(ms: number): string {
@@ -184,21 +200,7 @@ export function formatBasicTime(ms: number): string {
 	}
 }
 
-// @NOTE(luigi): do we really need this function?
-export function matchArgs(args: Arguments, ...kinds: ArgumentKind[]): boolean {
-	if (args.length < kinds.length)
-		return false;
-
-	for (let i = 0; i < kinds.length; i++) {
-		if (args[i].kind !== kinds[i])
-			return false;
-	}
-
-	return true;
-}
-
-// @NOTE(luigi): maybe better name?
-export function ASCII(s: string) {
+export function charCodeOf(s: string) {
 	return s.charCodeAt(0);
 }
 
@@ -229,19 +231,6 @@ export function parseTime(s: string): Response<number> {
 	}
 
 	return { success: true, data: result };
-}
-
-export function defaultErrorHandler(err: any) {
-	console.log(`====================================\n[ERROR] defaultErrorHandler(error)\n`);
-	console.log(err);
-}
-
-export async function discordErrorHandler(err: any) {
-	console.log("====================================\n[ERROR] discordErrorHandler(error)\n");
-	console.log(err);
-
-	if (err.message === "You are being rate limited.")
-		await sleep(err.retry_after ?? (Time.second * 10));
 }
 
 export function defaultEmbed(member: GuildMember) {
@@ -343,7 +332,7 @@ export function imageFrom(msg: Message, args: Arguments) {
 	const img = imageAttached(msg);
 	if (img) return img;
 
-	const emoji = <Argument & { kind: ArgumentKind.EMOJI }>args.find(arg => arg.kind === "EMOJI");
+	const emoji = <{ kind: "EMOJI", value: Emoji }>args.find(arg => arg.kind === ArgumentKind.EMOJI);
 	if (emoji)
 		return emoji.value.url ?? Server.defaultImage;
 
