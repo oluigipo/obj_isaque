@@ -1,12 +1,14 @@
-import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel } from "discord.js";
+import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions } from "discord.js";
+import Jimp from "jimp";
 
-export enum ArgumentKind { STRING, MEMBER, CHANNEL, NUMBER, TIME }
+export enum ArgumentKind { STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL", NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI" }
 export type Argument =
 	{ kind: ArgumentKind.STRING, value: string } |
 	{ kind: ArgumentKind.MEMBER, value: GuildMember } |
 	{ kind: ArgumentKind.CHANNEL, value: GuildChannel } |
 	{ kind: ArgumentKind.NUMBER, value: number } |
-	{ kind: ArgumentKind.TIME, value: number };
+	{ kind: ArgumentKind.TIME, value: number } |
+	{ kind: ArgumentKind.EMOJI, value: Emoji };
 
 export type Arguments = Argument[];
 
@@ -85,6 +87,12 @@ export const Roles = {
 export const MsgTemplates = {
 	error: (user: User, command: string) => `<:error:${Emojis.no}> | ${user} Argumentos inválidos! Tente ver como esse comando funciona usando \`${Server.prefix}help ${command}\`.`
 };
+
+export let defaultFontWhite: any;
+export let defaultFontBlack: any;
+
+Jimp.loadFont(Jimp.FONT_SANS_32_WHITE).then(fnt => defaultFontWhite = fnt);
+Jimp.loadFont(Jimp.FONT_SANS_32_BLACK).then(fnt => defaultFontBlack = fnt);
 
 // Functions
 export function formatTime(ms: number): string {
@@ -280,22 +288,6 @@ export function validatePermissions(member: GuildMember, channel: TextChannel, p
 	return true;
 }
 
-// @NOTE(luigi): oof
-// export function time() {
-// 	const now = new Date();
-// 	const result = new Date(
-// 		now.getUTCFullYear(),
-// 		now.getUTCMonth(),
-// 		now.getUTCDate(),
-// 		now.getUTCHours(),
-// 		now.getUTCMinutes(),
-// 		now.getUTCSeconds(),
-// 		now.getUTCMilliseconds()
-// 	).getTime();
-
-// 	return result;
-// }
-
 export function emptyEmbed() {
 	return new MessageEmbed();
 }
@@ -311,4 +303,75 @@ export function matchArguments<T extends ArgumentKind[]>(karr: Arguments, ...is:
 	}
 
 	return true;
+}
+
+const formats = [".jpeg", ".jpg", ".png", ".bmp"];
+function isImage(name: string | undefined): boolean {
+	if (!name)
+		return false;
+
+	const i = name.indexOf('?');
+	if (i !== -1)
+		name = name.substr(0, i);
+
+	for (const f of formats) {
+		if (name.endsWith(f))
+			return true;
+	}
+
+	return false;
+}
+
+export function imageFrom(msg: Message, args: Arguments) {
+	function imageAttached(msg: Message) {
+		const attcs = msg.attachments.values();
+
+		for (const attc of attcs) {
+			if (isImage(attc.name) && (attc.width ?? Infinity) <= 1280 && (attc.height ?? Infinity) <= 720) {
+				return attc.url;
+			}
+		}
+
+		const args = msg.content.split(' ');
+		const link = args.find(arg => arg.match(/^https?:\/\//));
+		if (link && isImage(link))
+			return link;
+
+		return undefined;
+	}
+
+	const img = imageAttached(msg);
+	if (img) return img;
+
+	const emoji = <Argument & { kind: ArgumentKind.EMOJI }>args.find(arg => arg.kind === "EMOJI");
+	if (emoji)
+		return emoji.value.url ?? Server.defaultImage;
+
+	const channel = <TextChannel>msg.channel;
+	const messages = Array.from(channel.messages.cache.values()).reverse().slice(0, 20);
+	for (const m of messages) {
+		const img = imageAttached(m);
+		if (img) return img;
+	}
+
+	return undefined;
+}
+
+export function processImage(img: string | Jimp, callback: (image: Jimp) => any) {
+	if (typeof img === "string")
+		return Jimp.read(img).then(image => {
+			callback(image);
+		});
+	else
+		return new Promise<Jimp>(resolve => {
+			resolve(img);
+		}).then(callback);
+}
+
+export function imageAsAttachment(buffer: Buffer, format: string): MessageOptions {
+	return { files: [{ attachment: buffer, name: `image.${format}` }] };
+}
+
+export function allowedImage(image: Jimp) {
+	return image.getWidth() <= 800 && image.getHeight() <= 800;
 }

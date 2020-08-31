@@ -46,7 +46,7 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 				if (member === undefined) continue;
 				arg.kind = ArgumentKind.MEMBER;
 				arg.value = member;
-			} else if (str[1] === '#') {
+			} else if (str[0] === '#') {
 				str = str.substr(1);
 
 				const id = str.substr(0, 18);
@@ -57,6 +57,14 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 				if (channel === undefined) continue;
 				arg.kind = ArgumentKind.CHANNEL;
 				arg.value = channel;
+			} else if (str[0] === ':') {
+				const last = str.indexOf(':', 2);
+				const id = str.substr(last + 1, 18);
+
+				const emoji = client.emojis.cache.get(id);
+				if (emoji === undefined) continue;
+				arg.kind = ArgumentKind.EMOJI;
+				arg.value = emoji;
 			}
 
 			continue;

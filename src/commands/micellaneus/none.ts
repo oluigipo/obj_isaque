@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, discordErrorHandler, Time, Emojis, ArgumentKind } from "../../defs";
+import { Command, Arguments, Permission, discordErrorHandler, Time, Emojis, ArgumentKind, defaultErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 
 const audios = {
@@ -17,7 +17,7 @@ export default <Command>{
 		}
 
 		msg.react(Emojis.yes);
-		const key = keys[Math.floor(Math.random() * keys.length)];
+		let key = keys[Math.floor(Math.random() * keys.length)];
 		let audio = audios[key];
 
 		if (args.length > 1 && args[1].kind === ArgumentKind.STRING) {
@@ -29,7 +29,7 @@ export default <Command>{
 
 			const action = () => setTimeout(() => connection.disconnect(), Time.second);
 			dispatcher.on("finish", action);
-			dispatcher.on("error", action);
+			dispatcher.on("error", err => (defaultErrorHandler(err), action()));
 		}).catch(discordErrorHandler);
 	},
 	aliases: ["none", "isaque"],
