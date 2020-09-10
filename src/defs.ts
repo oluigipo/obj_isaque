@@ -116,18 +116,18 @@ export function formatTime(ms: number): string {
 
 	switch (true) {
 		case ms >= Time.year:
-			const years: number = Math.trunc(ms / Time.year);
-			ms = ms % Time.week;
+			const years = Math.trunc(ms / Time.year);
+			ms = ms % Time.year;
 			str.push(`${years} ano${years > 1 ? 's' : ''}`);
 
 		case ms >= Time.month:
-			const months: number = Math.trunc(ms / Time.month);
-			ms = ms % Time.week;
+			const months = Math.trunc(ms / Time.month);
+			ms = ms % Time.month;
 			if (months > 0)
 				str.push(`${months} m${months > 1 ? 'eses' : 'ês'}`);
 
 		case ms >= Time.week:
-			const weeks: number = Math.trunc(ms / Time.week);
+			const weeks = Math.trunc(ms / Time.week);
 			ms = ms % Time.week;
 			if (weeks > 0)
 				str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
@@ -172,7 +172,7 @@ export function formatTime(ms: number): string {
 export function formatBasicTime(ms: number): string {
 	switch (true) {
 		case ms > Time.week:
-			const weeks: number = Math.trunc(ms / Time.week);
+			const weeks = Math.trunc(ms / Time.week);
 			ms = ms % Time.week;
 			return (`${weeks} semana${weeks > 1 ? 's' : ''}`);
 

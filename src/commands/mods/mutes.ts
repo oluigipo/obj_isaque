@@ -17,7 +17,7 @@ export default <Command>{
 
 		for (let i = 0; i < list.length; ++i) {
 			const mute = list[i];
-			final.addField(`Caso nº ${i + 1}`, `Usuário: ${mute.user}\nMutado dia: \`${mute.begins}\`\nDuração: \`${mute.duration}\`\nAcaba: \`${mute.ends}\``
+			final.addField(`Caso nº ${i + 1}`, `Usuário: <@${mute.user}>\nMutado dia: \`${mute.begins}\`\nDuração: \`${mute.duration}\`\nAcaba: \`${mute.ends}\``
 				+ (mute.reason ? `\nMotivo: \`${mute.reason}\`` : ""));
 		}
 
