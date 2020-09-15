@@ -190,7 +190,7 @@ client.on("voiceStateUpdate", (state0, state1) => {
 });
 
 client.on("message", (message) => {
-	if (message.author.bot || message.channel.type !== "text" || message.guild === null)
+	if (message.author.bot || message.channel.type === "dm" || message.guild === null)
 		return;
 
 	Balance.onMessage(message);
@@ -210,8 +210,7 @@ client.on("message", (message) => {
 		];
 		if (!predictResponse(message)) {
 			message.channel.send(
-				`${message.author} ${
-				respostas[Math.floor(Math.random() * respostas.length)]
+				`${message.author} ${respostas[Math.floor(Math.random() * respostas.length)]
 				}`,
 			).catch(defaultErrorHandler);
 		}

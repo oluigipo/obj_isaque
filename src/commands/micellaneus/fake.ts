@@ -14,7 +14,7 @@ export default <Command>{
 		const _c = <TextChannel>msg.channel;
 		const channel = guild.channels.cache.find(ch => ch.name === _c.name);
 
-		if (!channel || channel.type !== "text")
+		if (!channel || (channel.type !== "text" && channel.type !== "news"))
 			return;
 
 		(<TextChannel>channel).send(text).catch(discordErrorHandler);

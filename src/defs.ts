@@ -1,4 +1,4 @@
-import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions } from "discord.js";
+import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions, NewsChannel } from "discord.js";
 import Jimp from "jimp";
 
 // Commands
@@ -259,7 +259,7 @@ export function dateOf(time: number) {
 	return `${date} - ${hour}`;
 }
 
-export function validatePermissions(member: GuildMember, channel: TextChannel, perms: Permission): boolean {
+export function validatePermissions(member: GuildMember, channel: TextChannel | NewsChannel, perms: Permission): boolean {
 	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
