@@ -27,23 +27,25 @@ export default <Command>{
 			return msg.channel.send(`Voce rolou um d6 e conseguiu ${roll(1, 6)}`).catch(discordErrorHandler);
 		if (expr === "em casa")
 			return msg.channel.send(`<:renda:551130874750566401>`).catch(discordErrorHandler);
-		if (args[1] === "mortis") {
-			const now = new Date();
-			const hours = (now.getUTCHours() + 9) % 12;
-			const minutes = now.getUTCMinutes();
-			const cmd = RITUAL[hours].replace('$', minutes > 30 ? 'a' : 'o');
 
-			const tempo = Math.floor(Math.random() * 26) + 5;
-			if (args[2] == cmd) {
-				if (Math.random() > 0.8) {
-					mute(msg.author.id, tempo * Time.minute, 'Usou o dado mortis');
-					return msg.channel.send(`${msg.author} foi mutado por ${tempo} horas ao usar o dado mortis!`).catch(discordErrorHandler);
-				} else {
-					return msg.channel.send(`${msg.author} usou o dado da morte e sobreviveu!`).catch(discordErrorHandler);
-				}
-			}
-			return msg.channel.send(`Voce escolheu o dado da morte, para rolar seu destino digite \`!!dado mortis ${cmd}\``).catch(discordErrorHandler);
-		}
+		// @NOTE(luigi): disabled
+		// if (args[1] === "mortis") {
+		// 	const now = new Date();
+		// 	const hours = (now.getUTCHours() + 9) % 12;
+		// 	const minutes = now.getUTCMinutes();
+		// 	const cmd = RITUAL[hours].replace('$', minutes > 30 ? 'a' : 'o');
+
+		// 	const tempo = Math.floor(Math.random() * 26) + 5;
+		// 	if (args[2] == cmd) {
+		// 		if (Math.random() > 0.8) {
+		// 			mute(msg.author.id, tempo * Time.minute, 'Usou o dado mortis');
+		// 			return msg.channel.send(`${msg.author} foi mutado por ${tempo} horas ao usar o dado mortis!`).catch(discordErrorHandler);
+		// 		} else {
+		// 			return msg.channel.send(`${msg.author} usou o dado da morte e sobreviveu!`).catch(discordErrorHandler);
+		// 		}
+		// 	}
+		// 	return msg.channel.send(`Voce escolheu o dado da morte, para rolar seu destino digite \`!!dado mortis ${cmd}\``).catch(discordErrorHandler);
+		// }
 
 		const match = DICE_REGEX.exec(expr)
 		if (match) {
