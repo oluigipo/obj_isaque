@@ -65,7 +65,9 @@ export const Server = {
 export const Channels = {
 	shitpost: ["553933292542361601", "671327942420201492"],
 	music: "621805258519216130",
-	rules: "517857905051959348"
+	rules: "517857905051959348",
+	log: "589614780470525992",
+	logObject: <TextChannel>{}
 }
 
 export const Emojis = {

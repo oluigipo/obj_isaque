@@ -125,8 +125,18 @@ client.on("ready", async () => {
 	notNull(client.user).setPresence({ activity: { name: "o curso do NoNe!", type: "WATCHING" }, status: "online" })
 		.catch(discordErrorHandler);
 
-	// @NOTE(luigi): what?²
-	(<TextChannel>client.guilds.cache.get(Server.id)?.channels.cache.get(Channels.rules)).messages.fetch().catch(discordErrorHandler);
+	const guild = client.guilds.cache.get(Server.id);
+	if (!guild)
+		return;
+
+	// Fetching messages
+	(<TextChannel>guild.channels.cache.get(Channels.rules)).messages.fetch().catch(discordErrorHandler);
+
+	const channel = guild.channels.cache.get(Channels.log);
+	if (!channel || channel.type !== "text")
+		return;
+
+	Channels.logObject = <TextChannel>channel;
 
 	console.log("Online!");
 });

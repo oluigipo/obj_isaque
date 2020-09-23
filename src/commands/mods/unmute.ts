@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler, defaultEmbed, notNull, emptyEmbed } from "../../defs";
+import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler, defaultEmbed, notNull, emptyEmbed, Channels } from "../../defs";
 import { Message } from "discord.js";
 import * as Moderation from "../../moderation";
 
@@ -42,7 +42,7 @@ export default <Command>{
 
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
-		msg.channel.send(embed).catch(discordErrorHandler);
+		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
 	},
 	aliases: ["unmute"],
 	syntaxes: ["@users..."],

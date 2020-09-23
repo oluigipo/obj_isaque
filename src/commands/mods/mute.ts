@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, emptyEmbed } from "../../defs";
+import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, emptyEmbed, Channels } from "../../defs";
 import { Message, GuildMember } from "discord.js";
 import * as Moderation from "../../moderation";
 
@@ -67,7 +67,7 @@ export default <Command>{
 
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
-		msg.channel.send(embed).catch(discordErrorHandler);
+		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
 	},
 	aliases: ["mute", "mutar"],
 	description: "Muta um ou mais membros por um tempo (in)determinado.",
