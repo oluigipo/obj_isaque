@@ -32,6 +32,7 @@ export default <Command>{
 		let embed = emptyEmbed();
 		embed.description = final;
 		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	syntaxes: ["<@user...>"],
 	permissions: Permission.MOD,

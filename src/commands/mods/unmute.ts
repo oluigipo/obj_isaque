@@ -1,5 +1,5 @@
 import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler, defaultEmbed, notNull, emptyEmbed, Channels } from "../../defs";
-import { Message } from "discord.js";
+import { GuildMember, Message } from "discord.js";
 import * as Moderation from "../../moderation";
 
 export default <Command>{
@@ -11,23 +11,33 @@ export default <Command>{
 
 		let finalmsg = "";
 		for (const arg of args) {
-			if (arg.kind === ArgumentKind.MEMBER) {
-				const member = arg.value;
-
-				const result = Moderation.weakunmute(member.id, member);
-
-				if (!result.success) {
-					finalmsg += `Algo deu errado ao desmutar ${member}. \`${result.error}\`\n`;
+			let id: string, member: GuildMember | undefined;
+			switch (arg.kind) {
+				default:
 					continue;
-				}
-
-				finalmsg += `Você está livre ${member}!`;
-
-				if (result.warning)
-					finalmsg += ` Nota: ${result.warning}`;
-
-				finalmsg += '\n';
+				case ArgumentKind.MEMBER:
+					id = arg.value.id;
+					member = arg.value;
+					break;
+				case ArgumentKind.USERID:
+					id = arg.value;
+					member = undefined;
+					break;
 			}
+
+			const result = Moderation.weakunmute(id, member);
+
+			if (!result.success) {
+				finalmsg += `Algo deu errado ao desmutar <@${id}>. \`${result.error}\`\n`;
+				continue;
+			}
+
+			finalmsg += `Você está livre <@${id}>!`;
+
+			if (result.warning)
+				finalmsg += ` Nota: ${result.warning}`;
+
+			finalmsg += '\n';
 		}
 
 		// no one muted
@@ -43,6 +53,7 @@ export default <Command>{
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
 		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	aliases: ["unmute"],
 	syntaxes: ["@users..."],

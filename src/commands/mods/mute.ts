@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, emptyEmbed, Channels } from "../../defs";
+import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, emptyEmbed, Channels, Time } from "../../defs";
 import { Message, GuildMember } from "discord.js";
 import * as Moderation from "../../moderation";
 
@@ -10,11 +10,12 @@ export default <Command>{
 		}
 		args.shift(); // consume command
 
-		let duration = -1;
 		let finalmsg = "";
 		let reasonList: string[] | undefined;
 		let toMute: { duration: number, member: GuildMember }[] = [];
 		for (const arg of args) {
+			let duration = -1;
+
 			if (reasonList)
 				reasonList.push(arg.value.toString());
 
@@ -24,6 +25,9 @@ export default <Command>{
 				} break;
 				case ArgumentKind.TIME:
 					duration = arg.value;
+					break;
+				case ArgumentKind.NUMBER:
+					duration = arg.value * Time.minute;
 					break;
 				default:
 					if (!reasonList)
@@ -37,7 +41,7 @@ export default <Command>{
 		for (const e of toMute) {
 			const member = e.member;
 			// @NOTE(luigi): we don't need to update the db every iteration of the loop
-			const result = Moderation.weakmute(member.id, duration, reason, member);
+			const result = Moderation.weakmute(member.id, e.duration, reason, member);
 
 			if (!result.success) {
 				finalmsg += `Algo deu errado ao mutar ${member}. \`${result.error}\`\n`;
@@ -45,10 +49,10 @@ export default <Command>{
 			}
 
 			finalmsg += `Sinta o peso do mute ${member}! Mutado `;
-			if (duration === -1)
+			if (e.duration === -1)
 				finalmsg += `até alguém quiser desmutar.`;
 			else
-				finalmsg += `por \`${formatTime(duration)}\`.`;
+				finalmsg += `por \`${formatTime(e.duration)}\`.`;
 
 			if (result.warning)
 				finalmsg += ` Nota: ${result.warning}`;
@@ -68,6 +72,7 @@ export default <Command>{
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
 		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	aliases: ["mute", "mutar"],
 	description: "Muta um ou mais membros por um tempo (in)determinado.",

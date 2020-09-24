@@ -4,11 +4,10 @@ import dolar from "./dolar";
 import emoji from "./emoji";
 import lisp from "./lisp";
 import dado from "./dado";
-import cat from "./cat";
 import ph from "./ph";
 import sonbra from "./sonbra";
 import ulon from "./ulon";
 import fake from "./fake";
 import none from "./none";
 
-export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, none, cat, dado];
+export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, none, dado];

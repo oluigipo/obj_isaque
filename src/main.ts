@@ -43,9 +43,13 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 				if (msg.guild === null) continue;
 				const member = msg.guild.members.cache.get(id);
 
-				if (member === undefined) continue;
-				arg.kind = ArgumentKind.MEMBER;
-				arg.value = member;
+				if (member === undefined) {
+					arg.kind = ArgumentKind.USERID;
+					arg.value = id;
+				} else {
+					arg.kind = ArgumentKind.MEMBER;
+					arg.value = member;
+				}
 			} else if (str[0] === '#') {
 				str = str.substr(1);
 
@@ -74,6 +78,27 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 
 		// parse as number or time
 		if (code >= charCodeOf('0') && code <= charCodeOf('9')) {
+
+			// 18 chars, check if it's an ID
+			if (str.length == 18) {
+				let isntId = false;
+
+				for (let i = 1; i < str.length; ++i) {
+					const code = str.charCodeAt(i);
+
+					if (code < charCodeOf('0') || code > charCodeOf('9')) {
+						isntId = true;
+						break;
+					}
+				}
+
+				if (!isntId) {
+					arg.kind = ArgumentKind.USERID;
+					arg.value = str;
+					continue;
+				}
+			}
+
 			const v = parseFloat(str);
 
 			// parse as time if the length doesn't match

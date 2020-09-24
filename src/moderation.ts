@@ -124,7 +124,11 @@ export function weakunmute(userid: string, member?: GuildMember): Response<numbe
 			if (!member) {
 				const c = client.guilds.cache.get(Server.id)?.members.cache.get(userid);
 				if (c === undefined) {
-					return { success: false, error: "Membro desconhecido" }
+					return {
+						success: true,
+						data: mute.time + mute.duration,
+						warning: "Ele deve ter saído do servidor, então eu só tirei ele da database."
+					};
 				}
 
 				member = c;

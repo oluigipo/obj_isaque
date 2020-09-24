@@ -2,16 +2,17 @@ import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Em
 import Jimp from "jimp";
 
 // Commands
-export enum ArgumentKind { STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL", NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI" }
+export enum ArgumentKind { STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL", NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI", USERID = "USERID" }
 
 export type Arguments = Argument[];
-export type Argument = { kind: ArgumentKind } &
-	({ kind: ArgumentKind.STRING, value: string } |
+export type Argument =
+	{ kind: ArgumentKind.STRING, value: string } |
 	{ kind: ArgumentKind.MEMBER, value: GuildMember } |
 	{ kind: ArgumentKind.CHANNEL, value: GuildChannel } |
 	{ kind: ArgumentKind.NUMBER, value: number } |
 	{ kind: ArgumentKind.TIME, value: number } |
-	{ kind: ArgumentKind.EMOJI, value: Emoji });
+	{ kind: ArgumentKind.EMOJI, value: Emoji } |
+	{ kind: ArgumentKind.USERID, value: string };
 
 export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4 }
 

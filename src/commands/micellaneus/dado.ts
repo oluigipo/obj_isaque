@@ -1,5 +1,3 @@
-// @NOTE(luigi): disabled
-
 import { Command, Arguments, Permission, Time, discordErrorHandler } from "../../defs";
 import { Message } from "discord.js";
 import { mute } from "../../moderation";
@@ -10,7 +8,7 @@ function roll(count: number, sides: number): number | string {
 	if (count >= 200) {
 		return "`Não posso rodar tantos dados assim. Tá achando que é a prova do OBMEP?`";
 	}
-	if (count == 1) return Math.floor(Math.random() * sides);
+	if (count == 1) return Math.floor(Math.random() * sides) + 1;
 	return new Array(count)
 		.fill(null)
 		.map(_ => Math.floor(Math.random() * sides) + 1)
