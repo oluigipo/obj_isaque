@@ -129,16 +129,18 @@ export function formatTime(ms: number): string {
 			str.push(`${years} ano${years > 1 ? 's' : ''}`);
 
 		case ms >= Time.month:
-			const months = Math.trunc(ms / Time.month);
+			const months: number | undefined = Math.trunc(ms / Time.month);
 			ms = ms % Time.month;
 			if (months > 0)
 				str.push(`${months} m${months > 1 ? 'eses' : 'ês'}`);
 
 		case ms >= Time.week:
-			const weeks = Math.trunc(ms / Time.week);
-			ms = ms % Time.week;
-			if (weeks > 0)
-				str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
+			if (months === 0) {
+				const weeks = Math.trunc(ms / Time.week);
+				ms = ms % Time.week;
+				if (weeks > 0)
+					str.push(`${weeks} semana${weeks > 1 ? 's' : ''}`);
+			}
 
 		case ms >= Time.day:
 			const days = Math.trunc(ms / Time.day);
@@ -169,6 +171,8 @@ export function formatTime(ms: number): string {
 		return "alguns instantes";
 	} else if (str.length === 1) {
 		return str[0];
+	} else if (str.length > 3) {
+		str = str.filter((_, i) => i < 3);
 	}
 
 	let last = str[str.length - 1];

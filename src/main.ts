@@ -2,7 +2,7 @@ import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
 	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull, validatePermissions, Roles, Emojis, emptyEmbed, defaultEmbed, cursedInvites
+	notNull, validatePermissions, Roles, Emojis, emptyEmbed, defaultEmbed, cursedInvites, formatTime
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
@@ -248,7 +248,12 @@ client.on("guildMemberAdd", async member => {
 
 	embed.description += member.toString();
 	embed.addField("ID", member.id, true);
-	embed.addField("Account Age", member.user?.createdTimestamp ?? "Desconhecido (é null, fazer o quê)", true);
+
+	let age = "Desconhecido (é null, fazer o quê)";
+	if (member.user?.createdTimestamp)
+		age = formatTime(Date.now() - member.user?.createdTimestamp);
+
+	embed.addField("Account Age", age, true);
 	embed.addField("Invite", invite ?? "noneclass", true);
 
 	const user = member.user;
