@@ -2,7 +2,7 @@ import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
 import {
 	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull, validatePermissions, Roles, Emojis
+	notNull, validatePermissions, Roles, Emojis, emptyEmbed, defaultEmbed, cursedInvites
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
@@ -139,6 +139,10 @@ async function fetchInvites(guild?: Guild) {
 	return undefined;
 }
 
+client.on("inviteCreate", invite => {
+	invites[invite.code] = invite.uses ?? 0;
+});
+
 client.on("ready", async () => {
 	await Database.init(auth.mongoURI, auth.mongo).catch(defaultErrorHandler);
 	await Moderation.init(client).catch(defaultErrorHandler);
@@ -157,11 +161,19 @@ client.on("ready", async () => {
 	// Fetching messages
 	(<TextChannel>guild.channels.cache.get(Channels.rules)).messages.fetch().catch(discordErrorHandler);
 
-	const channel = guild.channels.cache.get(Channels.log);
+	// log de punições
+	let channel = guild.channels.cache.get(Channels.log);
 	if (!channel || channel.type !== "text")
 		return;
 
 	Channels.logObject = <TextChannel>channel;
+
+	// join log
+	channel = guild.channels.cache.get(Channels.joinLog);
+	if (!channel || channel.type !== "text")
+		return;
+
+	Channels.joinLogObject = <TextChannel>channel;
 
 	console.log("Online!");
 });
@@ -203,11 +215,47 @@ client.on("guildMemberAdd", async member => {
 
 	const newInvites = (<Invites>await fetchInvites().catch(discordErrorHandler));
 
+	let invite: string | undefined;
 	if (newInvites[Server.specialInvite] > invites[Server.specialInvite]) {
 		member.roles.add(Roles.aluno).catch(discordErrorHandler);
+
+		invite = Server.specialInvite;
+	} else {
+		const keys = Object.keys(invites);
+		for (const key of keys) {
+			if (invites[key] < newInvites[key]) {
+				invite = key;
+				break;
+			}
+		}
+	}
+
+	let banned = false;
+	if (cursedInvites.includes(invite ?? "")) {
+		banned = true;
+		member.ban({ reason: "Cursed invite: " + invite });
+		Channels.logObject.send(emptyEmbed().setDescription(`SINTA O PODER DO MARTELO! SEU CONVITE O AMALDIÇOOU! ${member}`));
 	}
 
 	invites = newInvites;
+
+	const embed = defaultEmbed(member);
+
+	embed.title = "Member Joined";
+	embed.description = "";
+	if (banned)
+		embed.description += "[Cursed Invite] ";
+
+	embed.description += member.toString();
+	embed.addField("ID", member.id, true);
+	embed.addField("Account Age", member.user?.createdTimestamp ?? "Desconhecido (é null, fazer o quê)", true);
+	embed.addField("Invite", invite ?? "noneclass", true);
+
+	const user = member.user;
+	if (user)
+		embed.addField("Username", user.tag, true);
+
+	Channels.joinLogObject.send(embed).catch(discordErrorHandler);
 });
 
 client.on("voiceStateUpdate", (state0, state1) => {

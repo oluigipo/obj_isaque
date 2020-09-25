@@ -11,11 +11,11 @@ export default <Command>{
 		args.shift(); // consume command
 
 		let finalmsg = "";
+
+		let duration = -1;
 		let reasonList: string[] | undefined;
 		let toMute: { duration: number, member: GuildMember }[] = [];
 		for (const arg of args) {
-			let duration = -1;
-
 			if (reasonList)
 				reasonList.push(arg.value.toString());
 

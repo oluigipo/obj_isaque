@@ -1,4 +1,3 @@
-// 
 import { Command, Arguments, Permission, emptyEmbed, discordErrorHandler } from "../../defs";
 import { Message, MessageAttachment } from "discord.js";
 import request from "request";

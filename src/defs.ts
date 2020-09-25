@@ -1,4 +1,4 @@
-import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions, NewsChannel } from "discord.js";
+import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions, NewsChannel, PartialGuildMember } from "discord.js";
 import Jimp from "jimp";
 
 // Commands
@@ -68,7 +68,9 @@ export const Channels = {
 	music: "621805258519216130",
 	rules: "517857905051959348",
 	log: "589614780470525992",
-	logObject: <TextChannel>{}
+	logObject: <TextChannel>{},
+	joinLog: "742891288055119973",
+	joinLogObject: <TextChannel>{}
 }
 
 export const Emojis = {
@@ -98,6 +100,9 @@ export let defaultFontBlack: any;
 
 Jimp.loadFont(Jimp.FONT_SANS_32_WHITE).then(fnt => defaultFontWhite = fnt);
 Jimp.loadFont(Jimp.FONT_SANS_32_BLACK).then(fnt => defaultFontBlack = fnt);
+
+// Invites
+export let cursedInvites = <string[]>[];
 
 // Default error handling
 export function defaultErrorHandler(err: any) {
@@ -236,10 +241,10 @@ export function parseTime(s: string): Response<number> {
 	return { success: true, data: result };
 }
 
-export function defaultEmbed(member: GuildMember) {
+export function defaultEmbed(member: GuildMember | PartialGuildMember) {
 	const final = new MessageEmbed();
 	final.color = Server.botcolor;
-	final.author = { name: member.displayName, iconURL: member.user.avatarURL() ?? undefined };
+	final.author = { name: member.displayName, iconURL: member.user?.avatarURL() ?? undefined };
 	final.footer = { text: member.client.user?.username, iconURL: member.client.user?.avatarURL() ?? undefined };
 
 	return final;
