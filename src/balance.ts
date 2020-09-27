@@ -18,8 +18,19 @@ export interface User {
 	medals: Medal;
 }
 
-let users: User[] = [];
+export interface Competitors {
+	[key: string]: number;
+};
 
+export interface Event {
+	msg: string;
+	cost: number;
+	users: Competitors;
+	prize: number | string;
+};
+
+let users: User[] = [];
+export let event: Event | undefined;
 let stagedUpdate: NodeJS.Timeout | undefined;
 
 const emptyUser = (id: string): User => ({
@@ -67,6 +78,9 @@ async function loadDB() {
 	const db = collections.balance;
 	const things = (await db.find({}).toArray())[0];
 	users = things.users;
+	event = things.event;
+	if (event?.cost === undefined)
+		event = undefined;
 }
 
 /**
@@ -266,6 +280,103 @@ export function transfer(id1: string, id2: string, qnt: number): Response<undefi
 }
 
 export const userCount = () => users.length;
+
+function updateEventDB() {
+	const db = collections.balance;
+	db.findOneAndUpdate({}, { $set: { event: (event ?? {}) } }, { projection: { _id: 0, event: 1 } })
+		.catch(defaultErrorHandler);
+}
+
+interface EventResult {
+	[key: string]: "SUCCESS" | "NOT REGISTERED" | "NO MONEY";
+};
+
+export function beginEvent(msg: string, cost: number, prize: number | string, users: string[]): Response<EventResult> {
+	if (event) {
+		return { success: false, error: "Não posso rodar mais de um evento ao mesmo tempo" };
+	}
+
+	const ev = <Event>{ msg, cost, users: {}, prize };
+	const result = <EventResult>{};
+
+	for (const user of users) {
+		const r = buy(user, cost);
+
+		if (!r.success) {
+			result[user] = "NOT REGISTERED";
+			continue;
+		}
+
+		if (!r.data) {
+			result[user] = "NO MONEY";
+			continue;
+		}
+
+		result[user] = "SUCCESS";
+		ev.users[user] = 0;
+	}
+
+	event = ev;
+	updateEventDB();
+	updateDB();
+
+	return { success: true, data: result };
+}
+
+export function eventPoint(user: string, qnt = 1): Response<number> {
+	if (!event) {
+		return { success: false, error: "Não existe um evento acontecendo no momento" };
+	}
+
+	const points = event.users[user];
+	if (points === void 0) {
+		return { success: false, error: "Esse usuário não está participando" };
+	}
+
+	event.users[user] += qnt;
+	updateEventDB();
+
+	return { success: true, data: event.users[user] };
+}
+
+interface EventWinner {
+	user: string;
+	points: number;
+	prize: string | number;
+};
+
+export function finishEvent(): Response<EventWinner, string[]> {
+	if (!event) {
+		return { success: false, error: "Não existe um evento acontecendo no momento" };
+	}
+
+	const keys = Object.keys(event.users);
+	if (keys.length === 0) {
+		return { success: false, error: "Não tem nenhum participante nesse evento" };
+	}
+
+	let winners = <EventWinner[]>[];
+
+	for (const key of keys) {
+		winners.push({ user: key, points: event.users[key], prize: event.prize });
+	}
+
+	winners = winners.sort((a, b) => b.points - a.points);
+	winners = winners.filter(w => w.points >= winners[0].points);
+
+	if (winners.length > 1) {
+		return { success: false, error: "Empate!", extra: winners.reduce((acc, val) => (acc.push(val.user), acc), <string[]>[]) };
+	}
+
+	if (typeof event.prize === "number")
+		prize([winners[0].user], event.prize, true);
+
+	event = undefined;
+
+	updateEventDB();
+
+	return { success: true, data: winners[0] };
+}
 
 export function onMessage(msg: Message) {
 	if (msg.guild?.id !== Server.id || Channels.shitpost.includes(<string>msg.channel?.id))

@@ -28,16 +28,17 @@ export interface Command {
 }
 
 // API Responses
-export type Response<T = undefined> = Success<T> | Failure;
+export type Response<T = undefined, U = undefined> = Success<T> | Failure<U>;
 export interface Success<T> {
 	success: true;
 	data: T;
 	warning?: string;
 }
 
-export interface Failure {
+export interface Failure<U> {
 	success: false;
 	error: string;
+	extra?: U;
 }
 
 // Constants
@@ -87,7 +88,9 @@ export const Roles = {
 	aluno: "585871344718184458",
 	unity: "730818777998032967",
 	gamemaker: "630202297716178964",
-	mod: "507553894310608899"
+	mod: "507553894310608899",
+	event: "758467541239595058",
+	gamemaster: "758468120787681340"
 };
 
 export const MsgTemplates = {

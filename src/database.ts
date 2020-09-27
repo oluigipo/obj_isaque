@@ -1,4 +1,4 @@
-import { MongoClient, Collection } from "mongodb";
+import { MongoClient, Collection, MongoError } from "mongodb";
 
 export let db: MongoClient;
 export const dbname = "maindb";
@@ -19,19 +19,15 @@ export async function init(uriTemplate: string, password: string) {
 
 	const dbo = db.db();
 
-	let mutes = dbo.collection("mutes", {}, (err, c) => {
+	const errorHandler = (err: MongoError) => {
 		if (err) {
 			console.log(err);
 			success = false;
 		}
-	});
+	};
 
-	let balance = dbo.collection("balance", {}, err => {
-		if (err) {
-			console.log(err);
-			success = false;
-		}
-	});
+	let mutes = dbo.collection("mutes", {}, errorHandler);
+	let balance = dbo.collection("balance", {}, errorHandler);
 
 	collections.mutes = mutes;
 	collections.balance = balance;
