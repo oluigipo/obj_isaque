@@ -10,7 +10,7 @@ export default <Command>{
 		}
 		args.shift(); // consume command
 
-		let final = "";
+		let final = `${msg.author}\n`;
 		for (const arg of args) {
 			if (arg.kind === ArgumentKind.MEMBER) {
 				const result = Moderation.ban(arg.value);
@@ -31,7 +31,7 @@ export default <Command>{
 
 		let embed = emptyEmbed();
 		embed.description = final;
-		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		Channels.logObject.send(embed).catch(discordErrorHandler);
 		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	syntaxes: ["<@user...>"],

@@ -9,7 +9,7 @@ export default <Command>{
 			return;
 		}
 
-		let finalmsg = "";
+		let finalmsg = `${msg.author}\n`;
 		for (const arg of args) {
 			let id: string, member: GuildMember | undefined;
 			switch (arg.kind) {
@@ -52,7 +52,7 @@ export default <Command>{
 
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
-		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		Channels.logObject.send(embed).catch(discordErrorHandler);
 		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	aliases: ["unmute"],
