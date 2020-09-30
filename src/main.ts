@@ -142,19 +142,9 @@ function removeAndReward(channel: TextChannel) {
 	channel.messages.fetch()
 		.then(messages => {
 			messages.forEach(value => {
-				if (!value.pinned && Date.now() - value.createdTimestamp > Time.day) {
-					let prize: number;
 
-					value.delete();
-					if (value.attachments.some(attachment => attachment.width !== null)) {
-						prize = 100;
-					} else if (value.content.includes("steamcommunity.com/")) {
-						prize = 10;
-					} else {
-						return;
-					}
-
-					const result = Balance.prize([value.author.id], prize)[0];
+				function prizeWith(qnt: number) {
+					const result = Balance.prize([value.author.id], qnt)[0];
 					if (!result.success) {
 						let channel = <TextChannel>value.guild?.channels.cache.get("671327942420201492");
 						if (!channel || channel.type !== "text")
@@ -162,6 +152,29 @@ function removeAndReward(channel: TextChannel) {
 
 						channel.send(`${value.author} Você não está registrado, então você não pode receber pelo like/review que você fez enviada no <#${Channels.steamReviews}>`)
 					}
+				}
+
+				if (value.content.includes("steamcommunity.com/")) {
+					const reaction = value.reactions.cache.get(Emojis.yes);
+					if (!reaction)
+						return;
+
+					reaction.users.fetch().then(users => {
+						let member: GuildMember | undefined;
+						if (users.some(user => (
+							member = channel.members.get(user.id),
+							member && validatePermissions(member, channel, Permission.MOD)) ?? false)
+						) {
+							reaction.remove();
+							prizeWith(100);
+						}
+					});
+				} else if (
+					!value.pinned && Date.now() - value.createdTimestamp > Time.day &&
+					value.attachments.some(attachment => attachment.width !== null)
+				) {
+					value.delete();
+					prizeWith(10);
 				}
 			});
 
