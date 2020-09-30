@@ -138,15 +138,34 @@ async function fetchInvites(guild?: Guild) {
 	return undefined;
 }
 
-function removeNotPinned(channel: TextChannel) {
+function removeAndReward(channel: TextChannel) {
 	channel.messages.fetch()
 		.then(messages => {
 			messages.forEach(value => {
-				if (!value.pinned && Date.now() - value.createdTimestamp > Time.day)
+				if (!value.pinned && Date.now() - value.createdTimestamp > Time.day) {
+					let prize: number;
+
 					value.delete();
+					if (value.attachments.some(attachment => attachment.width !== null)) {
+						prize = 100;
+					} else if (value.content.includes("steamcommunity.com/")) {
+						prize = 10;
+					} else {
+						return;
+					}
+
+					const result = Balance.prize([value.author.id], prize)[0];
+					if (!result.success) {
+						let channel = <TextChannel>value.guild?.channels.cache.get("671327942420201492");
+						if (!channel || channel.type !== "text")
+							return;
+
+						channel.send(`${value.author} Você não está registrado, então você não pode receber pelo like/review que você fez enviada no <#${Channels.steamReviews}>`)
+					}
+				}
 			});
 
-			setTimeout(removeNotPinned, Time.minute * 5, channel);
+			setTimeout(removeAndReward, Time.minute * 5, channel);
 		})
 		.catch(discordErrorHandler);
 }
@@ -196,7 +215,7 @@ client.on("ready", async () => {
 		channel = guild.channels.cache.get(Channels.steamReviews);
 		if (!channel || channel.type !== "text")
 			return;
-		removeNotPinned(<TextChannel>channel);
+		removeAndReward(<TextChannel>channel);
 	} catch (err) {
 		discordErrorHandler(err);
 	}

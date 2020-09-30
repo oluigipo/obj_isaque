@@ -279,7 +279,7 @@ export function validatePermissions(member: GuildMember, channel: TextChannel | 
 	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
-	if (member.hasPermission("ADMINISTRATOR") || member.roles.cache.has(Roles.mod) || member.user.id === "327576484396924929")
+	if (member.hasPermission("ADMINISTRATOR") || member.roles.cache.has(Roles.mod))
 		return true;
 
 	if (perms & Permission.MOD)
