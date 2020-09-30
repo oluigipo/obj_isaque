@@ -14,7 +14,7 @@ export let giveaways: Giveaway[] = [];
 export let scheduled: NodeJS.Timeout | undefined;
 
 export async function init(client: Client) {
-	client.channels.fetch("630896547504324674")
+	client.channels.fetch("632359792010199104")
 		.then(c => {
 			if (c.type === "text") {
 				channel = <TextChannel>c;
