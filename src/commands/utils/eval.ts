@@ -2,6 +2,7 @@ import { Command, Arguments, Permission, discordErrorHandler } from "../../defs"
 import * as Defs from "../../defs";
 import * as Moderation from "../../moderation";
 import * as Balance from "../../balance";
+import * as Giveaway from "../../giveaway";
 import { Message } from "discord.js";
 
 export default <Command>{
@@ -9,10 +10,11 @@ export default <Command>{
 		const expr = raw.slice(1).join(' ');
 
 		// @NOTE(luigi): don't remove.
-		// Typescript will optimize and remove import
+		// Typescript will remove those imports if they are not used.
 		Defs;
 		Moderation;
 		Balance;
+		Giveaway;
 
 		let result: any;
 		try {

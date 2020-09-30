@@ -10,7 +10,7 @@ export default <Command>{
 		}
 		args.shift(); // consume command
 
-		let finalmsg = "";
+		let finalmsg = `${msg.author}\n`;
 
 		let duration = -1;
 		let reasonList: string[] | undefined;
@@ -71,7 +71,7 @@ export default <Command>{
 
 		let embed = emptyEmbed();
 		embed.description = finalmsg;
-		Channels.logObject.send(`${msg.author}`, embed).catch(discordErrorHandler);
+		Channels.logObject.send(embed).catch(discordErrorHandler);
 		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
 	aliases: ["mute", "mutar"],

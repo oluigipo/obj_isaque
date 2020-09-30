@@ -26,11 +26,8 @@ export async function init(uriTemplate: string, password: string) {
 		}
 	};
 
-	let mutes = dbo.collection("mutes", {}, errorHandler);
-	let balance = dbo.collection("balance", {}, errorHandler);
-
-	collections.mutes = mutes;
-	collections.balance = balance;
+	collections.mutes = dbo.collection("mutes", {}, errorHandler);
+	collections.balance = dbo.collection("balance", {}, errorHandler);
 
 	return success;
 }

@@ -33,9 +33,9 @@ export default <Command>{
 		for (let i = 0; i < result.length; i++) {
 			const r = result[i];
 			if (r.success) {
-				final.description += `${ids[i]} ganhou \`$${qnt}\`!\n`;
+				final.description += `<@${ids[i]}> ganhou \`$${qnt}\`!\n`;
 			} else {
-				final.description += `${ids[i]}: ${r.error}\n`;
+				final.description += `<@${ids[i]}>: ${r.error}\n`;
 			}
 		}
 

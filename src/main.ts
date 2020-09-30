@@ -1,16 +1,15 @@
-import { Client, Message, GuildMember, TextChannel, Guild } from "discord.js";
+import { Client, Message, GuildMember, TextChannel, Guild, Role, ChannelLogsQueryOptions } from "discord.js";
 import {
 	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
-	notNull, validatePermissions, Roles, Emojis, emptyEmbed, defaultEmbed, cursedInvites, formatTime
+	notNull, validatePermissions, Roles, Emojis, emptyEmbed, defaultEmbed, cursedInvites, formatTime, dateOf, Time
 } from "./defs";
 import * as Moderation from "./moderation";
 import * as Database from "./database";
 import * as Balance from "./balance";
+import * as Giveaway from "./giveaway";
 import * as fs from "fs";
 import commands from "./commands";
-
-// @TODO(luigi): !!curse invite
 
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 Server.specialInvite = auth.invite;
@@ -61,7 +60,7 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 				if (channel === undefined) continue;
 				arg.kind = ArgumentKind.CHANNEL;
 				arg.value = channel;
-			} else if (str[0] === ':') {
+			} else if (str[0] === ':' || str.startsWith("a:")) {
 				const last = str.indexOf(':', 2);
 				const id = str.substr(last + 1, 18);
 
@@ -139,41 +138,68 @@ async function fetchInvites(guild?: Guild) {
 	return undefined;
 }
 
+function removeNotPinned(channel: TextChannel) {
+	channel.messages.fetch()
+		.then(messages => {
+			messages.forEach(value => {
+				if (!value.pinned && Date.now() - value.createdTimestamp > Time.day)
+					value.delete();
+			});
+
+			setTimeout(removeNotPinned, Time.minute * 5, channel);
+		})
+		.catch(discordErrorHandler);
+}
+
 client.on("inviteCreate", invite => {
 	invites[invite.code] = invite.uses ?? 0;
 });
 
 client.on("ready", async () => {
-	await Database.init(auth.mongoURI, auth.mongo).catch(defaultErrorHandler);
-	await Moderation.init(client).catch(defaultErrorHandler);
-	await Balance.init(client).catch(defaultErrorHandler);
+	try {
+		await Database.init(auth.mongoURI, auth.mongo);
+		await Moderation.init(client);
+		await Balance.init(client);
+		await Giveaway.init(client);
+	} catch (err) {
+		defaultErrorHandler(err);
+	}
 
-	// @NOTE(luigi): what?
-	invites = (<Invites | undefined>await fetchInvites().catch(discordErrorHandler)) ?? {};
+	try {
+		// @NOTE(luigi): what?
+		invites = (await fetchInvites()) ?? {};
 
-	notNull(client.user).setPresence({ activity: { name: "o curso do NoNe!", type: "WATCHING" }, status: "online" })
-		.catch(discordErrorHandler);
+		notNull(client.user).setPresence({ activity: { name: "o curso do NoNe!", type: "WATCHING" }, status: "online" });
 
-	const guild = client.guilds.cache.get(Server.id);
-	if (!guild)
-		return;
+		const guild = client.guilds.cache.get(Server.id);
+		if (!guild)
+			return;
 
-	// Fetching messages
-	(<TextChannel>guild.channels.cache.get(Channels.rules)).messages.fetch().catch(discordErrorHandler);
+		// Fetching messages
+		(<TextChannel>guild.channels.cache.get(Channels.rules)).messages.fetch();
 
-	// log de punições
-	let channel = guild.channels.cache.get(Channels.log);
-	if (!channel || channel.type !== "text")
-		return;
+		// log de punições
+		let channel = guild.channels.cache.get(Channels.log);
+		if (!channel || channel.type !== "text")
+			return;
 
-	Channels.logObject = <TextChannel>channel;
+		Channels.logObject = <TextChannel>channel;
 
-	// join log
-	channel = guild.channels.cache.get(Channels.joinLog);
-	if (!channel || channel.type !== "text")
-		return;
+		// join log
+		channel = guild.channels.cache.get(Channels.joinLog);
+		if (!channel || channel.type !== "text")
+			return;
 
-	Channels.joinLogObject = <TextChannel>channel;
+		Channels.joinLogObject = <TextChannel>channel;
+
+		// Steam Reviews
+		channel = guild.channels.cache.get(Channels.steamReviews);
+		if (!channel || channel.type !== "text")
+			return;
+		removeNotPinned(<TextChannel>channel);
+	} catch (err) {
+		discordErrorHandler(err);
+	}
 
 	console.log("Online!");
 });
@@ -192,6 +218,8 @@ client.on("messageReactionAdd", (reaction, user) => {
 	else if (reaction.emoji.id === Emojis.gamemaker && !member.roles.cache.has(Roles.gamemaker)) // game maker
 		member.roles.add(Roles.gamemaker).catch(discordErrorHandler);
 });
+
+client.on("error", discordErrorHandler);
 
 client.on("messageReactionRemove", (reaction, user) => {
 	if (reaction.message.id !== Server.rolepickMsg)
@@ -251,14 +279,30 @@ client.on("guildMemberAdd", async member => {
 
 	let age = "Desconhecido (é null, fazer o quê)";
 	if (member.user?.createdTimestamp)
-		age = formatTime(Date.now() - member.user?.createdTimestamp);
+		age = dateOf(member.user.createdTimestamp);
 
-	embed.addField("Account Age", age, true);
+	embed.addField("Creation Date", age, true);
 	embed.addField("Invite", invite ?? "noneclass", true);
 
 	const user = member.user;
 	if (user)
 		embed.addField("Username", user.tag, true);
+
+	Channels.joinLogObject.send(embed).catch(discordErrorHandler);
+});
+
+client.on("guildMemberRemove", member => {
+	const embed = defaultEmbed(member);
+
+	embed.title = "Member Left";
+	embed.description = member.toString();
+	embed.addField("ID", member.id, true);
+	if (member.user)
+		embed.addField("Username", member.user.tag, true);
+
+	if (member.roles.cache.size > 0) {
+		embed.addField("Roles", member.roles.cache.array().join(' '));
+	}
 
 	Channels.joinLogObject.send(embed).catch(discordErrorHandler);
 });
@@ -332,7 +376,7 @@ client.on("message", (message) => {
 
 	command.run(message, args, rawArgs).catch(e => {
 		console.log(e);
-		message.channel.send(`${devs[0]} aconteceu algo de errado, dá uma olhadinha no console aí`)
+		message.channel.send(`<@${devs[0]}> aconteceu algo de errado, dá uma olhadinha no console aí`)
 			.catch(discordErrorHandler);
 	});
 });

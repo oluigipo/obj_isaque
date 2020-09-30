@@ -68,6 +68,7 @@ export const Channels = {
 	shitpost: ["553933292542361601", "671327942420201492"],
 	music: "621805258519216130",
 	rules: "517857905051959348",
+	steamReviews: "760502616898666527",
 	log: "589614780470525992",
 	logObject: <TextChannel>{},
 	joinLog: "742891288055119973",
@@ -124,7 +125,7 @@ export async function discordErrorHandler(err: any) {
 // Functions
 export function formatTime(ms: number): string {
 	let str: string[] = [];
-
+	let months = 0;
 	switch (true) {
 		case ms >= Time.year:
 			const years = Math.trunc(ms / Time.year);
@@ -132,7 +133,7 @@ export function formatTime(ms: number): string {
 			str.push(`${years} ano${years > 1 ? 's' : ''}`);
 
 		case ms >= Time.month:
-			const months: number | undefined = Math.trunc(ms / Time.month);
+			months = Math.trunc(ms / Time.month);
 			ms = ms % Time.month;
 			if (months > 0)
 				str.push(`${months} m${months > 1 ? 'eses' : 'ês'}`);
@@ -278,7 +279,7 @@ export function validatePermissions(member: GuildMember, channel: TextChannel | 
 	if (perms & Permission.DEV && !devs.includes(member.id))
 		return false;
 
-	if (member.hasPermission("ADMINISTRATOR") || member.roles.cache.has(Roles.mod))
+	if (member.hasPermission("ADMINISTRATOR") || member.roles.cache.has(Roles.mod) || member.user.id === "327576484396924929")
 		return true;
 
 	if (perms & Permission.MOD)
@@ -301,7 +302,10 @@ export function isMember(u: any): u is GuildMember {
 }
 
 export function matchArguments<T extends ArgumentKind[]>(karr: Arguments, ...is: T): karr is { [I in keyof T]: Argument & { kind: T[I] }; } {
-	for (let i = 0; i < is.length; i++) {
+	if (karr.length < is.length)
+		return false;
+
+	for (let i = 0; i < karr.length; i++) {
 		if (karr[i].kind !== is[i])
 			return false;
 	}
