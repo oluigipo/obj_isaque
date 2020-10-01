@@ -16,10 +16,10 @@ async function resolve_image(this: any, arg: string): Promise<Jimp> {
 	if (match = emoji_re.exec(arg)) {
 		return Jimp.read(`https://cdn.discordapp.com/emojis/${match[1]}.png`)
 	} else if ((match = user_re.exec(arg)) || (match = userid_re.exec(arg))) {
-		return Jimp.read(this.client.users.resolve(match[1])?.displayAvatarURL({size: 128, format: 'png'}) ?? `https://cdn.discordapp.com/emojis/730239159066689649.png`)
+		return Jimp.read(this.client.users.resolve(match[1])?.displayAvatarURL({ size: 128, format: 'png' }) ?? `https://cdn.discordapp.com/emojis/730239159066689649.png`)
 	} else {
-		if (!arg.match(/\.jpeg|\.png|\.bmp|\.tiff|\.gif$/))
-			throw {kind: "BadFormat", reason: "link precisa ser .jpeg | .png | .bmp | .tiff | .gif"};
+		if (!arg.match(/\.jpeg|\.jpg|\.png|\.bmp|\.tiff|\.gif$/))
+			throw { kind: "BadFormat", reason: "link precisa ser .jpeg | .png | .bmp | .tiff | .gif" };
 		return Jimp.read(arg)
 	}
 }
@@ -34,26 +34,26 @@ export default <Command>{
 		const args = raw.slice(1, 3);
 
 		Promise.all(args.map(resolve_image, msg))
-		.then(([img1, img2]) => {
-			dino_drake.clone()
-				.blit(img1.resize(128, 128), 0, 0)
-				.blit(img2.resize(128, 128), 0, 128)
-				.getBuffer(dino_drake.getMIME(), (err, buffer) => {
-					if (err) {
-						defaultErrorHandler(err);
-						msg.reply("deu ruim").catch(discordErrorHandler);
-						return;
-					}
+			.then(([img1, img2]) => {
+				dino_drake.clone()
+					.blit(img1.resize(128, 128), 0, 0)
+					.blit(img2.resize(128, 128), 0, 128)
+					.getBuffer(dino_drake.getMIME(), (err, buffer) => {
+						if (err) {
+							defaultErrorHandler(err);
+							msg.reply("deu ruim").catch(discordErrorHandler);
+							return;
+						}
 
-					msg.channel.send(`${msg.author}`, imageAsAttachment(buffer, `png`))
-						.catch(discordErrorHandler);
-				});
-		})
-		.catch(err => {
-			if (err.kind == "BadFormat") return msg.reply(err.reason).catch(discordErrorHandler);
-			msg.reply("deu ruim").catch(discordErrorHandler);
-			defaultErrorHandler(err);
-		});
+						msg.channel.send(`${msg.author}`, imageAsAttachment(buffer, `png`))
+							.catch(discordErrorHandler);
+					});
+			})
+			.catch(err => {
+				if (err.kind == "BadFormat") return msg.reply(err.reason).catch(discordErrorHandler);
+				msg.reply("deu ruim").catch(discordErrorHandler);
+				defaultErrorHandler(err);
+			});
 	},
 	aliases: ["dinodrake"],
 	syntaxes: ["[user|link|emoji] [user|link|emoji]"],
