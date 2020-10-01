@@ -372,10 +372,10 @@ client.on("message", (message) => {
 			"não quero falar contigo. sai",
 			"hmmmm... Já tentou apagar a system32?",
 		];
+
 		if (!predictResponse(message)) {
 			message.channel.send(
-				`${message.author} ${respostas[Math.floor(Math.random() * respostas.length)]
-				}`,
+				`${message.author} ${respostas[Math.floor(Math.random() * respostas.length)]}`,
 			).catch(defaultErrorHandler);
 		}
 	}
