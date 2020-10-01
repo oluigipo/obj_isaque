@@ -18,7 +18,7 @@ async function resolve_image(this: any, arg: string): Promise<Jimp> {
 	} else if ((match = user_re.exec(arg)) || (match = userid_re.exec(arg))) {
 		return Jimp.read(this.client.users.resolve(match[1])?.displayAvatarURL({ size: 128, format: 'png' }) ?? `https://cdn.discordapp.com/emojis/730239159066689649.png`)
 	} else {
-		if (!arg.match(/\.jpeg|\.jpg|\.png|\.bmp|\.tiff|\.gif$/))
+		if (!arg.match(/(\.jpeg|\.jpg|\.png|\.bmp|\.tiff|\.gif)(\?.*)?$/))
 			throw { kind: "BadFormat", reason: "link precisa ser .jpeg | .png | .bmp | .tiff | .gif" };
 		return Jimp.read(arg)
 	}
