@@ -16,3 +16,22 @@
 * `description:  string`: Breve resumo do comando (chamada quando `!!help`);
 * `help:  string`: Mensagem de ajuda do comando (chamada quando `!!help seuComando`);
 * `examples:  string[]`: Exemplo de uso do comando ou suas sintaxes.
+## Tipo `Arguments`: `Argument[]`
+* `Argument` é uma estrutura que possui dois fields: `kind: ArgumentKind` e `value: T`;
+* O tipo de `value` depende do valor de `kind`;
+* O primeiro argumento sempre será uma `STRING`, que é o alias usado para chamar o comando;
+* `NUMBER` sempre será **unsigned**;
+* `USERID` sempre será uma string de 18 dígitos;
+* `TIME` sempre será em **ms** (milliseconds);
+* Você pode usar a função `matchArguments(Argument[], ...ArgumentKind) => boolean` definida em `src/defs.ts` se os argumentos batem com os tipos passados.
+* Referência de cada tipo para `value` dependendo de `kind`:
+
+| **`kind`** | **`typeof value`** |
+| :-------------| -----------: |
+| "MEMBER" | GuildMember |
+| "STRING" | String |
+| "CHANNEL" | GuildChannel |
+| "NUMBER" | number |
+| "TIME" | number |
+| "EMOJI" | Emoji |
+| "USERID" | string |
