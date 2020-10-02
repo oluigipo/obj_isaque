@@ -58,7 +58,7 @@ export default <Command>{
 	aliases: ["dinodrake"],
 	syntaxes: ["[user|link|emoji] [user|link|emoji]"],
 	description: "Faça um meme com o Dino, feito por <@310480160640073729>",
-	help: `Manda um meme do Dino Drake com duas imagens`,
+	help: `Manda um meme do Dino Drake com duas imagens. Feito por <@310480160640073729>`,
 	examples: [],
 	permissions: Permission.SHITPOST
 }

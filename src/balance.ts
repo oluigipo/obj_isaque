@@ -1,4 +1,4 @@
-import { collections } from "./database";
+import { collections, readCollection, writeCollection } from "./database";
 import { defaultErrorHandler, Response, Time, Channels, Server } from "./defs";
 import { Message, Guild, GuildMemberRoleManager, Client } from "discord.js";
 
@@ -75,10 +75,10 @@ export async function init(c: Client) {
  * Loads the database.
  */
 async function loadDB() {
-	const db = collections.balance;
-	const things = (await db.find({}).toArray())[0];
-	users = things.users;
-	event = things.event;
+	const objs = await readCollection("balance");
+
+	users = objs.users;
+	event = objs.event;
 	if (event?.cost === undefined)
 		event = undefined;
 }
@@ -92,9 +92,7 @@ export async function updateDB() {
 		stagedUpdate = undefined;
 	}
 
-	const db = collections.balance;
-	await db.findOneAndUpdate({}, { $set: { users } }, { projection: { _id: 0, users: 1 } })
-		.catch(defaultErrorHandler);
+	await writeCollection("balance", "users", users);
 }
 
 /**
@@ -281,12 +279,6 @@ export function transfer(id1: string, id2: string, qnt: number): Response<undefi
 
 export const userCount = () => users.length;
 
-function updateEventDB() {
-	const db = collections.balance;
-	db.findOneAndUpdate({}, { $set: { event: (event ?? {}) } }, { projection: { _id: 0, event: 1 } })
-		.catch(defaultErrorHandler);
-}
-
 interface EventResult {
 	[key: string]: "SUCCESS" | "NOT REGISTERED" | "NO MONEY";
 };
@@ -317,7 +309,7 @@ export function beginEvent(msg: string, cost: number, prize: number | string, us
 	}
 
 	event = ev;
-	updateEventDB();
+	writeCollection("balance", "event", event);
 	updateDB();
 
 	return { success: true, data: result };
@@ -334,7 +326,7 @@ export function eventPoint(user: string, qnt = 1): Response<number> {
 	}
 
 	event.users[user] += qnt;
-	updateEventDB();
+	writeCollection("balance", "event", event);
 
 	return { success: true, data: event.users[user] };
 }
@@ -373,7 +365,7 @@ export function finishEvent(): Response<EventWinner, string[]> {
 
 	event = undefined;
 
-	updateEventDB();
+	writeCollection("balance", "event", event);
 
 	return { success: true, data: winners[0] };
 }

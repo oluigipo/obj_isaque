@@ -1,6 +1,6 @@
 import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf, formatTime } from "./defs";
 import { Client, GuildMember } from "discord.js";
-import { collections } from "./database";
+import { collections, readCollection, writeCollection } from "./database";
 
 interface Mute {
 	id: string;
@@ -11,7 +11,7 @@ interface Mute {
 
 export type Mutes = Mute[];
 
-let mutes: Mutes;
+export let mutes: Mutes;
 let client: Client;
 
 export async function init(c: Client) {
@@ -46,17 +46,11 @@ export function autoUnmute() {
 }
 
 async function loadDB() {
-	// @NOTE(luigi): proper database communication
-	const db = collections.mutes;
-	mutes = (await db.find({}).toArray())[0].mutes;
+	mutes = await readCollection("mutes", "mutes");
 }
 
 export function updateDB() {
-	// @NOTE(luigi): proper database communication
-
-	const db = collections.mutes;
-	db.findOneAndUpdate({}, { $set: { mutes } }, { projection: { _id: 0, mutes: 1 } })
-		.catch(defaultErrorHandler);
+	writeCollection("mutes", "mutes", mutes);
 }
 
 /**

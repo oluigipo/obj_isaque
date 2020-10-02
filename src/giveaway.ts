@@ -1,6 +1,6 @@
 import { Client, TextChannel, User } from "discord.js";
 import { defaultErrorHandler, discordErrorHandler, Emojis } from "./defs";
-import { collections } from "./database";
+import { collections, readCollection, writeCollection } from "./database";
 
 export interface Giveaway {
 	ends: number;
@@ -45,15 +45,11 @@ function scheduleGiveaway() {
 }
 
 async function loadDB() {
-	const db = collections.balance;
-	const things = (await db.find({}).toArray())[0];
-	giveaways = things.giveaways ?? [];
+	giveaways = await readCollection("balance", "giveaways");
 }
 
 async function updateDB() {
-	const db = collections.balance;
-	await db.findOneAndUpdate({}, { $set: { giveaways } }, { projection: { _id: 0, giveaways: 1 } })
-		.catch(defaultErrorHandler);
+	writeCollection("balance", "giveaways", giveaways);
 }
 
 async function execGiveaway(giveaway: Giveaway) {

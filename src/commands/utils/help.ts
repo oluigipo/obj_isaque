@@ -1,6 +1,6 @@
-import { Command, Arguments, Permission, ArgumentKind, discordErrorHandler, defaultEmbed, notNull, Server, validatePermissions, Time, defaultErrorHandler } from "../../defs";
-import { Message, GuildMember, TextChannel, CollectorFilter } from "discord.js";
-import cmds from "../index";
+import { Command, Arguments, Permission, discordErrorHandler, defaultEmbed, notNull, Server, validatePermissions } from "../../defs";
+import { Message, MessageEmbed, TextChannel } from "discord.js";
+import commands from "..";
 
 function permissions(perm: Permission): string {
 	if (perm === Permission.NONE)
@@ -16,119 +16,129 @@ function permissions(perm: Permission): string {
 	if (perm & Permission.DEV)
 		list.push("Desenvolvedor");
 
-	return list.join(' ');
+	return list.join(', ');
 }
 
-function showCommand(msg: Message, cmd: Command) {
-	let final = defaultEmbed(notNull(msg.member));
+function helpCommand(msg: Message, name: string) {
+	// find command
+	let command: Command | undefined;
+	const categories = Object.keys(commands);
 
-	final.title = `Comando: ${cmd.aliases[0]}`;
-	final.description = cmd.help;
+	for (const cat of categories) {
+		let toBreak = false;
 
-	let syntaxes = "";
-	for (const syntax of cmd.syntaxes) {
-		syntaxes += `\`${`${Server.prefix}${cmd.aliases[0]} ${syntax}`.trim()}\`\n`;
-	}
-
-	final.addField("Sintaxes", syntaxes);
-
-	if (cmd.aliases.length > 1) {
-		let aliases = '`' + cmd.aliases.join("`, `") + '`';
-		final.addField("Aliases", aliases);
-	}
-
-	final.addField("Permissões Necessárias", permissions(cmd.permissions));
-
-	if (cmd.subcommands) {
-		let subcommands = "";
-		for (const sub of cmd.subcommands) {
-			subcommands += `\`${sub.aliases[0]}\`\n`;
-		}
-
-		final.addField("Subcomandos", subcommands);
-	}
-
-	let examples = "";
-	for (const example of cmd.examples) {
-		examples += `\`${`${Server.prefix}${cmd.aliases[0]} ${example}`.trim()}\`\n`;
-	}
-
-	if (examples !== "")
-		final.addField("Exemplos", examples);
-
-	msg.channel.send(`${msg.author}`, final).catch(discordErrorHandler);
-}
-
-async function showPage(msg: Message, ind: number, commands: Command[], member: GuildMember) {
-	let final = defaultEmbed(notNull(msg.member));
-
-	const max = Math.floor(commands.length / 9);
-	const index = Math.max(Math.min(ind, max), 0);
-
-	final.title = `Página ${index + 1}/${max + 1}`;
-
-	const min = Math.min((index + 1) * 9, commands.length);
-	for (let i = 9 * index; i < min; ++i) {
-		const cmd = commands[i];
-		final.addField(cmd.aliases[0], cmd.description, true);
-	}
-
-	msg.edit(`${member}`, final).then(async message => {
-		if (index > 0) await message.react('⬅️').catch(discordErrorHandler);
-		if (index < max) await message.react('➡️').catch(discordErrorHandler);
-
-		const filter: CollectorFilter = (reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === member.id;
-		message.awaitReactions(filter, { maxUsers: 1, time: Time.minute * 3 }).then(collected => {
-			const reaction = collected.first();
-
-			if (!reaction)
-				return;
-
-			msg.reactions.removeAll().catch(discordErrorHandler);
-
-			if (reaction.emoji.name === '➡️')
-				showPage(msg, index + 1, commands, member).catch(defaultErrorHandler);
-			else if (reaction.emoji.name === '⬅️')
-				showPage(msg, index - 1, commands, member).catch(defaultErrorHandler);
-
-		}).catch(discordErrorHandler);
-	}).catch(discordErrorHandler);
-}
-
-export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
-		args.shift();
-
-		// @TODO(luigi): support subcommands
-		let command: string | undefined;
-		while (args.length > 0) {
-			if (args[0].kind === ArgumentKind.STRING) {
-				command = args[0].value;
+		for (const cmd of commands[<keyof typeof commands>cat]) {
+			if (cmd.aliases.includes(name)) {
+				command = cmd;
+				toBreak = true;
 				break;
 			}
 		}
 
-		if (command) {
-			for (const cmd of cmds) {
-				if (cmd.aliases.includes(command)) {
-					showCommand(msg, cmd);
-					return;
-				}
-			}
+		if (toBreak)
+			break;
+	}
 
-			msg.reply("não consegui achar esse comando").catch(discordErrorHandler);
-		} else {
-			const m = <Message>await msg.channel.send('.').catch(discordErrorHandler);
-			const member = <GuildMember>msg.member;
-			const commands = cmds.filter(c => validatePermissions(member, <TextChannel>msg.channel, c.permissions))
-				.sort((a, b) => b.description.length - a.description.length);
-			showPage(m, 0, commands, member).catch(defaultErrorHandler);
+	if (!command)
+		return undefined;
+
+	// write message
+	const embed = defaultEmbed(notNull(msg.member));
+
+	embed.title = `Comando: ${command.aliases[0]}`;
+	embed.description = command.help;
+
+	let syntaxes = "";
+	for (const syntax of command.syntaxes) {
+		syntaxes += `\`${`${Server.prefix}${command.aliases[0]} ${syntax}`.trim()}\`\n`;
+	}
+
+	embed.addField("Sintaxes", syntaxes);
+
+	if (command.aliases.length > 1) {
+		let aliases = '`' + command.aliases.join("`, `") + '`';
+		embed.addField("Aliases", aliases);
+	}
+
+	embed.addField("Permissões Necessárias", permissions(command.permissions));
+
+	if (command.subcommands) {
+		let subcommands = "";
+		for (const sub of command.subcommands) {
+			subcommands += `\`${sub.aliases[0]}\`\n`;
 		}
+
+		embed.addField("Subcomandos", subcommands);
+	}
+
+	let examples = "";
+	for (const example of command.examples) {
+		examples += `\`${`${Server.prefix}${command.aliases[0]} ${example}`.trim()}\`\n`;
+	}
+
+	if (examples !== "")
+		embed.addField("Exemplos", examples);
+
+	return embed;
+}
+
+function helpGeneral(msg: Message) {
+	const embed = defaultEmbed(notNull(msg.member));
+
+	embed.title = "Ajuda";
+	embed.description = "olha a lista de comandos aí";
+
+	const names = {
+		"mice": "Outros",
+		"mods": "Moderação",
+		"utils": "Utilitários",
+		"balance": "Banco",
+		"games": "Jogos",
+		"image": "Imagens"
+	};
+
+	const categories = Object.keys(commands);
+	for (const cat of categories) {
+		let commandList: string[] = [];
+		let _cat = <keyof typeof commands>cat;
+
+		for (const cmd of commands[_cat]) {
+			if (validatePermissions(notNull(msg.member), <TextChannel>msg.channel, cmd.permissions))
+				commandList.push(cmd.aliases[0]);
+		}
+
+		if (commandList.length > 0) {
+			commandList.sort();
+			embed.addField(names[_cat], `\`\`\`\n${commandList.join('\n')}\n\`\`\``, true);
+		}
+	}
+
+	embed.fields.sort((a, b) => b.value.length - a.value.length);
+
+	return embed;
+}
+
+export default <Command>{
+	async run(msg: Message, args: Arguments, raw: string[]) {
+		let result: MessageEmbed | undefined;
+
+		if (args.length > 1 && args[1].kind === "STRING") {
+			result = helpCommand(msg, args[1].value);
+
+			if (!result) {
+				msg.reply("esse comando não existe");
+				return;
+			}
+		} else {
+			result = helpGeneral(msg);
+		}
+
+		msg.channel.send(`${msg.author}`, result).catch(discordErrorHandler);
 	},
-	aliases: ["help", "ajuda"],
-	syntaxes: ["", "<comando> <subcomando...>"],
-	description: "Informações sobre os comandos.",
+	aliases: ["help", "ajuda", "comandos"],
+	syntaxes: ["[comando]"],
+	description: "Ajuda geral sobre os comandos.",
 	help: "HEEEEEEELP I NEED SOMEBODY",
-	examples: ["help", "mute", "lisp"],
+	examples: ["mute", "velha", "help"],
 	permissions: Permission.NONE
 }

@@ -81,7 +81,8 @@ export const Emojis = {
 	horse: '🏇',
 	surrender: '<:peepo_surrender:743070678349119609>',
 	unity: "743241304405967020",
-	gamemaker: "556607844208869386"
+	gamemaker: "556607844208869386",
+	circle: '🔵'
 };
 
 export const Roles = {

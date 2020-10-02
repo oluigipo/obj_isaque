@@ -326,6 +326,7 @@ client.on("guildMemberAdd", async member => {
 client.on("guildMemberRemove", member => {
 	const embed = defaultEmbed(member);
 
+	embed.color = 0xff3333;
 	embed.title = "Member Left";
 	embed.description = member.toString();
 	embed.addField("ID", member.id, true);
@@ -392,11 +393,22 @@ client.on("message", (message) => {
 	const rawArgs = message.content.slice(Server.prefix.length).split(' ').filter(s => s !== "");
 
 	let command: Command | undefined;
-	for (const cmd of commands) {
-		if (cmd.aliases.includes(rawArgs[0])) {
-			command = cmd;
-			break;
+
+	const categories = Object.keys(commands);
+
+	for (const cat of categories) {
+		let toBreak = false;
+
+		for (const cmd of commands[<keyof typeof commands>cat]) {
+			if (cmd.aliases.includes(rawArgs[0])) {
+				command = cmd;
+				toBreak = true;
+				break;
+			}
 		}
+
+		if (toBreak)
+			break;
 	}
 
 	if (command === undefined || !message.member || !validatePermissions(message.member, message.channel, command.permissions))
