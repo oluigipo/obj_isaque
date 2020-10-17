@@ -77,8 +77,8 @@ export default <Command>{
 	},
 	syntaxes: ["", "[moeda] [quantidade]"],
 	permissions: Permission.SHITPOST,
-	aliases: ["dolar"],
-	description: "Mostra o valor do dolar, feito por <@310480160640073729>",
-	help: "Mostra o valor do dolar (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>\nMoedas conhecidas: `" + Object.keys(moedas_cambio).join("`, `") + '`',
+	aliases: ["cambio", "dolar"],
+	description: "Mostra o valor do dolar ou outras moedas, feito por <@310480160640073729>",
+	help: "Mostra o valor do dolar ou outras moedas (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>\nMoedas conhecidas: `" + Object.keys(moedas_cambio).join("`, `") + '`',
 	examples: [``, `25`, "CAD", "EUR 15"]
 };
