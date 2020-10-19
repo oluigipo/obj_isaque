@@ -34,7 +34,7 @@ export default <Command>{
 			dispatcher.on("error", err => (defaultErrorHandler(err), action()));
 		}).catch(discordErrorHandler);
 	},
-	aliases: ["none", "isaque"],
+	aliases: ["audio", "efeito_especial_muito_louco"],
 	syntaxes: ["[audio = random]"],
 	description: "Imagina só ouvir o none te dar um \"olá\".",
 	help: "Já ouvi isso tantas vezes que não sei se é da minha cabeça ou se esqueci de sair de uma call <:pepe_surrender:745960957552885772>\n\nÁudios: "
