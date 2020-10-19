@@ -8,6 +8,6 @@ import ph from "./ph";
 import sonbra from "./sonbra";
 import ulon from "./ulon";
 import fake from "./fake";
-import none from "./none";
+import audio from "./audio";
 
-export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, none, dado];
+export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, audio, dado];

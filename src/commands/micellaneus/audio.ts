@@ -3,7 +3,9 @@ import { Message } from "discord.js";
 
 const audios = {
 	ola: "ola-pessoal",
-	conseguiram: "conseguiram"
+	conseguiram: "conseguiram",
+	pessoas: "oi_pessoas_que_estao_me_assistindo",
+	proficional: "proficional"
 };
 
 type Key = keyof typeof audios;
