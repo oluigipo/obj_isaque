@@ -41,7 +41,7 @@ export default <Command>{
 				await message.react(Emojis.yes);
 				const filter: CollectorFilter = (reaction, user) => reaction.emoji.name === Emojis.yes && !user.bot;
 
-				message.awaitReactions(filter, { time: time }).then(collected => {
+				message.awaitReactions(filter, { time: time }).then(async collected => {
 					let users = <string[]>[];
 
 					const reaction = collected.first();
@@ -50,9 +50,14 @@ export default <Command>{
 						return;
 					}
 
-					reaction.users.cache.forEach(user => {
-						users.push(user.id);
-					});
+					let usersArray = reaction.users.cache.array();
+
+					for (const user of usersArray) {
+						const member = await message.guild?.members.fetch(user.id);
+
+						if (member && member.roles.cache.has(Roles.community))
+							users.push(user.id);
+					}
 
 					const result = beginEvent(message.id, cost, prize, users);
 					if (!result.success) {

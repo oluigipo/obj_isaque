@@ -1,9 +1,13 @@
-import { Command, Arguments, Permission, discordErrorHandler } from "../../defs";
+import { Command, Arguments, Permission, discordErrorHandler, Roles } from "../../defs";
 import { Message } from "discord.js";
 import * as Balance from "../../balance";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments, raw: string[]) {
+		if (!msg.member?.roles.cache.has(Roles.community))
+			return msg.reply("você precisa ter o cargo Community para se registrar. Dê uma olhada no <#517857905051959348>")
+				.catch(discordErrorHandler);
+
 		const result = Balance.createUser(msg.author.id);
 
 		if (result.success) {

@@ -239,24 +239,24 @@ client.on("ready", async () => {
 	console.log("Online!");
 });
 
-client.on("messageReactionAdd", (reaction, user) => {
+client.on("messageReactionAdd", async (reaction, user) => {
 	if (reaction.message.guild?.id !== Server.id)
 		return;
 
-	const member = reaction.message.guild?.members.cache.get(user.id);
+	const member = await reaction.message.guild?.members.fetch(user.id);
 	if (!member)
 		return;
 
 	switch (reaction.message.id) {
 		case Server.rolepickMsg:
-			if (reaction.emoji.id === Emojis.unity && !member.roles.cache.has(Roles.unity)) // unity
+			if (reaction.emoji.id === Emojis.unity) // unity
 				member.roles.add(Roles.unity).catch(discordErrorHandler);
-			else if (reaction.emoji.id === Emojis.gamemaker && !member.roles.cache.has(Roles.gamemaker)) // game maker
+			else if (reaction.emoji.id === Emojis.gamemaker) // game maker
 				member.roles.add(Roles.gamemaker).catch(discordErrorHandler);
-
 			break;
+
 		case Server.communityRolepickMsg:
-			if (reaction.emoji.id === "582605020340682773"/* :capitaonone: */ && !member.roles.cache.has(Roles.community))
+			if (reaction.emoji.id === Emojis.capitao)
 				member.roles.add(Roles.community).catch(discordErrorHandler);
 			break;
 	}
@@ -264,26 +264,26 @@ client.on("messageReactionAdd", (reaction, user) => {
 
 client.on("error", discordErrorHandler);
 
-client.on("messageReactionRemove", (reaction, user) => {
+client.on("messageReactionRemove", async (reaction, user) => {
 	if (reaction.message.guild?.id !== Server.id)
 		return;
 
-	const member = reaction.message.guild?.members.cache.get(user.id);
+	const member = await reaction.message.guild?.members.fetch(user.id);
 	if (!member)
 		return;
 
 	switch (reaction.message.id) {
 		case Server.rolepickMsg:
-			if (reaction.emoji.id === Emojis.unity && member.roles.cache.has(Roles.unity)) // unity
+			if (reaction.emoji.id === Emojis.unity) // unity
 				member.roles.remove(Roles.unity).catch(discordErrorHandler);
-			else if (reaction.emoji.id === Emojis.gamemaker && member.roles.cache.has(Roles.gamemaker)) // game maker
+			else if (reaction.emoji.id === Emojis.gamemaker) // game maker
 				member.roles.remove(Roles.gamemaker).catch(discordErrorHandler);
 			break;
 
-		case Server.communityRolepickMsg:
-			if (reaction.emoji.id === "582605020340682773"/* :capitaonone: */ && member.roles.cache.has(Roles.community))
-				member.roles.remove(Roles.community).catch(discordErrorHandler);
-			break;
+		// case Server.communityRolepickMsg:
+		// 	if (reaction.emoji.id === Emojis.capitao)
+		// 		member.roles.remove(Roles.community).catch(discordErrorHandler);
+		// 	break;
 	}
 });
 
