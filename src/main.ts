@@ -163,10 +163,13 @@ function removeAndReward(channel: TextChannel) {
 						let member: GuildMember | undefined;
 						if (users.some(user => (
 							member = channel.members.get(user.id),
-							member && validatePermissions(member, channel, Permission.MOD)) ?? false)
+							member && !member.user.bot && validatePermissions(member, channel, Permission.MOD) && value.createdTimestamp > Time.day) ?? false)
 						) {
 							reaction.remove();
+							value.delete();
 							prizeWith(100);
+						} else if (!users.some(user => user.id === client.user?.id)) {
+							value.react(Emojis.yes);
 						}
 					});
 				} else if (
@@ -237,35 +240,51 @@ client.on("ready", async () => {
 });
 
 client.on("messageReactionAdd", (reaction, user) => {
-	if (reaction.message.id !== Server.rolepickMsg)
+	if (reaction.message.guild?.id !== Server.id)
 		return;
 
 	const member = reaction.message.guild?.members.cache.get(user.id);
-
 	if (!member)
 		return;
 
-	if (reaction.emoji.id === Emojis.unity && !member.roles.cache.has(Roles.unity)) // unity
-		member.roles.add(Roles.unity).catch(discordErrorHandler);
-	else if (reaction.emoji.id === Emojis.gamemaker && !member.roles.cache.has(Roles.gamemaker)) // game maker
-		member.roles.add(Roles.gamemaker).catch(discordErrorHandler);
+	switch (reaction.message.id) {
+		case Server.rolepickMsg:
+			if (reaction.emoji.id === Emojis.unity && !member.roles.cache.has(Roles.unity)) // unity
+				member.roles.add(Roles.unity).catch(discordErrorHandler);
+			else if (reaction.emoji.id === Emojis.gamemaker && !member.roles.cache.has(Roles.gamemaker)) // game maker
+				member.roles.add(Roles.gamemaker).catch(discordErrorHandler);
+
+			break;
+		case Server.communityRolepickMsg:
+			if (reaction.emoji.id === "582605020340682773"/* :capitaonone: */ && !member.roles.cache.has(Roles.community))
+				member.roles.add(Roles.community).catch(discordErrorHandler);
+			break;
+	}
 });
 
 client.on("error", discordErrorHandler);
 
 client.on("messageReactionRemove", (reaction, user) => {
-	if (reaction.message.id !== Server.rolepickMsg)
+	if (reaction.message.guild?.id !== Server.id)
 		return;
 
 	const member = reaction.message.guild?.members.cache.get(user.id);
-
 	if (!member)
 		return;
 
-	if (reaction.emoji.id === Emojis.unity && member.roles.cache.has(Roles.unity)) // unity
-		member.roles.remove(Roles.unity).catch(discordErrorHandler);
-	else if (reaction.emoji.id === Emojis.gamemaker && member.roles.cache.has(Roles.gamemaker)) // game maker
-		member.roles.remove(Roles.gamemaker).catch(discordErrorHandler);
+	switch (reaction.message.id) {
+		case Server.rolepickMsg:
+			if (reaction.emoji.id === Emojis.unity && member.roles.cache.has(Roles.unity)) // unity
+				member.roles.remove(Roles.unity).catch(discordErrorHandler);
+			else if (reaction.emoji.id === Emojis.gamemaker && member.roles.cache.has(Roles.gamemaker)) // game maker
+				member.roles.remove(Roles.gamemaker).catch(discordErrorHandler);
+			break;
+
+		case Server.communityRolepickMsg:
+			if (reaction.emoji.id === "582605020340682773"/* :capitaonone: */ && member.roles.cache.has(Roles.community))
+				member.roles.remove(Roles.community).catch(discordErrorHandler);
+			break;
+	}
 });
 
 client.on("guildMemberAdd", async member => {

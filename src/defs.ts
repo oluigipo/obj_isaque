@@ -61,6 +61,7 @@ export const Server = {
 	botcolor: 0x30a246,
 	timeout: Time.second * 5,
 	rolepickMsg: "743559874734063626",
+	communityRolepickMsg: "771033656810274827",
 	defaultImage: "https://cdn.discordapp.com/attachments/431273314049327104/743175664798007367/unknown.png"
 };
 
@@ -92,7 +93,8 @@ export const Roles = {
 	gamemaker: "630202297716178964",
 	mod: "507553894310608899",
 	event: "758467541239595058",
-	gamemaster: "758468120787681340"
+	gamemaster: "758468120787681340",
+	community: "770691692986368050"
 };
 
 export const MsgTemplates = {

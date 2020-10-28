@@ -1,5 +1,5 @@
-import { Client, TextChannel, User } from "discord.js";
-import { defaultErrorHandler, discordErrorHandler, Emojis } from "./defs";
+import { Client, GuildMember, TextChannel, User } from "discord.js";
+import { defaultErrorHandler, discordErrorHandler, Emojis, Roles } from "./defs";
 import { collections, readCollection, writeCollection } from "./database";
 
 export interface Giveaway {
@@ -62,8 +62,9 @@ async function execGiveaway(giveaway: Giveaway) {
 	const users = await reaction.users.fetch().catch(discordErrorHandler);
 	if (!users) return;
 
+	let member: GuildMember | undefined;
 	const winners = users
-		.filter(user => !user.bot)
+		.filter(user => !user.bot && (member = channel.members.get(user.id), member !== void 0 && member.roles.cache.has(Roles.community)))
 		.random(giveaway.qnt)
 		.reduce((acc, val) => acc + `\n${val}`, "");
 
