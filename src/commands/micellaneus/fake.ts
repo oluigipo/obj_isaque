@@ -3,8 +3,11 @@ import { Message, GuildChannel, TextChannel } from "discord.js";
 
 export default <Command>{
 	async run(msg: Message, args: Arguments, raw: string[]) {
-		if (msg.channel.id === Server.id)
+		if (!(msg.member?.hasPermission("ADMINISTRATOR") || msg.author.id === "327576484396924929" /*id do gabe*/))
 			return;
+
+		if (msg.guild?.id === Server.id)
+			msg.delete();
 
 		const text = raw.slice(1).join(' ');
 		const guild = msg.client.guilds.cache.get(Server.id);
@@ -24,5 +27,5 @@ export default <Command>{
 	description: "...",
 	help: "...",
 	examples: ["..."],
-	permissions: Permission.MOD
+	permissions: Permission.NONE
 }

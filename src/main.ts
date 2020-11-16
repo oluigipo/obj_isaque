@@ -329,10 +329,17 @@ client.on("guildMemberAdd", async member => {
 	embed.addField("ID", member.id, true);
 
 	let age = "Desconhecido (é null, fazer o quê)";
-	if (member.user?.createdTimestamp)
+	if (member.user?.createdTimestamp) {
 		age = dateOf(member.user.createdTimestamp);
 
+		const accountAge = Date.now() - member.user.createdTimestamp;
+		if (accountAge < Time.week * 2)
+			embed.addField("Account Age (new account)", formatTime(accountAge));
+	}
+
 	embed.addField("Creation Date", age, true);
+
+
 	embed.addField("Invite", invite ?? "noneclass", true);
 
 	const user = member.user;
