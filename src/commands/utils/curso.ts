@@ -4,7 +4,8 @@ import { Message } from "discord.js";
 const links: any = {
 	"330403904992837632": "https://go.hotmart.com/Y17948280P",
 	"338717274032701460": "https://go.hotmart.com/V17855634L",
-	"454330688267878401": "https://go.hotmart.com/E39119891D"
+	"454330688267878401": "https://go.hotmart.com/E39119891D",
+	"194463676558737408": "https://go.hotmart.com/Q31250063W"
 };
 
 export default <Command>{
