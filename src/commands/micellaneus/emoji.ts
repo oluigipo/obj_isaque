@@ -10,7 +10,7 @@ export default <Command>{
 			return;
 		}
 		if (args.length < 2) {
-			msg.reply("qual emoji e´ pra mandar?")
+			msg.reply("qual emoji é pra mandar?")
 				.catch(discordErrorHandler);
 			return;
 		}
