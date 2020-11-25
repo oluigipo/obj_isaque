@@ -1,4 +1,4 @@
-import { Command, Arguments, Permission, matchArguments, ArgumentKind, defaultEmbed, Emojis, formatTime, discordErrorHandler, Time, notNull } from "../../defs";
+import { Command, Arguments, Permission, matchArguments, ArgumentKind, defaultEmbed, Emojis, formatTime, discordErrorHandler, Time, notNull, Roles } from "../../defs";
 import { GuildMember, Message, MessageReaction, User } from "discord.js";
 import { createGiveaway } from "../../giveaway";
 
@@ -77,7 +77,7 @@ export default <Command>{
 							embed.addField("Quantidade de Vencedores", qnt, true);
 							embed.addField("Prêmio", prize, true);
 
-							msg.channel.send(`Sorteio!${everton ? " @everyone" : ""}`, embed)
+							msg.channel.send(`Sorteio!${everton ? ` <@&${Roles.community}>` : ""}`, embed)
 								.then(message => {
 									message.react(Emojis.yes);
 									createGiveaway(message.id, duration, qnt, prize);

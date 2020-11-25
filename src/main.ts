@@ -10,6 +10,7 @@ import * as Balance from "./balance";
 import * as Giveaway from "./giveaway";
 import * as fs from "fs";
 import commands from "./commands";
+import * as SteamReviews from "./steam-reviews";
 
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 Server.specialInvite = auth.invite;
@@ -138,54 +139,6 @@ async function fetchInvites(guild?: Guild) {
 	return undefined;
 }
 
-function removeAndReward(channel: TextChannel) {
-	channel.messages.fetch()
-		.then(messages => {
-			messages.forEach(value => {
-
-				function prizeWith(qnt: number) {
-					const result = Balance.prize([value.author.id], qnt)[0];
-					if (!result.success) {
-						let channel = <TextChannel>value.guild?.channels.cache.get("671327942420201492");
-						if (!channel || channel.type !== "text")
-							return;
-
-						channel.send(`${value.author} Você não está registrado, então você não pode receber pelo like/review que você fez enviada no <#${Channels.steamReviews}>`)
-					}
-				}
-
-				if (value.content.includes("steamcommunity.com/")) {
-					const reaction = value.reactions.cache.get(Emojis.yes);
-					if (!reaction)
-						return;
-
-					reaction.users.fetch().then(users => {
-						let member: GuildMember | undefined;
-						if (users.some(user => (
-							member = channel.members.get(user.id),
-							member && !member.user.bot && validatePermissions(member, channel, Permission.MOD) && value.createdTimestamp > Time.day) ?? false)
-						) {
-							reaction.remove();
-							value.delete();
-							prizeWith(100);
-						} else if (!users.some(user => user.id === client.user?.id)) {
-							value.react(Emojis.yes);
-						}
-					});
-				} else if (
-					!value.pinned && Date.now() - value.createdTimestamp > Time.day &&
-					value.attachments.some(attachment => attachment.width !== null)
-				) {
-					value.delete();
-					prizeWith(10);
-				}
-			});
-
-			setTimeout(removeAndReward, Time.minute * 5, channel);
-		})
-		.catch(discordErrorHandler);
-}
-
 client.on("inviteCreate", invite => {
 	invites[invite.code] = invite.uses ?? 0;
 });
@@ -196,6 +149,7 @@ client.on("ready", async () => {
 		await Moderation.init(client);
 		await Balance.init(client);
 		await Giveaway.init(client);
+		await SteamReviews.init(client);
 	} catch (err) {
 		defaultErrorHandler(err);
 	}
@@ -226,12 +180,6 @@ client.on("ready", async () => {
 			return;
 
 		Channels.joinLogObject = <TextChannel>channel;
-
-		// Steam Reviews
-		channel = guild.channels.cache.get(Channels.steamReviews);
-		if (!channel || channel.type !== "text")
-			return;
-		removeAndReward(<TextChannel>channel);
 	} catch (err) {
 		discordErrorHandler(err);
 	}
@@ -240,8 +188,10 @@ client.on("ready", async () => {
 });
 
 client.on("messageReactionAdd", async (reaction, user) => {
-	if (reaction.message.guild?.id !== Server.id)
+	if (reaction.message.guild?.id !== Server.id || user.id === client.user?.id)
 		return;
+
+	SteamReviews.onReactionAdded(reaction, user);
 
 	const member = await reaction.message.guild?.members.fetch(user.id);
 	if (!member)
@@ -385,6 +335,7 @@ client.on("message", (message) => {
 		return;
 
 	Balance.onMessage(message);
+	SteamReviews.onMessage(message);
 
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {

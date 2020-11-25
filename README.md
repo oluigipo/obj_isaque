@@ -27,11 +27,14 @@
 * Referência de cada tipo para `value` dependendo de `kind`:
 
 | **`kind`** | **`typeof value`** |
-| :-------------| -----------: |
-| "MEMBER" | GuildMember |
-| "STRING" | String |
-| "CHANNEL" | GuildChannel |
-| "NUMBER" | number |
-| "TIME" | number |
-| "EMOJI" | Emoji |
-| "USERID" | string |
+| :--------- | -----------------: |
+| "MEMBER"   |        GuildMember |
+| "STRING"   |             String |
+| "CHANNEL"  |       GuildChannel |
+| "NUMBER"   |             number |
+| "TIME"     |             number |
+| "EMOJI"    |              Emoji |
+| "USERID"   |             string |
+## TODO
+* Criação de estrutura base de "módulos";
+* Transferir todas as features que se encaixariam na ideia de "módulo" para essa nova estrutura.
