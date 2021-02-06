@@ -1,8 +1,9 @@
 // @NOTE(luigi): not checked
 
 import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
-import { Message, TextChannel, Webhook } from "discord.js";
+import { GuildEmoji, Message, MessageReaction, TextChannel, User, Webhook } from "discord.js";
 import * as Balance from "../../balance";
+import * as stringSimilarity from 'string-similarity';
 
 export default <Command>{
 	async run(msg: Message, _: Arguments, args: string[]) {
@@ -19,12 +20,43 @@ export default <Command>{
 		if (args.length > 2 && Number(args[2]) !== NaN)
 			qnt = Math.max(Math.min(Number(args[2]), 68), 1);
 
-		const e = msg.client.emojis.cache.find(a => a.name === args[1]);
-		if (e === null || e === undefined) {
+		let e_ = msg.client.emojis.cache.find(a => a.name === args[1]);
+		if (e_ === null || e_ === undefined) {
+			const sim_array: GuildEmoji[] = [];
+			const name_array = msg.client.emojis.cache.map(a => (sim_array.push(a),a.name));
+
+			const best = stringSimilarity.findBestMatch(args[1], name_array);
+
+			const sent_msg = await msg.channel.send(`O emoji \`${args[1]}\` é inválido. Você quis dizer \`${best.bestMatch.target}\`?`)
+				.catch(discordErrorHandler);
+			
+			if (!sent_msg) return;
+
+			sent_msg.react('👍')
+			const confirmed = await sent_msg
+				.awaitReactions(
+					(reaction: MessageReaction, user: User) => reaction.emoji.name == '👍'&& user.id === msg.author.id,
+					{ max: 1, time: 60000, errors: ['time'] })
+				.then(_ => {
+					sent_msg.delete()
+					return true
+				})
+				.catch(_ => false)
+
+			if (confirmed) {
+				e_ = sim_array[best.bestMatchIndex];
+			} else {
+				return
+			}
+		}
+
+		if (e_ === null || e_ === undefined) {
 			msg.channel.send(`O emoji \`${args[1]}\` é inválido.`)
 				.catch(discordErrorHandler);
 			return;
 		}
+
+		const e = e_;
 
 		if (e.animated && !msg.member.permissions.has("ADMINISTRATOR")) {
 			const r = Balance.buy(msg.author.id, 10);
