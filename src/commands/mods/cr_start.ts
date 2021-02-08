@@ -3,7 +3,8 @@ import { Message } from "discord.js";
 import * as SteamReviews from "../../steam-reviews";
 
 const message =
-	`Abrindo as entradas para o sorteio de R$20,00 na carteira da Steam. Mande print dos likes nas reviews listadas para ganhar entradas para o sorteio. <@&${Roles.community}>
+	`Comecando o sorteio de um gift card de 20 reais na steam, para participar, basta enviar uma print provando que você deu like nas reviews, cada print equivale a uma entrada, e quanto mais entradas, mais chances de ganhar.
+O sorteio encerra nas proximas horas. <@&${Roles.community}>
 
 Reviews para dar like:
 `;

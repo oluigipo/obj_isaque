@@ -11,6 +11,7 @@ import * as Giveaway from "./giveaway";
 import * as fs from "fs";
 import commands from "./commands";
 import * as SteamReviews from "./steam-reviews";
+import https from "https";
 
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 Server.specialInvite = auth.invite;
@@ -332,6 +333,35 @@ client.on("voiceStateUpdate", (state0, state1) => {
 
 client.on("message", (message) => {
 	if (message.author.bot || message.channel.type === "dm" || message.guild === null)
+		return;
+
+	// let req = https.get(`https://discord.com/api/v8/channels/${message.channel.id}/messages/${message.id}`, {
+	// 	headers: {
+	// 		'Authorization': `Bot ${auth.token}`
+	// 	}
+	// }, (res) => {
+	// 	let chunks: Uint8Array[] = [];
+
+	// 	res.on("data", (chunk) => {
+	// 		chunks.push(chunk);
+	// 	});
+
+	// 	res.on("end", (chunk: any) => {
+	// 		var body = Buffer.concat(chunks);
+	// 		let data = JSON.parse(body.toString())
+	// 		if (data.stickers) {
+	// 			message.delete()
+	// 		}
+	// 	});
+
+	// 	res.on("error", (error) => {
+	// 		console.error(error);
+	// 	});
+	// });
+
+	// req.end();
+
+	if (message.content.length < 1)
 		return;
 
 	Balance.onMessage(message);
