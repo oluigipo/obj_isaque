@@ -10,7 +10,6 @@ import * as Balance from "./balance";
 import * as Giveaway from "./giveaway";
 import * as fs from "fs";
 import commands from "./commands";
-import * as SteamReviews from "./steam-reviews";
 import https from "https";
 
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
@@ -150,7 +149,6 @@ client.on("ready", async () => {
 		await Moderation.init(client);
 		await Balance.init(client);
 		await Giveaway.init(client);
-		await SteamReviews.init(client);
 	} catch (err) {
 		defaultErrorHandler(err);
 	}
@@ -191,8 +189,6 @@ client.on("ready", async () => {
 client.on("messageReactionAdd", async (reaction, user) => {
 	if (reaction.message.guild?.id !== Server.id || user.id === client.user?.id)
 		return;
-
-	SteamReviews.onReactionAdded(reaction, user);
 
 	const member = await reaction.message.guild?.members.fetch(user.id);
 	if (!member)
@@ -365,7 +361,6 @@ client.on("message", (message) => {
 		return;
 
 	Balance.onMessage(message);
-	SteamReviews.onMessage(message);
 
 	// answer question
 	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
