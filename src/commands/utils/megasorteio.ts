@@ -1,6 +1,6 @@
 // @NOTE(luigi): still checkin
 
-import { Command, Arguments, Server, Permission, Time, formatTime, defaultEmbed, notNull, ArgumentKind, discordErrorHandler, defaultErrorHandler } from "../../defs";
+import { Command, Arguments, Server, Permission, Time, formatTime, defaultEmbed, notNull, ArgumentKind, discordErrorHandler, defaultErrorHandler, Roles } from "../../defs";
 import { Message, User, MessageReaction } from "discord.js";
 
 export default <Command>{
@@ -81,7 +81,7 @@ export default <Command>{
 										mess.react('✅');
 										mess.awaitReactions((reaction: MessageReaction, user: User) => (reaction.emoji.name === '✅' && !user.bot), { time: opcoes.duracao })
 											.then((el) => {
-												let arr = el.first()?.users.cache.array().filter(u => !u.bot);
+												let arr = el.first()?.users.cache.array().filter(u => !u.bot && msg.guild?.member(u)?.roles.cache.has(Roles.community));
 												if (arr === undefined) {
 													msg.channel.send("ninguém participou do sorteio " + "<:life:746046636743983134>".repeat(4));
 													return;
