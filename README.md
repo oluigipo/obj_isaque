@@ -23,13 +23,13 @@
 * `NUMBER` sempre será **unsigned**;
 * `USERID` sempre será uma string de 18 dígitos;
 * `TIME` sempre será em **ms** (milliseconds);
-* Você pode usar a função `matchArguments(Argument[], ...ArgumentKind) => boolean` definida em `src/defs.ts` se os argumentos batem com os tipos passados.
+* Você pode usar a função `matchArguments(Argument[], ...ArgumentKind) => boolean` definida em `src/defs.ts` para checar se os tipos dos argumentos batem com os tipos passados.
 * Referência de cada tipo para `value` dependendo de `kind`:
 
 | **`kind`** | **`typeof value`** |
 | :--------- | -----------------: |
 | "MEMBER"   |        GuildMember |
-| "STRING"   |             String |
+| "STRING"   |             string |
 | "CHANNEL"  |       GuildChannel |
 | "NUMBER"   |             number |
 | "TIME"     |             number |
@@ -37,4 +37,5 @@
 | "USERID"   |             string |
 ## TODO
 * Criação de estrutura base de "módulos";
-* Transferir todas as features que se encaixariam na ideia de "módulo" para essa nova estrutura.
+* Transferir todas as features que se encaixariam na ideia de "módulo" para essa nova estrutura;
+* Atualizar o comando `!!docs` para a nova documentação.

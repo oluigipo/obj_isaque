@@ -1,4 +1,4 @@
-import { Client, Message, GuildMember, TextChannel, Guild, Role, ChannelLogsQueryOptions } from "discord.js";
+import { Client, Message, GuildMember, TextChannel, Guild, Role, ChannelLogsQueryOptions, User } from "discord.js";
 import {
 	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
 	parseTime, discordErrorHandler, Permission, Channels, defaultErrorHandler,
@@ -15,7 +15,8 @@ import https from "https";
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 Server.specialInvite = auth.invite;
 const client = new Client();
-type Invites = { [key: string]: number };
+type Invite = { code: string, uses: number, author: User | null; };
+type Invites = { [key: string]: Invite };
 let invites: Invites = {};
 
 const timeout = <{ [key: string]: number }>{};
@@ -132,7 +133,7 @@ async function fetchInvites(guild?: Guild) {
 	const inv = await (guild ?? client.guilds.cache.get(Server.id))?.fetchInvites()
 	if (inv) {
 		const invites: Invites = {};
-		inv.forEach((value) => invites[value.code] = value.uses ?? 0);
+		inv.forEach((value) => invites[value.code] = { code: value.code, uses: value.uses ?? 0, author: value.inviter });
 		return invites;
 	}
 
@@ -140,7 +141,7 @@ async function fetchInvites(guild?: Guild) {
 }
 
 client.on("inviteCreate", invite => {
-	invites[invite.code] = invite.uses ?? 0;
+	invites[invite.code] = { code: invite.code, uses: invite.uses ?? 0, author: invite.inviter };
 });
 
 client.on("ready", async () => {
@@ -241,23 +242,23 @@ client.on("guildMemberAdd", async member => {
 
 	const newInvites = (<Invites>await fetchInvites().catch(discordErrorHandler));
 
-	let invite: string | undefined;
+	let invite: Invite | undefined;
 	if (newInvites[Server.specialInvite] > invites[Server.specialInvite]) {
 		member.roles.add(Roles.aluno).catch(discordErrorHandler);
 
-		invite = Server.specialInvite;
+		invite = newInvites[Server.specialInvite];
 	} else {
 		const keys = Object.keys(invites);
 		for (const key of keys) {
 			if (invites[key] < newInvites[key]) {
-				invite = key;
+				invite = newInvites[key];
 				break;
 			}
 		}
 	}
 
 	let banned = false;
-	if (cursedInvites.includes(invite ?? "")) {
+	if (cursedInvites.includes(invite?.code ?? "")) {
 		banned = true;
 		member.ban({ reason: "Cursed invite: " + invite });
 		Channels.logObject.send(emptyEmbed().setDescription(`SINTA O PODER DO MARTELO! SEU CONVITE O AMALDIÇOOU! ${member}`));
@@ -286,8 +287,9 @@ client.on("guildMemberAdd", async member => {
 
 	embed.addField("Creation Date", age, true);
 
+	embed.addField("Invite", invite?.code ?? "noneclass", true);
 
-	embed.addField("Invite", invite ?? "noneclass", true);
+	embed.addField("Invite Author", invite?.author?.toString() ?? "Desconhecido");
 
 	const user = member.user;
 	if (user)

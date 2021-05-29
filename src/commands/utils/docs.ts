@@ -167,13 +167,40 @@ export default <Command>{
 
 				final.title = "Erro: nome não encontrado!";
 				final.description = `Não foi possível achar o nome \`${fn}\`. Você quis dizer algum dos nomes a seguir?`;
-				items.forEach(i => {
+				for (const i of items) {
 					final.description += `\n[${i.name}](${i.link})`;
-				});
+				}
 				//msg.channel.send(`${msg.author} A função/variável/constante \`${fn}\` não existe. Ela pode ser do GMS1, e este comando funciona somente com o GMS2`);
 
-				msg.channel.send(final).catch(discordErrorHandler);
-				return;
+				let finalMessage = await msg.channel.send(final).catch(discordErrorHandler);
+				if (!finalMessage) return;
+
+				const numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'].slice(0, items.length);
+
+				(async() => {
+					for (const number of numbers) {
+						const result = await finalMessage.react(number).catch(() => undefined);
+
+						// probably the message was deleted
+						if (result === undefined) break;
+					}
+				})();
+
+				let pageIndexToSend = await finalMessage.awaitReactions(
+											((reaction, user) => numbers.includes(reaction.emoji.name) && user.id === msg.author.id),
+											{ max: 1, time: 60000, errors: ['time'] })
+					.then(collection => {
+						return numbers.indexOf(collection.first()?.emoji?.name ?? "");
+					})
+					.catch(() => -1);
+
+				if (pageIndexToSend !== -1) {
+					result = await fetchPage(items[pageIndexToSend].name);
+				}
+
+				if (result === undefined) return;
+
+				finalMessage.delete();
 			}
 
 			switch (result.error) {
