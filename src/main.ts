@@ -243,14 +243,14 @@ client.on("guildMemberAdd", async member => {
 	const newInvites = (<Invites>await fetchInvites().catch(discordErrorHandler));
 
 	let invite: Invite | undefined;
-	if (newInvites[Server.specialInvite] > invites[Server.specialInvite]) {
+	if (newInvites[Server.specialInvite].uses > invites[Server.specialInvite].uses) {
 		member.roles.add(Roles.aluno).catch(discordErrorHandler);
 
 		invite = newInvites[Server.specialInvite];
 	} else {
 		const keys = Object.keys(invites);
 		for (const key of keys) {
-			if (invites[key] < newInvites[key]) {
+			if (invites[key].uses < newInvites[key].uses) {
 				invite = newInvites[key];
 				break;
 			}
