@@ -1,235 +1,191 @@
 import { Command, Arguments, Server, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
-import { Message } from "discord.js";
+import { Message, GuildMember } from "discord.js";
 import * as stringSimilarity from 'string-similarity';
-import request from 'request';
-import { JSDOM } from "jsdom";
 import fs from 'fs';
 
-// http://docs2.yoyogames.com/files/searchdat.js
-// http://docs2.yoyogames.com/
+type Table = [string, string][];
 
-interface DocsJson {
-	SearchFiles: string[];
-	SearchTitles: string[];
-}
-
-interface Item {
-	link: string;
+interface DefinitionPage {
+	kind: "defpage";
+	url: string;
 	name: string;
-}
-
-interface Page {
-	title: string;
-	link: string;
-	image?: string; // url
-	description?: string;
-	note?: string;
-	params?: string;
-	returns?: string;
+	syntax: string;
+	description: string;
+	notes: string[];
+	constants?: Table;
+	params?: Table;
+	returns: string;
 	example?: string;
+	imageUrl?: string;
 }
 
-let docs: DocsJson = JSON.parse(fs.readFileSync("./docs.json", "utf8"));
-const cache = <{ [key: string]: Page | undefined }>{};
-
-function exists(fn: string): number {
-	return docs.SearchTitles.indexOf(fn);
+interface ReferencePage {
+	kind: "refpage";
+	references: string[];
+	url: undefined;
 }
 
-function closest(fn: string): Item[] {
+type Page = DefinitionPage | ReferencePage;
+
+interface Documentation {
+	mainPageUrl: string;
+	pages: { [key: string]: Page };
+}
+
+let docsEnglish: Documentation = JSON.parse(fs.readFileSync("./docs/gms-en.json", "utf8"));
+let docsPortuguese: Documentation = JSON.parse(fs.readFileSync("./docs/gms-br.json", "utf8"));
+
+type ClosestPages = { name: string, url: string, isRef: boolean }[];
+function closest(docs: Documentation, fn: string): ClosestPages {
 	let result: { index: number, score: number }[] = [];
 
-	let minScore = 0;
-	function getMinScore() {
-		minScore = (result = result.sort((a, b) => a.score - b.score))[0].score;
+	const keys = Object.keys(docs.pages);
+	for (let i = 0; i < keys.length; i++) {
+		let similarity = stringSimilarity.compareTwoStrings(keys[i], fn);
+		result.push({ index: i, score: similarity });
 	}
 
-	for (let i = 0; i < docs.SearchTitles.length; i++) {
-		let similarity = stringSimilarity.compareTwoStrings(docs.SearchTitles[i], fn);
+	// Do not try to read this.
+	let final: ClosestPages = result
+		.sort((a, b) => b.score - a.score)
+		.slice(0, 5)
+		.map((a) => {
+			let result = { name: keys[a.index], url: "", isRef: false };
+			let url = docs.pages[keys[a.index]].url;
 
-		if (similarity > minScore) {
-			if (result.length > 5) result.shift();
-			result.push({ index: i, score: similarity });
+			if (!url) {
+				let reference = ( <ReferencePage>docs.pages[keys[a.index]] ).references[0];
+				url = <string>docs.pages[reference].url;
+				result.isRef = true;
+			}
 
-			getMinScore();
-		}
-	}
-
-	let final: Item[] = result.map((a) => { return { name: docs.SearchTitles[a.index], link: `http://docs2.yoyogames.com/${docs.SearchFiles[a.index].replace(/\s+/g, '%20')}` }; });
-	return final.reverse();
-}
-
-async function makeRequest(url: string) {
-	return new Promise<{ error: any, body: any }>((resolve, reject) => {
-		request(url, {}, (error, res) => {
-			resolve({ error, body: res.body });
+			result.url = url;
+			return result;
 		});
-	});
+
+	return final;
 }
 
-type FetchPageResult = { page: Page, error: 0 } | { link: string, error: 1 } | { error: 2 } | undefined;
-async function fetchPage(fn: string): Promise<FetchPageResult> {
-	const ind = exists(fn);
-	if (ind === -1) return;
+function tableToText(table: Table): string {
+	let result = "";
 
-	const link = `http://docs2.yoyogames.com/${docs.SearchFiles[ind].replace(/\s/g, '%20')}`;
-
-	if (docs.SearchTitles[ind].toLowerCase() !== docs.SearchTitles[ind]) {
-		return { link, error: 1 };
+	for (const row of table) {
+		result += `\`${row[0]}\`: ${row[1]}\n`;
 	}
 
-	const final = <Page>{};
-	final.title = docs.SearchTitles[ind];
-	final.description = "";
-	final.link = link;
+	return result.trim();
+}
 
-	const { error, body } = await makeRequest(link);
+function sendPage(msg: Message, page: DefinitionPage, redirected?: string) {
+	let embed = defaultEmbed(<any>msg.member);
+	let truncated = false;
 
-	if (error) {
-		console.log(error);
-		return { error: 2 };
-	}
-
-	const { document } = new JSDOM(body).window;
-
-	const page = document.getElementsByClassName("body-scroll")[0];
-	const image = page.getElementsByTagName("img");
-	if (image.length > 0) {
-		final.image = `${link.slice(0, link.lastIndexOf('/') + 1)}${image[0].getAttribute("src")}`;
-	}
-
-	const descriptionEle = page.getElementsByTagName("blockquote")[0];
-	const noteEle = descriptionEle.getElementsByClassName("note")[0];
-
-	let description: any = descriptionEle.getElementsByTagName("p");
-
-	if (description.length === 0) {
-		let mmmmmm = Math.max(
-			(<string>descriptionEle.textContent).indexOf("NOTES"),
-			(<string>descriptionEle.textContent).indexOf("IMPORTANT"),
-			(<string>descriptionEle.textContent).indexOf("WARNING")
-		);
-		description = (<string>descriptionEle.textContent).slice(0, mmmmmm !== -1 ? mmmmmm : undefined);
-	} else {
-		description = description[0].textContent;
-	}
-
-	if (description !== null) final.description += description;
-	if (noteEle !== undefined) {
-		final.note = (<string>noteEle.textContent).replace("NOTE: ", '');
-	}
-
-	const params = page.getElementsByClassName("param")[0];
-	if (params !== undefined) {
-		const ppp = params.getElementsByTagName("tr");
-		let f = "";
-
-		for (let i = 1; i < ppp.length; i++) {
-			const eee = ppp[i].getElementsByTagName("td");
-
-			f += `\`${eee[0].textContent}\`: ${eee[1].textContent}\n`;
+	function addField(name: string, data: any) {
+		let str = String(data);
+		if (str.length > 1024) {
+			str = str.slice(0, 1024);
+			truncated = true;
 		}
 
-		final.params = f;
+		embed.addField(name, str);
 	}
 
-	const codes = page.getElementsByClassName("code");
-	if (codes.length < 3) {
-		return { link, error: 1 };
+	try {
+		embed.title = page.name
+		embed.description = page.description;
+		embed.url = page.url;
+		if (redirected) embed.title += ` (${redirected})`;
+		if (page.constants && page.constants.length > 0) addField("Constants", `\n${tableToText(page.constants)}`);
+		if (page.imageUrl) embed.image = { url: page.imageUrl };
+		for (const note of page.notes) addField("Note:", note);
+		if (page.params && page.params.length > 0) addField("Parameters", tableToText(page.params));
+		if (page.returns) addField("Returns", page.returns);
+		if (page.example) addField("Example", page.example);
+	} catch (e) {
+		msg.reply(`Aqui está o link. Infelizmente essa página é muito grande para o discord aguentar 😔\n${page.url}`).catch(discordErrorHandler);
+		return;
 	}
-	final.title = (<string>codes[codes.length - 3].textContent).replace(';', '');
 
-	final.returns = codes[codes.length - 2].textContent ?? undefined;
-	final.example = `\`\`\`gml\n${codes[codes.length - 1].textContent}\`\`\``;
-	return { page: final, error: 0 };
+	let m = !truncated ? undefined : "OBS: essa página era muito grande para eu conseguir enviá-la por completo 😔";
+	msg.channel.send(m, embed).catch(discordErrorHandler);
 }
 
-export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
-		if (args.length < 2) {
-			msg.channel.send(`${msg.author} https://docs2.yoyogames.com/`).catch(discordErrorHandler);
+export default <Command> {
+	async run(msg: Message, args: Arguments, raw: string[]) {
+		let docs = docsEnglish;
+
+		if (["docsbr", "gmdocsbr"].includes(raw[0])) {
+			docs = docsPortuguese;
+		}
+
+		if (raw.length < 2) {
+			msg.reply(docs.mainPageUrl).catch(discordErrorHandler);
 			return;
 		}
 
-		let final = defaultEmbed(notNull(msg.member));
-		let fn = args.slice(1).join(' ');
-		let page: Page;
+		const query = raw.slice(1).join(' ');
+		let redirected: string | undefined = undefined;
+		let page = docs.pages[query];
 
-		// find in the cache
-		const cached = cache[fn];
-		if (cached) {
-			page = cached;
+		if (page) {
+			if (page.url === undefined) {
+				page = <DefinitionPage>docs.pages[page.references[0]];
+				redirected = query;
+			}
 		} else {
-			let result = await fetchPage(fn);
+			const funcs = closest(docs, query);
 
-			if (result === undefined) {
-				let items = closest(fn);
+			let embed = defaultEmbed(<any>msg.member);
+			embed.description = `Não foi possível encontrar a página de \`${query}\`. Você quis dizer algumas das seguintes dessas?\n`;
 
-				final.title = "Erro: nome não encontrado!";
-				final.description = `Não foi possível achar o nome \`${fn}\`. Você quis dizer algum dos nomes a seguir?`;
-				for (const i of items) {
-					final.description += `\n[${i.name}](${i.link})`;
-				}
-				//msg.channel.send(`${msg.author} A função/variável/constante \`${fn}\` não existe. Ela pode ser do GMS1, e este comando funciona somente com o GMS2`);
+			for (const fn of funcs) {
+				embed.description += `\n[${fn.name}](${fn.url})`;
 
-				let finalMessage = await msg.channel.send(final).catch(discordErrorHandler);
-				if (!finalMessage) return;
-
-				const numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'].slice(0, items.length);
-
-				(async() => {
-					for (const number of numbers) {
-						const result = await finalMessage.react(number).catch(() => undefined);
-
-						// probably the message was deleted
-						if (result === undefined) break;
-					}
-				})();
-
-				let pageIndexToSend = await finalMessage.awaitReactions(
-											((reaction, user) => numbers.includes(reaction.emoji.name) && user.id === msg.author.id),
-											{ max: 1, time: 60000, errors: ['time'] })
-					.then(collection => {
-						return numbers.indexOf(collection.first()?.emoji?.name ?? "");
-					})
-					.catch(() => -1);
-
-				if (pageIndexToSend !== -1) {
-					result = await fetchPage(items[pageIndexToSend].name);
-				}
-
-				if (result === undefined) return;
-
-				finalMessage.delete();
+				if (fn.isRef)
+					embed.description += " (Redirected)";
 			}
 
-			switch (result.error) {
-				case 0:
-					page = result.page;
-					cache[fn] = page;
-					break;
-				case 1:
-					msg.channel.send(`${msg.author} Aqui está o link: ${result.link}`).catch(discordErrorHandler);
-					return;
-				case 2:
-					msg.channel.send(`<@373670846792990720> deu algo de errado... Dá uma olhada no console aí`)
-						.catch(discordErrorHandler);
-					return;
+			const finalmsg = await msg.channel.send(embed).catch(discordErrorHandler);
+			if (!finalmsg)
+				return;
+
+			const numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'].slice(0, funcs.length);
+
+			(async() => {
+				for (const number of numbers) {
+					const result = await finalmsg.react(number).catch(() => undefined);
+
+					// probably the message was deleted
+					if (result === undefined) break;
+				}
+			})();
+
+			let pageIndexToSend = await finalmsg.awaitReactions(
+										((reaction, user) => numbers.includes(reaction.emoji.name) && user.id === msg.author.id),
+										{ max: 1, time: 60000, errors: ['time'] })
+				.then(collection => {
+					return numbers.indexOf(collection.first()?.emoji?.name ?? "");
+				})
+				.catch(() => -1);
+
+			if (pageIndexToSend !== -1) {
+				page = docs.pages[funcs[pageIndexToSend].name];
+			} else {
+				return;
 			}
+
+			if (page.url === undefined) {
+				page = <DefinitionPage>docs.pages[page.references[0]];
+				redirected = query;
+			}
+
+			finalmsg.delete();
 		}
 
-		final.title = page.title;
-		final.description = page.description;
-		if (page.image) final.image = { url: page.image };
-		if (page.note) final.addField("Note", page.note);
-		if (page.params) final.addField("Parameters", page.params);
-		if (page.returns) final.addField("Returns", page.returns);
-		if (page.example) final.addField("Example", page.example);
-
-		msg.channel.send(final).catch(discordErrorHandler);
+		sendPage(msg, page, redirected);
 	},
 	permissions: Permission.NONE,
-	aliases: ["docs"],
+	aliases: ["docs", "docsbr", "gmdocs", "gmdocsbr"],
 	syntaxes: ["func"],
 	description: "A documentação do GMS2",
 	help: "Este comando pesquisa uma palavra na documentação do GMS2 e te diz o resultado da pesquisa. Use a vontade!",
