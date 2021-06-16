@@ -3,7 +3,17 @@ import { Message, GuildMember } from "discord.js";
 import * as stringSimilarity from 'string-similarity';
 import fs from 'fs';
 
-type Table = [string, string][];
+type Table = string[][];
+
+interface LocaleStrings {
+	note: string;
+	constants: string;
+	params: string;
+	returns: string;
+	example: string;
+	syntax: string;
+	redirected: string;
+}
 
 interface DefinitionPage {
 	kind: "defpage";
@@ -15,20 +25,22 @@ interface DefinitionPage {
 	constants?: Table;
 	params?: Table;
 	returns: string;
-	example?: string;
+	returnConstants?: Table;
 	imageUrl?: string;
+	example: string;
 }
 
 interface ReferencePage {
 	kind: "refpage";
-	references: string[];
 	url: undefined;
+	references: string[];
 }
 
 type Page = DefinitionPage | ReferencePage;
 
 interface Documentation {
 	mainPageUrl: string;
+	localesStrings: LocaleStrings;
 	pages: { [key: string]: Page };
 }
 
@@ -76,12 +88,13 @@ function tableToText(table: Table): string {
 	return result.trim();
 }
 
-function sendPage(msg: Message, page: DefinitionPage, redirected?: string) {
+function sendPage(msg: Message, locale: LocaleStrings, page: DefinitionPage, redirected?: string) {
 	let embed = defaultEmbed(<any>msg.member);
 	let truncated = false;
 
 	function addField(name: string, data: any) {
 		let str = String(data);
+		if (str.length == 0) return;
 		if (str.length > 1024) {
 			str = str.slice(0, 1024);
 			truncated = true;
@@ -94,13 +107,15 @@ function sendPage(msg: Message, page: DefinitionPage, redirected?: string) {
 		embed.title = page.name
 		embed.description = page.description;
 		embed.url = page.url;
-		if (redirected) embed.title += ` (${redirected})`;
-		if (page.constants && page.constants.length > 0) addField("Constants", `\n${tableToText(page.constants)}`);
+		if (redirected) embed.title += ` - ${locale.redirected} (${redirected})`;
+		if (page.constants) addField(locale.constants, tableToText(page.constants));
 		if (page.imageUrl) embed.image = { url: page.imageUrl };
-		for (const note of page.notes) addField("Note:", note);
-		if (page.params && page.params.length > 0) addField("Parameters", tableToText(page.params));
-		if (page.returns) addField("Returns", page.returns);
-		if (page.example) addField("Example", page.example);
+		for (const note of page.notes) addField(locale.note + ":", note);
+		if (page.syntax) addField(locale.syntax, `\`${page.syntax}\``);
+		if (page.params && page.params.length > 0) addField(locale.params, tableToText(page.params));
+		if (page.returns) addField(locale.returns, page.returns);
+		if (page.returnConstants) addField(locale.constants, tableToText(page.returnConstants));
+		if (page.example) addField(locale.example, page.example);
 	} catch (e) {
 		msg.reply(`Aqui está o link. Infelizmente essa página é muito grande para o discord aguentar 😔\n${page.url}`).catch(discordErrorHandler);
 		return;
@@ -182,7 +197,7 @@ export default <Command> {
 			finalmsg.delete();
 		}
 
-		sendPage(msg, page, redirected);
+		sendPage(msg, docs.localesStrings, page, redirected);
 	},
 	permissions: Permission.NONE,
 	aliases: ["docs", "docsbr", "gmdocs", "gmdocsbr"],

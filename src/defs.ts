@@ -318,7 +318,7 @@ export function matchArguments<T extends ArgumentKind[]>(karr: Arguments, ...is:
 }
 
 const formats = [".jpeg", ".jpg", ".png", ".bmp"];
-function isImage(name: string | undefined): boolean {
+function isImage(name: string | undefined | null): boolean {
 	if (!name)
 		return false;
 

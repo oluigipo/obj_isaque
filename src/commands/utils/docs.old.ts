@@ -219,7 +219,7 @@ export default <Command>{
 		}
 
 		final.title = page.title;
-		final.description = page.description;
+		final.description = page.description ?? null;
 		if (page.image) final.image = { url: page.image };
 		if (page.note) final.addField("Note", page.note);
 		if (page.params) final.addField("Parameters", page.params);
