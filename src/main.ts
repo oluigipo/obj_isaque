@@ -250,7 +250,7 @@ client.on("guildMemberAdd", async member => {
 	} else {
 		const keys = Object.keys(invites);
 		for (const key of keys) {
-			if (invites[key].uses < newInvites[key].uses) {
+			if (newInvites[key] && invites[key].uses < newInvites[key].uses) {
 				invite = newInvites[key];
 				break;
 			}
@@ -422,11 +422,17 @@ client.on("message", (message) => {
 
 	timeout[message.author.id] = Date.now();
 
-	command.run(message, args, rawArgs).catch(e => {
+	try {
+		command.run(message, args, rawArgs).catch(e => {
+			console.log(e);
+			message.channel.send(`<@${devs[0]}> aconteceu algo de errado, dá uma olhadinha no console aí`)
+				.catch(discordErrorHandler);
+		});
+	} catch (e) {
 		console.log(e);
 		message.channel.send(`<@${devs[0]}> aconteceu algo de errado, dá uma olhadinha no console aí`)
 			.catch(discordErrorHandler);
-	});
+	}
 });
 
 process.on("beforeExit", async () => {

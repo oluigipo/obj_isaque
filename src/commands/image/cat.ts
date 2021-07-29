@@ -14,10 +14,24 @@ export default <Command>{
 			msg.reply(`Você encontrou o gato secreto <:pepe_omg:746842550530342912>`, emptyEmbed().setImage(image))
 				.catch(discordErrorHandler);
 		} else {
-			request("https://aws.random.cat/meow", { json: true }, (err, res, body) => {
+			request("https://aws.random.cat/meow", (err, res, body) => {
 				if (err) {
 					msg.reply("deu isso aqui de errado, ó: `${err}`");
 					console.log(err);
+					return;
+				}
+
+				if (!body || !body.file)
+					try { // WHY???????????????
+						body = JSON.parse(res.body);
+					} catch (e) {
+						console.log(e);
+						return;
+					}
+
+				if (!body || !body.file) {
+					msg.reply("deu erro na request :(");
+					console.log(res);
 					return;
 				}
 
