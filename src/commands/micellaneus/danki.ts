@@ -62,6 +62,10 @@ const images: Item[] = [
 		url: "https://media.discordapp.net/attachments/553933292542361601/702175545596706836/danki.png",
 		title: "bob",
 		description: "bob esponja sabe"
+	}, {
+		url: "https://media.discordapp.net/attachments/610321540722196480/876535587115532288/dankicode.gif",
+		title: "choro",
+		description: "idk",
 	}
 ];
 let dankiImageCurrent = 0;
