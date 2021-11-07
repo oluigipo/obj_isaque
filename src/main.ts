@@ -362,31 +362,46 @@ client.on("message", (message) => {
 	if (message.content.length < 1)
 		return;
 
-	Balance.onMessage(message);
+	if (message.content.includes("@everyone") && !message.mentions.everyone && message.member) {
+		message.delete();
 
-	// answer question
-	if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
-		timeout[message.author.id] = Date.now();
-		const respostas = [
-			"Sim",
-			"Não",
-			"depende",
-			"obviamente",
-			"talvez...",
-			`não sei. Pergunta pro(a) ${message.guild?.members.cache.random().displayName}!`,
-			"não quero falar contigo. sai",
-			"hmmmm... Já tentou apagar a system32?",
-		];
+		if (!Moderation.isMuted(message.member.id)) {
+			console.log("detectei uma conta comprometida!");
 
-		if (!predictResponse(message)) {
-			message.channel.send(
-				`${message.author} ${respostas[Math.floor(Math.random() * respostas.length)]}`,
-			).catch(defaultErrorHandler);
+			let r = Moderation.mute(message.member.id, Time.day, "possivelmente conta hackeada", message.member);
+
+			if (r.success) {
+				message.channel.send(`usuário ${message.author} mutado: conta possivelmente comprometida`);
+			}
 		}
 	}
 
-	if (!message.content.startsWith(Server.prefix))
-		return;
+	Balance.onMessage(message);
+
+	// answer question
+	if (!message.content.startsWith(Server.prefix)) {
+		if (message.mentions.members?.has(notNull(client.user).id) && message.content.endsWith('?')) {
+			timeout[message.author.id] = Date.now();
+			const respostas = [
+				"Sim",
+				"Não",
+				"depende",
+				"obviamente",
+				"talvez...",
+				`não sei. Pergunta pro(a) ${message.guild?.members.cache.random().displayName}!`,
+				"não quero falar contigo. sai",
+				"hmmmm... Já tentou apagar a system32?",
+			];
+
+			if (!predictResponse(message)) {
+				message.channel.send(
+					`${message.author} ${respostas[Math.floor(Math.random() * respostas.length)]}`,
+				).catch(defaultErrorHandler);
+			}
+		} else {
+			return;
+		}
+	}
 
 	// timeout
 	if (!message.member?.hasPermission("ADMINISTRATOR") && (timeout[message.author.id] ?? 0) + Server.timeout > Date.now()) {

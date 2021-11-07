@@ -198,11 +198,11 @@ export function kick(user: string | GuildMember): Response<undefined> {
 	return { success: true, data: undefined };
 }
 
-export function ban(user: string | GuildMember): Response<undefined> {
+export function ban(user: string | GuildMember, reason?: string): Response<undefined> {
 	if (typeof user === "string") {
 		const c = client.guilds.cache.get(Server.id)?.members.cache.get(user);
 		if (c === undefined) {
-			return { success: false, error: "Membro desconhecido" }
+			return { success: false, error: "Membro desconhecido" };
 		}
 
 		user = c;
@@ -211,7 +211,7 @@ export function ban(user: string | GuildMember): Response<undefined> {
 	if (!user.bannable)
 		return { success: false, error: "Não posso banir esse usuário" };
 
-	user.ban().catch(discordErrorHandler);
+	user.ban({ reason }).catch(discordErrorHandler);
 
 	return { success: true, data: undefined };
 }

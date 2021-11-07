@@ -1,27 +1,38 @@
 import { Command, Arguments, Server, Permission, ArgumentKind, Emojis, defaultEmbed, notNull, discordErrorHandler, emptyEmbed, Channels } from "../../defs";
 import * as Moderation from "../../moderation";
-import { Message } from "discord.js";
+import { Message, GuildMember } from "discord.js";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Arguments, raw: string[]) {
 		if (args.length < 2) {
 			msg.channel.send("é pra banir quem?").catch(discordErrorHandler);
 			return;
 		}
 		args.shift(); // consume command
 
-		let final = `${msg.author}\n`;
-		for (const arg of args) {
-			if (arg.kind === ArgumentKind.MEMBER) {
-				const result = Moderation.ban(arg.value);
+		let final = "";
+		let reason: string | undefined = undefined;
+		let usersToBan: GuildMember[] = [];
+		for (let i = 0; i < args.length; ++i) {
+			const arg = args[i];
 
-				if (!result.success) {
-					final += `o(a) ${arg.value} é muito forte para mim. ${result.error}\n`;
-					continue;
-				}
+			if (reason !== undefined)
+				reason += " " + raw[i];
 
-				final += `SINTA O PESO DO MARTELO ${arg.value}!\n`;
+			if (arg.kind === ArgumentKind.MEMBER)
+				usersToBan.push(arg.value);
+			else if (reason === undefined)
+				reason = raw[i];
+		}
+
+		for (const user of usersToBan) {
+			const result = Moderation.ban(user);
+			if (!result.success) {
+				final += `o(a) ${user} é muito forte para mim. ${result.error}\n`;
+				continue;
 			}
+
+			final += `SINTA O PESO DO MARTELO ${user}!\n`;
 		}
 
 		if (final === "")
@@ -30,11 +41,11 @@ export default <Command>{
 			final = `eita, você baniu tanta gente que passou do limite de 2000 chars do discord ${Emojis.surrender.repeat(3)}`;
 
 		let embed = emptyEmbed();
-		embed.description = final;
+		embed.description = `${msg.author}\n${final}`;
 		Channels.logObject.send(embed).catch(discordErrorHandler);
 		msg.react(Emojis.yes).catch(discordErrorHandler);
 	},
-	syntaxes: ["<@user...>"],
+	syntaxes: ["<@user...> [reason]"],
 	permissions: Permission.MOD,
 	aliases: ["ban", "banir"],
 	description: "Banir usuários",

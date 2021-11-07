@@ -9,5 +9,6 @@ import sonbra from "./sonbra";
 import ulon from "./ulon";
 import fake from "./fake";
 import audio from "./audio";
+import google from "./google";
 
-export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, audio, dado];
+export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, audio, dado, google];
