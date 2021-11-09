@@ -37,19 +37,33 @@ function parseArgs(raw: string[], msg: Message): Arguments {
 		if (str[0] === '<') {
 			str = str.substr(1);
 			if (str[0] === '@') {
-				str = str.substr(1 + Number(str[1] === '!'));
+				let isRole = false;
+				if (str.startsWith("@&")) {
+					str = str.substr(2);
+					isRole = true;
+				} else {
+					str = str.substr((str[1] === '!') ? 2 : 1);
+				}
 
 				const id = str.substr(0, 18);
 
 				if (msg.guild === null) continue;
-				const member = msg.guild.members.cache.get(id);
+				if (isRole) {
+					const role = msg.guild.roles.cache.get(id);
+					if (role === undefined) continue;
 
-				if (member === undefined) {
-					arg.kind = ArgumentKind.USERID;
-					arg.value = id;
+					arg.kind = ArgumentKind.ROLE;
+					arg.value = role;
 				} else {
-					arg.kind = ArgumentKind.MEMBER;
-					arg.value = member;
+					const member = msg.guild.members.cache.get(id);
+
+					if (member === undefined) {
+						arg.kind = ArgumentKind.USERID;
+						arg.value = id;
+					} else {
+						arg.kind = ArgumentKind.MEMBER;
+						arg.value = member;
+					}
 				}
 			} else if (str[0] === '#') {
 				str = str.substr(1);

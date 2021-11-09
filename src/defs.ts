@@ -1,8 +1,12 @@
-import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions, NewsChannel, PartialGuildMember } from "discord.js";
+import { Message, GuildMember, GuildChannel, User, MessageEmbed, TextChannel, Emoji, MessageOptions, NewsChannel, PartialGuildMember, Role } from "discord.js";
 import Jimp from "jimp";
 
 // Commands
-export enum ArgumentKind { STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL", NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI", USERID = "USERID" }
+export enum ArgumentKind {
+	STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL",
+	NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI",
+	USERID = "USERID", ROLE = "ROLE",
+}
 
 export type Arguments = Argument[];
 export type Argument =
@@ -12,7 +16,8 @@ export type Argument =
 	{ kind: ArgumentKind.NUMBER, value: number } |
 	{ kind: ArgumentKind.TIME, value: number } |
 	{ kind: ArgumentKind.EMOJI, value: Emoji } |
-	{ kind: ArgumentKind.USERID, value: string };
+	{ kind: ArgumentKind.USERID, value: string } |
+	{ kind: ArgumentKind.ROLE, value: Role };
 
 export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4 }
 
