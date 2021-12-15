@@ -3,11 +3,11 @@ if (!Array.prototype.flat) {
 		if (depth <= 0)
 			return [...this];
 
-		let result = Array(this.length);
+		let result: any[] = [];
 
 		for (let i = 0; i < this.length; ++i) {
 			if (Array.isArray(this[i])) {
-				result.push(this[i].flat(depth - 1));
+				result = [...result, ...this[i].flat(depth - 1)];
 			} else {
 				result.push(this[i]);
 			}
