@@ -1,3 +1,35 @@
+if (!Array.prototype.flat) {
+	Array.prototype.flat = <any>function(this: any[], depth = 1): any[] {
+		if (depth <= 0)
+			return [...this];
+
+		let result = Array(this.length);
+
+		for (let i = 0; i < this.length; ++i) {
+			if (Array.isArray(this[i])) {
+				result.push(this[i].flat(depth - 1));
+			} else {
+				result.push(this[i]);
+			}
+		}
+
+		return result;
+	}
+
+	console.log("polyfill: Array.prototype.flat");
+}
+
+if (!Array.prototype.flatMap) {
+	Array.prototype.flatMap = function(callback: (value: any, index: number, array: any[]) => any, thisArg?: any): any[] {
+		if (thisArg)
+			callback = callback.bind(thisArg);
+
+		return this.map(callback).flat();
+	}
+
+	console.log("polyfill: Array.prototype.flatMap");
+}
+
 import { Client, Message, GuildMember, TextChannel, Guild, Role, ChannelLogsQueryOptions, User } from "discord.js";
 import {
 	Server, Command, devs, Arguments, charCodeOf, Argument, ArgumentKind,
