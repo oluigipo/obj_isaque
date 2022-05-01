@@ -70,7 +70,7 @@ export default <Command>{
 		async run(int: Discord.CommandInteraction) {
 			const member = await int.guild?.members.fetch(int.user.id);
 			if (!member || !member.voice.channel || alreadyPlaying || member.voice.channel.type === "GUILD_STAGE_VOICE") {
-				int.reply("entra num canal de voz aí pô").catch(Common.discordErrorHandler);
+				int.reply({ content: "entra num canal de voz aí pô", ephemeral: true }).catch(Common.discordErrorHandler);
 				return;
 			}
 			
@@ -79,12 +79,12 @@ export default <Command>{
 				audio = int.options.data[0].value;
 				
 				if (!keys.includes(audio)) {
-					int.reply("essa não é uma opção, camarada").catch(Common.discordErrorHandler);
+					int.reply({ content: "essa não é uma opção, camarada", ephemeral: true }).catch(Common.discordErrorHandler);
 					return;
 				}
 			}
 			
-			int.reply("tô chegando").catch(Common.discordErrorHandler);
+			int.reply({ content: "tô chegando", ephemeral: true }).catch(Common.discordErrorHandler);
 			exec(member, audio);
 		},
 		

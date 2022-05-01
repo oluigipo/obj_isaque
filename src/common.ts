@@ -247,11 +247,22 @@ export function dateOf(time: number) {
 	return `${date} - ${hour}`;
 }
 
-export function defaultEmbed(member: Discord.GuildMember): any {
+export function defaultEmbed(member: Discord.GuildMember | Discord.User): any {
+	let name: string;
+	let avatar: string | null;
+	
+	if (isMember(member)) {
+		name = member.displayName;
+		avatar = member.user?.avatarURL();
+	} else {
+		name = member.username;
+		avatar = member.avatarURL();
+	}
+	
 	return {
 		type: "rich",
 		color: SERVER.botColor,
-		author: { name: member.displayName, icon_url: member.user?.avatarURL() ?? undefined },
+		author: { name, icon_url: avatar ?? undefined },
 		footer: { text: client.user?.username, icon_url: client.user?.avatarURL() ?? undefined },
 		fields: [],
 	};

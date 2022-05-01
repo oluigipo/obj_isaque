@@ -10,5 +10,6 @@ import ulon from "./ulon";
 import fake from "./fake";
 import google from "./google";
 import audio from "./audio";
+import pingrp from "./pingrp";
 
-export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, dado, google, audio];
+export default [bfpp, danki, dolar, emoji, lisp, ph, sonbra, ulon, fake, dado, google, audio, pingrp];

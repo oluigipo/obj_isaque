@@ -130,29 +130,31 @@ export async function done() {
 	
 }
 
-export async function message(message: Discord.Message): Promise<boolean> {
-	if (!message.member?.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) && (timeout[message.author.id] ?? 0) + Common.SERVER.timeout > Date.now()) {
-		message.react(Common.EMOJIS.no).catch(Common.discordErrorHandler);
+export async function message(msg: Discord.Message): Promise<boolean> {
+	if (!msg.member || !msg.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) && (timeout[msg.author.id] ?? 0) + Common.SERVER.timeout > Date.now()) {
+		msg.react(Common.EMOJIS.no).catch(Common.discordErrorHandler);
 		return false;
 	}
 
-	if (!message.content.startsWith(Common.SERVER.prefix))
+	if (!msg.content.startsWith(Common.SERVER.prefix))
 		return true;
 
-	const text = message.content.slice(Common.SERVER.prefix.length);
+	const text = msg.content.slice(Common.SERVER.prefix.length);
 	const raw = text.split(" ").filter(v => v.length > 0);
-	const args = parseArgs(raw, message);
+	const args = parseArgs(raw, msg);
 
 	if (args.length < 1 || args[0].kind !== "STRING")
 		return true;
 
 	for (const cmd of commandsArray) {
 		if (cmd.aliases.includes(raw[0])) {
-			try {
-				await cmd.run(message, args, raw);
-			} catch (error) {
-				Common.error(`exception when running command '${raw[0]}': ${error}`);
-			}
+			if (validatePermissions(msg.member, <any>msg.channel, cmd.permissions))
+				try {
+					Common.log(`executing command ${raw[0]}...`);
+					await cmd.run(msg, args, raw);
+				} catch (error) {
+					Common.error(`exception when running command '${raw[0]}': ${error}`);
+				}
 
 			break;
 		}
@@ -170,11 +172,16 @@ export async function interactionCreate(int_: Discord.Interaction) {
 	const command = commandsArray.find(cmd => cmd.aliases.includes(name));
 	
 	if (command && command.interaction) {
-		try {
-			command.interaction.run(int);
-		} catch (err) {
-			Common.error(`failed to run command '${name}' in interaction: `, err);
-		}
+		const member = await int_.guild?.members.fetch(int_.user.id);
+		if (!member)
+			return false;
+		
+		if (validatePermissions(member, <any>int_.channel, command.permissions))
+			try {
+				command.interaction.run(int);
+			} catch (err) {
+				Common.error(`failed to run command '${name}' in interaction: `, err);
+			}
 		
 		return false; // NOTE(ljre): Stop the pipeline. We already handled the interaction.
 	}
