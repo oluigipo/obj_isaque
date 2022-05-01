@@ -1,24 +1,25 @@
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull, MsgTemplates, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 function makeRGB(r: number, g: number, b: number): number {
 	return (r << 16) | (g << 8) | (b);
 }
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
-		let final = defaultEmbed(notNull(msg.member));
+	async run(msg: Message, _: Argument[], args: string[]) {
+		let final = Common.defaultEmbed(Common.notNull(msg.member));
 
 		let num: number, base: number;
 		if (args.length < 2) {
-			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0])).catch(discordErrorHandler);
+			msg.channel.send(`${msg.author} diz o número aí pô`).catch(Common.discordErrorHandler);
 			return;
 		}
 
 		if (args.length >= 3) {
 			base = parseInt(args[1]);
 			if (isNaN(base) || base < 2 || base > 36) {
-				msg.reply(`Base inválida!`).catch(discordErrorHandler);
+				msg.channel.send(`${msg.author} base inválida`).catch(Common.discordErrorHandler);
 				return;
 			}
 		} else {
@@ -27,20 +28,19 @@ export default <Command>{
 
 		num = parseInt(args[1 + Number(args.length >= 3)], base);
 		if (isNaN(num)) {
-			msg.reply(`Número inválido!`).catch(discordErrorHandler);
+			msg.channel.send(`${msg.author} número inválido`).catch(Common.discordErrorHandler);
 			return;
 		}
 
 		final.title = "Resultado";
 		final.description = "Estas são as representações desse número em diferentes bases:";
 
-		final.addField("Decimal", num.toString(10), true);
-		final.addField("Octal", num.toString(8), true);
-		final.addField("Hexadecimal", num.toString(16), true);
-		final.addField("Binário", num.toString(2), true);
+		final.fields.push({ name: "Decimal", value: num.toString(10), inline: true });
+		final.fields.push({ name: "Octal", value: num.toString(8), inline: true });
+		final.fields.push({ name: "Hexadecimal", value: num.toString(16), inline: true });
+		final.fields.push({ name: "Binário", value: num.toString(2), inline: true });
 
-		msg.channel.send(final)
-			.catch(discordErrorHandler);
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["<base> <numero>", "<numero>"],
 	permissions: Permission.NONE,

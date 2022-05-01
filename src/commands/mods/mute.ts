@@ -1,11 +1,12 @@
-import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, emptyEmbed, Channels, Time } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message, GuildMember } from "discord.js";
 import * as Moderation from "../../moderation";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		if (args.length < 2) {
-			msg.reply("mutar quem?").catch(discordErrorHandler);
+			msg.reply("mutar quem?").catch(Common.discordErrorHandler);
 			return;
 		}
 		args.shift(); // consume command
@@ -26,9 +27,6 @@ export default <Command>{
 				case ArgumentKind.TIME:
 					duration = arg.value;
 					break;
-				case ArgumentKind.NUMBER:
-					duration = arg.value * Time.minute;
-					break;
 				default:
 					if (!reasonList)
 						reasonList = [arg.value.toString()];
@@ -43,7 +41,7 @@ export default <Command>{
 			// @NOTE(luigi): we don't need to update the db every iteration of the loop
 			const result = Moderation.weakmute(member.id, e.duration, reason, member);
 
-			if (!result.success) {
+			if (!result.ok) {
 				finalmsg += `Algo deu errado ao mutar ${member}. \`${result.error}\`\n`;
 				continue;
 			}
@@ -52,7 +50,7 @@ export default <Command>{
 			if (e.duration === -1)
 				finalmsg += `até alguém quiser desmutar.`;
 			else
-				finalmsg += `por \`${formatTime(e.duration)}\`.`;
+				finalmsg += `por \`${Common.formatTime(e.duration)}\`.`;
 
 			if (result.warning)
 				finalmsg += ` Nota: ${result.warning}`;
@@ -64,15 +62,15 @@ export default <Command>{
 			finalmsg = "mutar quem?";
 		else {
 			// update the db if someone was muted
-			Moderation.updateDB();
+			Moderation.updateDb();
 			if (finalmsg.length >= 2000)
-				finalmsg = `caraca, mutou tanta gente que passou do limite de 2000 caracteres do discord ${Emojis.surrender.repeat(3)}`
+				finalmsg = `caraca, mutou tanta gente que passou do limite de 2000 caracteres do discord ${Common.EMOJIS.surrender.repeat(3)}`
 		}
 
-		let embed = emptyEmbed();
+		let embed = Common.emptyEmbed();
 		embed.description = finalmsg;
-		Channels.logObject.send(embed).catch(discordErrorHandler);
-		msg.react(Emojis.yes).catch(discordErrorHandler);
+		Moderation.logChannel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
+		msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 	},
 	aliases: ["mute", "mutar"],
 	description: "Muta um ou mais membros por um tempo (in)determinado.",

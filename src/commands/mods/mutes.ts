@@ -1,16 +1,17 @@
-import { Command, Arguments, Permission, MsgTemplates, ArgumentKind, formatTime, Emojis, discordErrorHandler, notNull, defaultEmbed } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
 import * as Moderation from "../../moderation";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		let list = Moderation.getMutes();
 		if (list.length === 0) {
-			msg.channel.send("não tem nenhum doido mutado").catch(discordErrorHandler);
+			msg.channel.send("não tem nenhum doido mutado").catch(Common.discordErrorHandler);
 			return;
 		}
 
-		let final = defaultEmbed(notNull(msg.member));
+		let final = Common.defaultEmbed(Common.notNull(msg.member));
 
 		final.title = "Lista de Mutes";
 		final.description = "Lista que contém os nomes de todos os membros amaldiçoados pelo poder do Mute!";
@@ -21,7 +22,7 @@ export default <Command>{
 				+ (mute.reason ? `\nMotivo: \`${mute.reason}\`` : ""));
 		}
 
-		msg.channel.send(final).catch(discordErrorHandler);
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	aliases: ["mutes", "mutados"],
 	description: "Lista de membros mutados.",

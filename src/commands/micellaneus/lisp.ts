@@ -1,7 +1,6 @@
-// @NOTE(luigi): not checked
-
-import { Command, Arguments, Permission, discordErrorHandler, formatTime } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 enum TokenType { LPAREN, RPAREN, NUMBER, ID, STRING, QUOTE, LBRACK, RBRACK, LCURLY, RCURLY, MENTION, EOF }
 
@@ -174,7 +173,7 @@ const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([
 	["str.explode", (vm: LispVM, arr: Expr[]) => Expr.LIST(arr[0].as_str.split('').map(s => Expr.STR(s)))],
 	["==", (vm: LispVM, arr: Expr[]) => arr[0]?.equals(arr[1]) ? Expr.SYM("t") : Expr.LIST([])],
 	["!=", (vm: LispVM, arr: Expr[]) => !(arr[0]?.equals(arr[1])) ? Expr.SYM("t") : Expr.LIST([])],
-	["format-time", (vm: LispVM, arr: Expr[]) => Expr.STR(formatTime(arr[0].as_num))],
+	["format-time", (vm: LispVM, arr: Expr[]) => Expr.STR(Common.formatTime(arr[0].as_num))],
 	["randint", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.floor(Math.random() * arr[0].as_num))],
 	["random", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.random())],
 	["sin", (vm: LispVM, arr: Expr[]) => Expr.NUM(Math.sin(arr[0].as_num))],
@@ -554,18 +553,18 @@ class CallFrame {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Argument[], args: string[]) {
 		try {
 			let code = args.slice(1).join(' ');
 			let vm = new LispVM(code);
 			let e = vm.eval();
 			let secure = e.toString().replace(/@everyone|@here/, (m) => m.substr(1));
 			msg.channel.send(`Resultado: ${secure}`)
-				.catch(discordErrorHandler);
+				.catch(Common.discordErrorHandler);
 		} catch (error) {
 			let secure = String(error).replace(/@everyone|@here/, (m) => m.substr(1));
 			msg.channel.send(`Erro: ${secure}`)
-				.catch(discordErrorHandler);
+				.catch(Common.discordErrorHandler);
 		}
 	},
 	syntaxes: ["<code>"],

@@ -1,26 +1,72 @@
-import { Response, defaultErrorHandler, Roles, discordErrorHandler, Server, Time, dateOf, formatTime } from "./defs";
-import { Client, GuildMember } from "discord.js";
-import { collections, readCollection, writeCollection } from "./database";
+import Discord from "discord.js";
+import { REST } from "@discordjs/rest";
+import * as Common from "./common";
+import * as Database from "./database";
 
-interface Mute {
+// NOTE(ljre): Types and globals
+export interface Mute {
 	id: string;
 	time: number;
 	duration: number;
 	reason?: string;
 }
 
-export type Mutes = Mute[];
+export type FormatedMute = { user: string, ends: string, begins: string, duration: string, reason?: string };
 
-export let mutes: Mutes;
-let client: Client;
+export let mutes: Mute[];
 
-export async function init(c: Client) {
-	client = c;
-	await loadDB();
-	setTimeout(autoUnmute, Time.minute);
+export const readDb = () => Database.readCollection("mutes", "mutes");
+export const updateDb = () => Database.writeCollection("mutes", "mutes", mutes);
+
+export let logChannel: Discord.TextChannel;
+
+let cursedInvites: string[] = [];
+
+// NOTE(ljre): Events
+export async function init() {
+	mutes = await readDb();
+	logChannel = <Discord.TextChannel>await Common.client.channels.fetch(Common.CHANNELS.log).catch(Common.discordErrorHandler);
+
+	if (!logChannel) {
+		Common.error("could not fetch moderation log's channel!");
+		return false;
+	}
+
+	autoUnmute();
+
+	return true;
 }
 
-export function autoUnmute() {
+export async function done() {
+	await updateDb();
+}
+
+export async function message(message: Discord.Message) {
+	if (message.content.includes("@everyone") && !message.mentions.everyone && message.member) {
+		message.delete().catch(Common.discordErrorHandler);
+
+		if (!isMuted(message.member.id)) {
+			Common.log(`possivel conta compromedita detectada: ${message.member.id}`);
+
+			let r = mute(message.member.id, Common.TIME.day, "possivelmente conta hackeada", message.member);
+
+			if (r.ok)
+				message.channel.send(`usuário ${message.author} mutado: conta possivelmente comprometida`).catch(Common.discordErrorHandler);
+		}
+
+		return false;
+	}
+}
+
+export async function memberJoined(member: Discord.GuildMember, invite: string | undefined) {
+	if (cursedInvites.includes(invite ?? "") && member.bannable)
+		member.ban({ reason: "cursed invite: " + invite }).catch(Common.discordErrorHandler);
+	if (isMuted(member.id))
+		member.roles.add(Common.ROLES.muted).catch(Common.discordErrorHandler);
+}
+
+// NOTE(ljre): Functions
+function autoUnmute() {
 	let changed = false;
 	const now = Date.now();
 
@@ -41,25 +87,18 @@ export function autoUnmute() {
 	// console.log(mutes);
 
 	if (changed)
-		updateDB();
-	setTimeout(autoUnmute, Time.minute);
+		updateDb();
+	setTimeout(autoUnmute, Common.TIME.minute);
 }
 
-async function loadDB() {
-	mutes = await readCollection("mutes", "mutes");
-}
-
-export function updateDB() {
-	writeCollection("mutes", "mutes", mutes);
-}
-
+// NOTE(ljre): API
 /**
  * @returns On success: when the mute ends
  * @note This function DOESN'T update the database when it's called
  * @param userid Id of the user
  * @param duration Mute duration. -1 if undefined
  */
-export function weakmute(userid: string, duration: number = -1, reason?: string, member?: GuildMember): Response<number> {
+export function weakmute(userid: string, duration: number = -1, reason?: string, member?: Discord.GuildMember): Common.Result<number> {
 	let index = mutes.length;
 	let warning: string | undefined;
 
@@ -72,23 +111,20 @@ export function weakmute(userid: string, duration: number = -1, reason?: string,
 		}
 
 	if (!member) {
-		const c = client.guilds.cache.get(Server.id)?.members.cache.get(userid);
+		const c = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(userid);
 
 		if (c === undefined) {
-			return { success: false, error: "Membro desconhecido" }
+			return { ok: false, error: "Membro desconhecido" };
 		}
 
 		member = c;
 	}
 
-	if (member.voice.channelID)
-		member.voice.setMute(true);
-
-	member.roles.add(Roles.muted).catch(discordErrorHandler);
+	member.roles.add(Common.ROLES.muted).catch(Common.discordErrorHandler);
 
 	const now = Date.now();
 	mutes[index] = { id: userid, time: now, duration, reason };
-	return { success: true, data: now + duration, warning };
+	return { ok: true, data: now + duration, warning };
 }
 
 /**
@@ -97,10 +133,10 @@ export function weakmute(userid: string, duration: number = -1, reason?: string,
  * @param userid Id of the user
  * @param duration Mute duration. -1 if undefined
  */
-export function mute(userid: string, duration: number = -1, reason?: string, member?: GuildMember) {
+export function mute(userid: string, duration: number = -1, reason?: string, member?: Discord.GuildMember) {
 	const result = weakmute(userid, duration, reason, member);
-	if (result.success)
-		updateDB();
+	if (result.ok)
+		updateDb();
 	return result;
 }
 
@@ -109,17 +145,17 @@ export function mute(userid: string, duration: number = -1, reason?: string, mem
  * @note This function DOESN'T update the database when it's called
  * @param userid Id of the user
  */
-export function weakunmute(userid: string, member?: GuildMember): Response<number> {
+export function weakunmute(userid: string, member?: Discord.GuildMember): Common.Result<number> {
 	for (let i = 0; i < mutes.length; ++i)
 		if (mutes[i].id === userid) {
 			const mute = mutes[i];
 			mutes = mutes.filter((_, index) => index !== i);
 
 			if (!member) {
-				const c = client.guilds.cache.get(Server.id)?.members.cache.get(userid);
+				const c = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(userid);
 				if (c === undefined) {
 					return {
-						success: true,
+						ok: true,
 						data: mute.time + mute.duration,
 						warning: "Ele deve ter saído do servidor, então eu só tirei ele da database."
 					};
@@ -128,15 +164,12 @@ export function weakunmute(userid: string, member?: GuildMember): Response<numbe
 				member = c;
 			}
 
-			if (member.voice.channelID)
-				member.voice.setMute(false);
+			member.roles.remove(Common.ROLES.muted).catch(Common.discordErrorHandler);
 
-			member.roles.remove(Roles.muted).catch(discordErrorHandler);
-
-			return { success: true, data: mute.time + mute.duration };
+			return { ok: true, data: mute.time + mute.duration };
 		}
 
-	return { success: false, error: "Esse usuário não está mutado." };
+	return { ok: false, error: "Esse usuário não está mutado." };
 }
 
 /**
@@ -144,14 +177,13 @@ export function weakunmute(userid: string, member?: GuildMember): Response<numbe
  * @note This function DOES update the database when it's called
  * @param userid Id of the user
  */
-export function unmute(userid: string, member?: GuildMember) {
+export function unmute(userid: string, member?: Discord.GuildMember) {
 	const result = weakunmute(userid, member);
-	if (result.success)
-		updateDB();
+	if (result.ok)
+		updateDb();
 	return result;
 }
 
-type FormatedMute = { user: string, ends: string, begins: string, duration: string, reason?: string };
 /**
  * @returns A formatted string containing every mute in the database
  * @warning The output's length CAN be greater than 2000 chars (Discord's message's limit size)
@@ -160,9 +192,9 @@ export function getMutes() {
 	return mutes.reduce((acc: FormatedMute[], curr: Mute, index) =>
 		(acc.push({
 			user: `${curr.id}`,
-			ends: curr.duration === -1 ? "nunca" : dateOf(curr.time + curr.duration),
-			begins: dateOf(curr.time),
-			duration: curr.duration === -1 ? "infinito" : formatTime(curr.duration),
+			ends: curr.duration === -1 ? "nunca" : Common.dateOf(curr.time + curr.duration),
+			begins: Common.dateOf(curr.time),
+			duration: curr.duration === -1 ? "infinito" : Common.formatTime(curr.duration),
 			reason: curr.reason
 		}), acc), []);
 }
@@ -180,38 +212,46 @@ export function isMuted(userid: string): number | undefined {
 	return undefined;
 }
 
-export function kick(user: string | GuildMember): Response<undefined> {
+export function kick(user: string | Discord.GuildMember): Common.Result<undefined> {
 	if (typeof user === "string") {
-		const c = client.guilds.cache.get(Server.id)?.members.cache.get(user);
+		const c = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(user);
 		if (c === undefined) {
-			return { success: false, error: "Membro desconhecido" }
+			return { ok: false, error: "Membro desconhecido" };
 		}
 
 		user = c;
 	}
 
 	if (!user.kickable)
-		return { success: false, error: "Não posso kickar esse usuário" };
+		return { ok: false, error: "Não posso kickar esse usuário" };
 
-	user.kick().catch(discordErrorHandler);
+	user.kick().catch(Common.discordErrorHandler);
 
-	return { success: true, data: undefined };
+	return { ok: true, data: undefined };
 }
 
-export function ban(user: string | GuildMember, reason?: string): Response<undefined> {
+export function ban(user: string | Discord.GuildMember, reason?: string): Common.Result<undefined> {
 	if (typeof user === "string") {
-		const c = client.guilds.cache.get(Server.id)?.members.cache.get(user);
+		const c = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(user);
 		if (c === undefined) {
-			return { success: false, error: "Membro desconhecido" };
+			return { ok: false, error: "Membro desconhecido" };
 		}
 
 		user = c;
 	}
 
 	if (!user.bannable)
-		return { success: false, error: "Não posso banir esse usuário" };
+		return { ok: false, error: "Não posso banir esse usuário" };
 
-	user.ban({ reason }).catch(discordErrorHandler);
+	user.ban({ reason }).catch(Common.discordErrorHandler);
 
-	return { success: true, data: undefined };
+	return { ok: true, data: undefined };
+}
+
+export function curseInvite(invite: string) {
+	cursedInvites.push(invite);
+}
+
+export function uncurseInvite(invite: string) {
+	cursedInvites = cursedInvites.filter(inv => inv !== invite);
 }

@@ -1,19 +1,20 @@
-import { Command, Arguments, Permission, ArgumentKind, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
 import * as Balance from "../../balance";
+import * as Common from "../../common";
 
 const usersPerPage = 5;
 const inline = false;
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		let page = 1;
 		if (args.length > 1 && args[1].kind === ArgumentKind.NUMBER && args[1].value >= 1) {
 			page = Math.floor(args[1].value);
 		}
 
 		const result = Balance.richest(page - 1, usersPerPage);
-		let final = defaultEmbed(notNull(msg.member));
+		let final = Common.defaultEmbed(Common.notNull(msg.member));
 
 		final.title = `Burguesia. Página ${page}/${Math.ceil(Balance.userCount() / usersPerPage)}`;
 
@@ -37,13 +38,13 @@ export default <Command>{
 			if (result[i].id === msg.author.id)
 				desc = "🔴 " + desc;
 
-			final.addField(title.trim(), desc.trim(), inline);
+			final.fields.push({ name: title.trim(), value: desc.trim(), inline });
 		}
 
 		if (final.fields.length === 0)
-			final.addField(`Último lugar - $0`, `obj_isaque, agora um fantasma\n👻`, inline);
+			final.fields.push({ name: `Último lugar - $0`, value: `obj_isaque, agora um fantasma\n👻`, inline });
 
-		msg.channel.send(final).catch(discordErrorHandler);
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	aliases: ["richest", "burgueses", "rank"],
 	syntaxes: ["[página]"],

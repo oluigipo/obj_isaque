@@ -1,7 +1,6 @@
-// @NOTE(luigi): no revision
-
-import { Command, Arguments, Server, Permission, MsgTemplates, defaultEmbed } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message, MessageEmbed } from "discord.js";
+import * as Common from "../../common";
 
 function makeRGB(r: number, g: number, b: number): number {
 	return (r << 16) | (g << 8) | (b);
@@ -117,13 +116,12 @@ function _format(s: string): string {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Argument[], args: string[]) {
 		if (!msg.member) {
-			console.log("=============\n=====\nn===");
 			return;
 		}
 		if (args.length < 2) {
-			msg.channel.send(MsgTemplates.error(msg.author, this.aliases[0]));
+			msg.channel.send(`${msg.member} diz a cor aí`);
 			return;
 		}
 
@@ -177,17 +175,19 @@ export default <Command>{
 			return;
 		}
 
-		let final = defaultEmbed(msg.member);
+		let asHsv = rgbToHsv(color >> 16, (color >> 8) & 0xff, color & 0xff);
+		let asHsl = rgbToHsl(color >> 16, (color >> 8) & 0xff, color & 0xff);
+		let final = Common.defaultEmbed(msg.member);
 
 		final.color = color;
-		final.addField("RGB", `${color >> 16}, ${(color >> 8) & 0xff}, ${color & 0xff} (#${_format(color.toString(16))})`, true);
-		final.addField("BGR", `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(RGB2BGR(color).toString(16))})`, true);
-		let temp = rgbToHsv(color >> 16, (color >> 8) & 0xff, color & 0xff);
-		final.addField("HSV / HSB", `${temp[0]}, ${temp[1]}, ${temp[2]}`, true);
-		temp = rgbToHsl(color >> 16, (color >> 8) & 0xff, color & 0xff);
-		final.addField("HSL", `${temp[0]}, ${temp[1]}, ${temp[2]}`, true);
+		final.fields = [
+			{ name: "RGB", value: `${color >> 16}, ${(color >> 8) & 0xff}, ${color & 0xff} (#${_format(color.toString(16))})`, inline: true },
+			{ name: "BGR", value: `${(color & 0xff)}, ${(color >> 8) & 0xff}, ${color >> 16} (#${_format(RGB2BGR(color).toString(16))})`, inline: true },
+			{ name: "HSV / HSB", value: `${asHsv[0]}, ${asHsv[1]}, ${asHsv[2]}`, inline: true },
+			{ name: "HSL", value: `${asHsl[0]}, ${asHsl[1]}, ${asHsl[2]}`, inline: true },
+		];
 
-		msg.channel.send(final);
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	permissions: Permission.NONE,
 	aliases: ["color", "cor"],

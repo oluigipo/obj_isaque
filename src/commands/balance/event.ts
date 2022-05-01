@@ -1,11 +1,12 @@
-import { Command, Arguments, Permission, discordErrorHandler, ArgumentKind, Emojis, Channels, Roles } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { CollectorFilter, Message, TextChannel } from "discord.js";
-import { beginEvent } from "../../balance";
+import * as Balance from "../../balance";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (args.length < 4) {
-			msg.reply("tá faltando argumento pro comando").catch(discordErrorHandler);
+			msg.reply("tá faltando argumento pro comando").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -16,14 +17,14 @@ export default <Command>{
 		}
 
 		if (args[1].kind !== ArgumentKind.TIME) {
-			msg.reply("isso não é um tempo válido").catch(discordErrorHandler);
+			msg.reply("isso não é um tempo válido").catch(Common.discordErrorHandler);
 			return;
 		}
 
 		const time = args[1].value;
 
 		if (args[2].kind !== ArgumentKind.NUMBER) {
-			msg.reply("esse custo para participar não é válido").catch(discordErrorHandler);
+			msg.reply("esse custo para participar não é válido").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -38,10 +39,10 @@ export default <Command>{
 
 		msg.channel.send(`Aperte na reação para participar${mention ? " @everyone" : ""}!`)
 			.then(async message => {
-				await message.react(Emojis.yes);
-				const filter: CollectorFilter = (reaction, user) => reaction.emoji.name === Emojis.yes && !user.bot;
+				await message.react(Common.EMOJIS.yes);
+				const filter = (reaction: any, user: any) => reaction.emoji.name === Common.EMOJIS.yes && !user.bot;
 
-				message.awaitReactions(filter, { time: time }).then(async collected => {
+				message.awaitReactions({ filter, time }).then(async collected => {
 					let users = <string[]>[];
 
 					const reaction = collected.first();
@@ -50,17 +51,17 @@ export default <Command>{
 						return;
 					}
 
-					let usersArray = reaction.users.cache.array();
+					let usersArray = [...reaction.users.cache.values()];
 
 					for (const user of usersArray) {
 						const member = await message.guild?.members.fetch(user.id);
 
-						if (member && member.roles.cache.has(Roles.community))
+						if (member && member.roles.cache.has(Common.ROLES.community))
 							users.push(user.id);
 					}
 
-					const result = beginEvent(message.id, cost, prize, users);
-					if (!result.success) {
+					const result = Balance.beginEvent(message.id, cost, prize, users);
+					if (!result.ok) {
 						msg.reply(`deu coisa errada: \`${result.error}\``);
 						return;
 					}
@@ -68,7 +69,7 @@ export default <Command>{
 					message.channel.send("Evento iniciado!");
 
 					let channel = <TextChannel>msg.guild?.channels.cache.get("671327942420201492");
-					if (!channel || channel.type !== "text")
+					if (!channel || channel.type !== "GUILD_TEXT")
 						return;
 
 					const keys = Object.keys(result.data);
@@ -82,13 +83,11 @@ export default <Command>{
 
 						if (str)
 							channel.send(str);
-						else {
-							msg.guild?.members.cache.get(key)?.roles.add(Roles.event);
-						}
+						else
+							msg.guild?.members.cache.get(key)?.roles.add(Common.ROLES.event);
 					}
 				});
-			})
-			.catch(discordErrorHandler);
+			}).catch(Common.discordErrorHandler);
 	},
 	aliases: ["event", "evento"],
 	syntaxes: ["[everyone?] <tempo para começar> <custo> <prêmio...>"],

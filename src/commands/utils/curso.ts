@@ -1,5 +1,6 @@
-import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 const links: any = {
 	"330403904992837632": "https://go.hotmart.com/Y17948280P",
@@ -9,10 +10,9 @@ const links: any = {
 };
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		let link = links[msg.author.id] ?? "https://go.hotmart.com/P17856163O";
-		msg.channel.send(`${msg.author} ${link}`)
-			.catch(discordErrorHandler);
+		msg.channel.send(`${msg.author} ${link}`).catch(Common.discordErrorHandler);
 	},
 	syntaxes: [""],
 	permissions: Permission.NONE,

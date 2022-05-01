@@ -1,28 +1,27 @@
-import { Command, Arguments, Permission, emptyEmbed, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message, MessageAttachment } from "discord.js";
-import request from "request";
+import * as Common from "../../common";
 
 const secrets: string[] = [
     "https://media.discordapp.net/attachments/532676259851927571/712827126696509520/alamo-img.jpg?width=887&height=499"
 ];
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (Math.random() < 0.001 && secrets.length) {
 			const image = secrets[Math.floor(Math.random() * secrets.length)];
 
-			msg.reply(`Você encontrou o café secreto <:pepe_omg:746842550530342912>`, emptyEmbed().setImage(image))
-				.catch(discordErrorHandler);
+			msg.channel.send({
+				content: `${msg.author} Você encontrou o café secreto <:pepe_omg:746842550530342912>`,
+				embeds: [{ ...Common.emptyEmbed(), image: { url: image } }]
+			}).catch(Common.discordErrorHandler);
 		} else {
-			request("https://coffee.alexflipnote.dev/random.json", { json: true }, (err, res, body) => {
-				if (err) {
-					msg.reply("deu isso aqui de errado, ó: `${err}`");
-					console.log(err);
-					return;
-				}
-
-				const image = body.file;
+			Common.simpleRequest("https://coffee.alexflipnote.dev/random.json").then(data => {
+				const image = JSON.parse(data).file;
 				msg.channel.send(image);
+			}).catch(err => {
+				msg.reply(`deu isso aqui de errado, ó: \`${err}\``);
+				Common.error(err);
 			});
 		}
 	},

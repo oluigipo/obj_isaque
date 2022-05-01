@@ -1,5 +1,6 @@
-import { Command, Arguments, Permission, discordErrorHandler, ArgumentKind, Emojis, Time } from "../../defs";
-import { Message, CollectorFilter } from "discord.js";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
+import { Message } from "discord.js";
+import * as Common from "../../common";
 
 enum Place { X, O, NONE };
 type Table = [[Place, Place, Place], [Place, Place, Place], [Place, Place, Place]];
@@ -107,9 +108,9 @@ function createSession(id1: string, id2: string) {
 }
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (args.length < 2) {
-			msg.reply("vê o help").catch(discordErrorHandler);
+			msg.reply("vê o help").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -118,15 +119,15 @@ export default <Command>{
 			case ArgumentKind.MEMBER:
 				if (i !== -1) {
 					const p = (sessions[i].player1 === msg.author.id) ? sessions[i].player2 : sessions[i].player1;
-					msg.reply(`Você já está em um jogo com <@${p}}>`).catch(discordErrorHandler);
+					msg.reply(`Você já está em um jogo com <@${p}}>`).catch(Common.discordErrorHandler);
 					return;
 				}
 
 				const other = args[1].value;
-				msg.react(Emojis.yes).then(() => {
-					const filter: CollectorFilter = (reaction, user) => reaction.emoji.name === Emojis.yes && user.id === other.id;
+				msg.react(Common.EMOJIS.yes).then(() => {
+					const filter = (reaction: any, user: any) => reaction.emoji.name === Common.EMOJIS.yes && user.id === other.id;
 
-					msg.awaitReactions(filter, { maxUsers: 1, time: Time.minute * 3 }).then(reactions => {
+					msg.awaitReactions({ filter, maxUsers: 1, time: Common.TIME.minute * 3 }).then(reactions => {
 						const reaction = reactions.first();
 
 						if (!reaction)
@@ -134,48 +135,48 @@ export default <Command>{
 
 						let j = sessions.push(createSession(msg.author.id, other.id));
 						msg.channel.send(sessionToString(sessions[j - 1]))
-							.catch(discordErrorHandler);
-					}).catch(discordErrorHandler);
+							.catch(Common.discordErrorHandler);
+					}).catch(Common.discordErrorHandler);
 
-				}).catch(discordErrorHandler);
+				}).catch(Common.discordErrorHandler);
 
 				break;
 			case ArgumentKind.NUMBER:
 				if (i === -1) {
-					msg.reply("você não está em uma partida").catch(discordErrorHandler);
+					msg.reply("você não está em uma partida").catch(Common.discordErrorHandler);
 					return;
 				}
 
 				const result = processSession(sessions[i], msg.author.id, args[1].value);
 				switch (result) {
 					case Result.NONE:
-						msg.channel.send(sessionToString(sessions[i])).catch(discordErrorHandler);
+						msg.channel.send(sessionToString(sessions[i])).catch(Common.discordErrorHandler);
 						break;
 					case Result.WIN_O:
-						msg.channel.send(`Parabéns, <@${sessions[i].player2}>!\n${tableToString(sessions[i].state)}`).catch(discordErrorHandler);
+						msg.channel.send(`Parabéns, <@${sessions[i].player2}>!\n${tableToString(sessions[i].state)}`).catch(Common.discordErrorHandler);
 						sessions = sessions.filter((_, ii) => ii !== i);
 						break;
 					case Result.WIN_X:
-						msg.channel.send(`Parabéns, <@${sessions[i].player1}>!\n${tableToString(sessions[i].state)}`).catch(discordErrorHandler);
+						msg.channel.send(`Parabéns, <@${sessions[i].player1}>!\n${tableToString(sessions[i].state)}`).catch(Common.discordErrorHandler);
 						sessions = sessions.filter((_, ii) => ii !== i);
 						break;
 					case Result.ALREADY_SELECTED:
-						msg.reply("essa posição já foi marcada").catch(discordErrorHandler);
+						msg.reply("essa posição já foi marcada").catch(Common.discordErrorHandler);
 						break;
 					case Result.INVALID_PLACE:
-						msg.reply("essa posição é inválida").catch(discordErrorHandler);
+						msg.reply("essa posição é inválida").catch(Common.discordErrorHandler);
 						break;
 					case Result.INVALID_TURN:
-						msg.reply("não é a sua vez").catch(discordErrorHandler);
+						msg.reply("não é a sua vez").catch(Common.discordErrorHandler);
 						break;
 					case Result.END:
-						msg.channel.send("deu velha\n" + tableToString(sessions[i].state)).catch(discordErrorHandler);
+						msg.channel.send("deu velha\n" + tableToString(sessions[i].state)).catch(Common.discordErrorHandler);
 						sessions = sessions.filter((_, ii) => ii !== i);
 						break;
 				}
 				break;
 			default:
-				msg.reply("você viu o help?").catch(discordErrorHandler);
+				msg.reply("você viu o help?").catch(Common.discordErrorHandler);
 				break;
 		}
 	},

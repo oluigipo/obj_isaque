@@ -1,19 +1,20 @@
-import { Command, Arguments, Permission, imageFrom, discordErrorHandler, imageAsAttachment, allowedImage } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
 import Jimp from "jimp";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
-		const img = imageFrom(msg, args);
+	async run(msg: Message, args: Argument[], raw: string[]) {
+		const img = Common.imageFrom(msg, args);
 
 		if (!img) {
-			msg.reply("manda uma imagem po").catch(discordErrorHandler);
+			msg.reply("manda uma imagem po").catch(Common.discordErrorHandler);
 			return;
 		}
 
 		Jimp.read(img).then(image => {
-			if (!allowedImage(image)) {
-				msg.reply("essa imagem é muito grande").catch(discordErrorHandler);
+			if (!Common.allowedImage(image)) {
+				msg.reply("essa imagem é muito grande").catch(Common.discordErrorHandler);
 				return;
 			}
 
@@ -25,11 +26,14 @@ export default <Command>{
 				.contrast(0.275)
 				.getBuffer(Jimp.MIME_JPEG, (err, buffer) => {
 					if (err) {
-						msg.reply("deu ruim").catch(discordErrorHandler);
+						msg.reply("deu ruim").catch(Common.discordErrorHandler);
 						throw err; // raise
 					}
 
-					msg.channel.send(`${msg.author}`, imageAsAttachment(buffer, "jpg"));
+					msg.channel.send({
+						content: `${msg.author}`,
+						...Common.imageAsAttachment(buffer, "jpg")
+					}).catch(Common.discordErrorHandler);
 				});
 		});
 	},

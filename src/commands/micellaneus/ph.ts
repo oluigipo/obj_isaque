@@ -1,17 +1,17 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Time, Channels, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
-import request from 'request';
+import * as Common from "../../common";
 
 let cache: any[] = [];
 let lastCached = -1;
 let index = 0;
 
-let timePerCache = Time.day;
+let timePerCache = Common.TIME.day;
 
 function sendMeme(msg: Message) {
-	let final = defaultEmbed(notNull(msg.member));
+	let final = Common.defaultEmbed(Common.notNull(msg.member));
 
 	const post = cache[index++];
 	const title = post.data.title.length > 256 ? `${post.data.title.slice(0, 253)}...` : post.data.title;
@@ -20,27 +20,22 @@ function sendMeme(msg: Message) {
 	final.url = `https://www.reddit.com${post.data.permalink}`;
 	final.image = { url: post.data.url };
 
-	msg.channel.send(final)
-		.catch(discordErrorHandler);
+	msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 }
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		let now = Date.now();
 
 		if (lastCached + timePerCache < now || index >= cache.length) {
-			request("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100", {}, (error, response) => {
-				if (error) {
-					console.log(error);
-					msg.channel.send(`${msg.author} Algo deu errado ao fazer a request para o Reddit...`)
-						.catch(discordErrorHandler);
-					return;
-				}
-
-				cache = JSON.parse(response.body).data.children.filter((post: any) => post.data.post_hint === 'image');
+			Common.simpleRequest("https://www.reddit.com/r/ProgrammerHumor/top/.json?sort=top&t=week&limit=100").then(data => {
+				cache = JSON.parse(data).data.children.filter((post: any) => post.data.post_hint === 'image');
 				index = 0;
 				lastCached = now;
 				sendMeme(msg);
+			}).catch(error => {
+				Common.error(error);
+				msg.channel.send(`${msg.author} Algo deu errado ao fazer a request para o Reddit...`).catch(Common.discordErrorHandler);
 			});
 		} else {
 			sendMeme(msg);

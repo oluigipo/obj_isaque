@@ -1,11 +1,12 @@
-import { Command, Arguments, Server, Permission, ArgumentKind, Emojis, defaultEmbed, notNull, discordErrorHandler, emptyEmbed, Channels } from "../../defs";
-import * as Moderation from "../../moderation";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message, GuildMember } from "discord.js";
+import * as Moderation from "../../moderation";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (args.length < 2) {
-			msg.channel.send("é pra banir quem?").catch(discordErrorHandler);
+			msg.channel.send("é pra banir quem?").catch(Common.discordErrorHandler);
 			return;
 		}
 		args.shift(); // consume command
@@ -27,7 +28,7 @@ export default <Command>{
 
 		for (const user of usersToBan) {
 			const result = Moderation.ban(user);
-			if (!result.success) {
+			if (!result.ok) {
 				final += `o(a) ${user} é muito forte para mim. ${result.error}\n`;
 				continue;
 			}
@@ -38,12 +39,12 @@ export default <Command>{
 		if (final === "")
 			final = "você precisa marcar o maluco";
 		else if (final.length > 2000)
-			final = `eita, você baniu tanta gente que passou do limite de 2000 chars do discord ${Emojis.surrender.repeat(3)}`;
+			final = `eita, você baniu tanta gente que passou do limite de 2000 chars do discord ${Common.EMOJIS.surrender.repeat(3)}`;
 
-		let embed = emptyEmbed();
+		let embed = Common.emptyEmbed();
 		embed.description = `${msg.author}\n${final}`;
-		Channels.logObject.send(embed).catch(discordErrorHandler);
-		msg.react(Emojis.yes).catch(discordErrorHandler);
+		Moderation.logChannel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
+		msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["<@user...> [reason]"],
 	permissions: Permission.MOD,

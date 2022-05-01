@@ -1,13 +1,15 @@
-import { Command, Arguments, Permission, ArgumentKind, cursedInvites, discordErrorHandler, Emojis } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
+import * as Moderation from "../../moderation";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (args.length > 1 && args[1].kind == ArgumentKind.STRING) {
-			cursedInvites.push(args[1].value);
-			msg.react(Emojis.yes).catch(discordErrorHandler);
+			Moderation.curseInvite(args[1].value);
+			msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 		} else {
-			msg.reply("me diz o invite").catch(discordErrorHandler);
+			msg.reply("me diz o invite").catch(Common.discordErrorHandler);
 		}
 	},
 	aliases: ["curse"],

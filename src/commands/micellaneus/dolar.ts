@@ -1,8 +1,8 @@
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull, ArgumentKind, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
-import request from 'request';
+import * as Common from "../../common";
 
-const moedas_cambio: any = {
+const moedasCambio: any = {
 	"CAD": "Dólar Canadense",
 	"HKD": "Dólar de Hong Kong",
 	"ISK": "Coroa islandesa",
@@ -39,46 +39,45 @@ const moedas_cambio: any = {
 };
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, _: string[]) {
+	async run(msg: Message, args: Argument[], _: string[]) {
 		let multiplier = 1;
 		let moeda = "USD";
 		args.shift(); // consume command
 
 		if (args.length > 0 && args[0].kind === ArgumentKind.STRING) {
 			const m = args[0].value.toUpperCase();
-			moeda = moedas_cambio[m] ? m : "USD";
+			moeda = moedasCambio[m] ? m : "USD";
 			args.shift();
 		}
 
 		if (args.length > 0 && args[0].kind === ArgumentKind.NUMBER)
 			multiplier = args[0].value;
 
-		request(`https://api.exchangeratesapi.io/latest?base=${moeda}&symbols=BRL`, { json: true }, (err, response) => {
-			if (err) {
-				console.error(err);
-				msg.channel.send(`${msg.author} Algo deu errado ao fazer a request para o API...`).catch(discordErrorHandler);
-				return;
-			}
+		Common.simpleRequest(`https://api.exchangeratesapi.io/latest?base=${moeda}&symbols=BRL`).then(data => {
+			let json = JSON.parse(data);
 
-			let data = response.body;
-			if (data.error) return msg.channel.send(data.error).catch(discordErrorHandler);
-			let num = data.rates.BRL;
-			let date = data.date;
+			let num = json.rates.BRL;
+			let date = json.date;
 
-			let emb = defaultEmbed(notNull(msg.member))
-				.addField(moedas_cambio[moeda], `**${multiplier}**`, true)
-				.addField(`≈`, `** ­**`, true)
-				.addField(`Real`, `**${(num * multiplier).toFixed(2)}**`, true)
-				.setFooter(`Data dos dados: ${date}`)
+			let emb = Common.defaultEmbed(Common.notNull(msg.member));
 
+			emb.fields = [
+				{ name: moedasCambio[moeda], value: `**${multiplier}**`, inline: true },
+				{ name: "≈", value: `** **`, inline: true },
+				{ name: "Real", value: `**${(num * multiplier).toFixed(2)}**`, inline: true },
+				{ name: `Data dos dados`, value: `${date}` },
+			];
 
-			msg.channel.send(emb).catch(discordErrorHandler);
+			msg.channel.send({ embeds: [emb] }).catch(Common.discordErrorHandler);
+		}).catch(error => {
+			Common.error(error);
+			msg.channel.send(`Algo deu errado ao fazer request pra API 😔`).catch(Common.discordErrorHandler);
 		});
 	},
 	syntaxes: ["", "[moeda] [quantidade]"],
 	permissions: Permission.SHITPOST,
 	aliases: ["cambio", "dolar"],
 	description: "Mostra o valor do dolar ou outras moedas, feito por <@310480160640073729>",
-	help: "Mostra o valor do dolar ou outras moedas (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>\nMoedas conhecidas: `" + Object.keys(moedas_cambio).join("`, `") + '`',
+	help: "Mostra o valor do dolar ou outras moedas (O valor não é atualizado em tempo real)\nAPI usada: [exchangeratesapi.io](https://exchangeratesapi.io/).\nFeito por <@310480160640073729>\nMoedas conhecidas: `" + Object.keys(moedasCambio).join("`, `") + '`',
 	examples: [``, `25`, "CAD", "EUR 15"]
 };

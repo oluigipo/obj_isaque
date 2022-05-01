@@ -1,26 +1,25 @@
-import { Command, Arguments, Permission, emptyEmbed, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message, MessageAttachment } from "discord.js";
-import request from "request";
+import * as Common from "../../common";
 
 const secrets: string[] = [];
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (Math.random() < 0.001 && secrets.length) {
 			const image = secrets[Math.floor(Math.random() * secrets.length)];
 
-			msg.reply(`Você encontrou o cachorro secreto <:pepe_omg:746842550530342912>`, emptyEmbed().setImage(image))
-				.catch(discordErrorHandler);
+			msg.channel.send({
+				content: `${msg.author} Você encontrou o cachorro secreto <:pepe_omg:746842550530342912>`,
+				embeds: [{ ...Common.emptyEmbed(), image: { url: image } }]
+			}).catch(Common.discordErrorHandler);
 		} else {
-			request("https://dog.ceo/api/breeds/image/random", { json: true }, (err, res, body) => {
-				if (err) {
-					msg.reply("deu isso aqui de errado, ó: `${err}`");
-					console.log(err);
-					return;
-				}
-
-				const image = body.message;
-				msg.channel.send(image);
+			Common.simpleRequest("https://dog.ceo/api/breeds/image/random").then(data => {
+				const image = JSON.parse(data).message;
+				msg.channel.send(image).catch(Common.discordErrorHandler);
+			}).catch(err => {
+				msg.reply("deu isso aqui de errado, ó: `${err}`").catch(Common.discordErrorHandler);
+				Common.error(err);
 			});
 		}
 	},

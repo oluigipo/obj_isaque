@@ -1,11 +1,12 @@
-import { Command, Arguments, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 import * as Balance from "../../balance";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (raw.length < 2) {
-			msg.reply("diz a descrição po").catch(discordErrorHandler);
+			msg.reply("diz a descrição po").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -18,13 +19,13 @@ export default <Command>{
 			.trim();
 
 		if (desc.length === 0) {
-			msg.reply("esses truques não funcionam comigo <:glaso:743838981703073823>").catch(discordErrorHandler);
+			msg.reply("esses truques não funcionam comigo <:glaso:743838981703073823>").catch(Common.discordErrorHandler);
 			return;
 		}
 
 		const result = Balance.changeDesc(msg.author.id, desc);
-		if (result.success) {
-			msg.reply("descrição alterada").catch(discordErrorHandler);
+		if (result.ok) {
+			msg.reply("descrição alterada").catch(Common.discordErrorHandler);
 		} else {
 			msg.reply("erro: " + result.error);
 		}

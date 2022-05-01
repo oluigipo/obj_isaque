@@ -1,17 +1,18 @@
-import { Command, Arguments, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		raw.shift();
 		let term = raw.join(" ");
 
 		if (term === "") {
-			msg.channel.send("pesquisar o quê?").catch(discordErrorHandler);
+			msg.channel.send("pesquisar o quê?").catch(Common.discordErrorHandler);
 		} else {
 			let uri = encodeURI(`https://google.com/search?q=${term}`);
 
-			msg.channel.send(uri).catch(discordErrorHandler);
+			msg.channel.send(uri).catch(Common.discordErrorHandler);
 		}
 	},
 	aliases: ["google"],

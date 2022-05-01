@@ -1,11 +1,12 @@
-import { Command, Arguments, Permission, ArgumentKind, Emojis, discordErrorHandler, defaultEmbed, notNull, emptyEmbed, Channels } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { GuildMember, Message } from "discord.js";
 import * as Moderation from "../../moderation";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (args.length < 2) {
-			msg.reply("desmutar quem?").catch(discordErrorHandler);
+			msg.reply("desmutar quem?").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -27,7 +28,7 @@ export default <Command>{
 
 			const result = Moderation.weakunmute(id, member);
 
-			if (!result.success) {
+			if (!result.ok) {
 				finalmsg += `Algo deu errado ao desmutar <@${id}>. \`${result.error}\`\n`;
 				continue;
 			}
@@ -45,15 +46,15 @@ export default <Command>{
 			finalmsg = "desmutar quem?";
 		else {
 			// update the db if someone was unmuted
-			Moderation.updateDB();
+			Moderation.updateDb();
 			if (finalmsg.length >= 2000)
-				finalmsg = `caraca, tá tão bonzinho que a mensagem passou do limite de 2000 chars do discord ${Emojis.surrender.repeat(3)}`
+				finalmsg = `caraca, tá tão bonzinho que a mensagem passou do limite de 2000 chars do discord ${Common.EMOJIS.surrender.repeat(3)}`
 		}
 
-		let embed = emptyEmbed();
+		let embed = Common.emptyEmbed();
 		embed.description = finalmsg;
-		Channels.logObject.send(embed).catch(discordErrorHandler);
-		msg.react(Emojis.yes).catch(discordErrorHandler);
+		Moderation.logChannel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
+		msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 	},
 	aliases: ["unmute"],
 	syntaxes: ["@users..."],

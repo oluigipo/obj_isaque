@@ -1,17 +1,17 @@
-import { Command, Arguments, Permission, discordErrorHandler } from "../../defs";
-import * as Defs from "../../defs";
+import { Command, Argument, Permission } from "../index";
+import * as Common from "../../common";
 import * as Moderation from "../../moderation";
 import * as Balance from "../../balance";
 import * as Giveaway from "../../giveaway";
 import { Message } from "discord.js";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		const expr = raw.slice(1).join(' ');
 
 		// @NOTE(luigi): don't remove.
 		// Typescript will remove those imports if they are not used.
-		Defs;
+		Common;
 		Moderation;
 		Balance;
 		Giveaway;
@@ -23,7 +23,7 @@ export default <Command>{
 			result = String(e);
 		}
 
-		msg.channel.send(result).catch(discordErrorHandler);
+		msg.channel.send(result).catch(Common.discordErrorHandler);
 	},
 	aliases: ["eval"],
 	syntaxes: ["expr"],

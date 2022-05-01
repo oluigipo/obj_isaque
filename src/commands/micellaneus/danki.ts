@@ -1,7 +1,8 @@
 // @NOTE(luigi): not checked
 
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 interface Item {
 	url: string;
@@ -68,6 +69,7 @@ const images: Item[] = [
 		description: "idk",
 	}
 ];
+
 let dankiImageCurrent = 0;
 
 function roll() {
@@ -76,7 +78,7 @@ function roll() {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Argument[], args: string[]) {
 		let curr: Item;
 
 		if (args.length < 2) {
@@ -90,14 +92,13 @@ export default <Command>{
 				curr = tmp;
 		}
 
-		let final = defaultEmbed(notNull(msg.member));
+		let final = Common.defaultEmbed(Common.notNull(msg.member));
 		final.image = { url: curr.url };
 		final.title = curr.title;
 		final.description = curr.description;
-		final.color = Server.botcolor;
+		final.color = Common.SERVER.botColor;
 
-		msg.channel.send(final)
-			.catch(discordErrorHandler);
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["", "<nome>"],
 	permissions: Permission.SHITPOST,

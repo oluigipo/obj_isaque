@@ -1,10 +1,11 @@
-import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		msg.channel.send(`https://cdn.discordapp.com/attachments/507552679946485770/558803280935780386/VID-20190319-WA0001_1.gif`)
-			.catch(discordErrorHandler);
+			.catch(Common.discordErrorHandler);
 	},
 	syntaxes: [""],
 	permissions: Permission.SHITPOST,

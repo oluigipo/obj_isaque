@@ -1,42 +1,27 @@
-import { Command, Arguments, Permission, emptyEmbed, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message, MessageAttachment } from "discord.js";
-import request from "request";
+import * as Common from "../../common";
 
 const secrets = [
 	"https://media.discordapp.net/attachments/431273314049327104/732632910380793987/izjr3ZWHr-QAtIZvlhg4dwBOgYFNDybZ-AKZFzDRFdE.png",
 ];
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		if (Math.random() < 0.001) {
 			const image = secrets[Math.floor(Math.random() * secrets.length)];
 
-			msg.reply(`Você encontrou o gato secreto <:pepe_omg:746842550530342912>`, emptyEmbed().setImage(image))
-				.catch(discordErrorHandler);
+			msg.channel.send({
+				content: `${msg.author} Você encontrou o gato secreto <:pepe_omg:746842550530342912>`,
+				embeds: [{ ...Common.emptyEmbed(), image: { url: image } }]
+			}).catch(Common.discordErrorHandler);
 		} else {
-			request("https://aws.random.cat/meow", (err, res, body) => {
-				if (err) {
-					msg.reply("deu isso aqui de errado, ó: `${err}`");
-					console.log(err);
-					return;
-				}
-
-				if (!body || !body.file)
-					try { // WHY???????????????
-						body = JSON.parse(res.body);
-					} catch (e) {
-						console.log(e);
-						return;
-					}
-
-				if (!body || !body.file) {
-					msg.reply("deu erro na request :(");
-					console.log(res);
-					return;
-				}
-
-				const image = body.file;
-				msg.channel.send(image);
+			await Common.simpleRequest("https://aws.random.cat/meow").then(data => {
+				const image = JSON.parse(data).file;
+				msg.channel.send(image).catch(Common.discordErrorHandler);
+			}).catch(err => {
+				msg.reply(`deu isso aqui de errado, ó: \`${err}\``).catch(Common.discordErrorHandler);
+				Common.error(err);
 			});
 		}
 	},

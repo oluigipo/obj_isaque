@@ -1,6 +1,7 @@
 import { MongoClient, Collection, MongoError } from "mongodb";
-import { defaultErrorHandler } from "./defs";
+import * as Common from "./common";
 
+// NOTE(ljre): Types and globals
 export let db: MongoClient;
 export const dbname = "maindb";
 export const collections = {
@@ -10,31 +11,33 @@ export const collections = {
 
 type CollectionName = keyof typeof collections;
 
-export async function init(uriTemplate: string, password: string) {
+// NOTE(ljre): Events
+export async function init(): Promise<boolean> {
 	let success = true;
+	const uriTemplate = Common.auth.mongoURI;
+	const password = Common.auth.mongo;
+
 	const uri = uriTemplate.replace("{password}", password).replace("{dbname}", dbname);
 
-	db = new MongoClient(uri, { useUnifiedTopology: true });
+	db = new MongoClient(uri, { /*useUnifiedTopology: true*/ });
 	await db.connect().catch(err => {
-		console.log(err);
+		Common.error(err);
 		success = false;
 	});
 
 	const dbo = db.db();
 
-	const errorHandler = (err: MongoError) => {
-		if (err) {
-			console.log(err);
-			success = false;
-		}
-	};
-
-	collections.mutes = dbo.collection("mutes", {}, errorHandler);
-	collections.balance = dbo.collection("balance", {}, errorHandler);
+	collections.mutes = dbo.collection("mutes", {});
+	collections.balance = dbo.collection("balance", {});
 
 	return success;
 }
 
+export async function done() {
+	await db.close();
+}
+
+// NOTE(ljre): API
 export async function readCollection(name: CollectionName, object: string): Promise<any>;
 export async function readCollection(name: CollectionName): Promise<{ [key: string]: any }>;
 
@@ -58,9 +61,5 @@ export async function writeCollection(name: CollectionName, object: string, valu
 	const projection = <any>{ _id: 0 };
 	projection[object] = 1;
 
-	await db.findOneAndUpdate({}, { $set }, { projection }).catch(defaultErrorHandler);
-}
-
-export async function done() {
-	await db.logout();
+	await db.findOneAndUpdate({}, { $set }, { projection }).catch(Common.error);
 }

@@ -1,13 +1,11 @@
-// @NOTE(luigi): not checked
-
-import { Command, Arguments, Server, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Argument[], args: string[]) {
 		if (args.length < 2) {
-			msg.reply("e o código?")
-				.catch(discordErrorHandler);
+			msg.reply("e o código?").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -16,10 +14,10 @@ export default <Command>{
 
 		if (result.success)
 			msg.channel.send(`${msg.author} Output: \`\`\` ${result.output}\`\`\`\nMemory: \`\`\`${result.memory}\`\`\``)
-				.catch(discordErrorHandler);
+				.catch(Common.discordErrorHandler);
 		else
 			msg.channel.send(`${msg.author} ${result.error}\nMemory: \`\`\`${result.memory}\`\`\``)
-				.catch(discordErrorHandler);
+				.catch(Common.discordErrorHandler);
 
 
 		type Result = { success: true, output: string, memory: string } | { success: false, error: string, memory: string };

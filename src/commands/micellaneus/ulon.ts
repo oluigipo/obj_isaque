@@ -1,10 +1,11 @@
-import { Command, Arguments, Server, Channels, Permission, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		msg.channel.send(`ULO${'O'.repeat(Math.floor(Math.random() * 201))}N`)
-			.catch(discordErrorHandler);
+			.catch(Common.discordErrorHandler);
 	},
 	syntaxes: [""],
 	permissions: Permission.SHITPOST,

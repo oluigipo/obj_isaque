@@ -1,14 +1,12 @@
-// @NOTE(luigi): still checkin
-
-import { Command, Arguments, Server, Permission, Time, formatTime, defaultEmbed, notNull, ArgumentKind, discordErrorHandler, defaultErrorHandler, Roles } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message, User, MessageReaction, Role } from "discord.js";
-import * as Giveaway from "../../giveaway.js";
+import * as Giveaway from "../../giveaway";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		if (args.length < 4) {
-			msg.reply(`Informações insuficientes! \`${Server.prefix}megasorteio <tempo> <quantidade> <prêmio>\``)
-				.catch(discordErrorHandler);
+			msg.reply(`Informações insuficientes! \`${Common.SERVER.prefix}megasorteio <tempo> <quantidade> <prêmio>\``).catch(Common.discordErrorHandler);
 			return;
 		}
 		args.shift();
@@ -20,15 +18,13 @@ export default <Command>{
 		}
 
 		if (args[0].kind !== ArgumentKind.TIME) {
-			msg.reply(`${args[0].value.toString()} não serve. Me diga um tempo válido`)
-				.catch(discordErrorHandler);
+			msg.reply(`${args[0].value.toString()} não serve. Me diga um tempo válido`).catch(Common.discordErrorHandler);
 			return;
 		}
 		const duration = args[0].value;
 
 		if (args[1].kind !== ArgumentKind.NUMBER) {
-			msg.reply(`me diz a quantidade de vencedores que vai ter, mesmo que seja só 1`)
-				.catch(discordErrorHandler);
+			msg.reply(`me diz a quantidade de vencedores que vai ter, mesmo que seja só 1`).catch(Common.discordErrorHandler);
 			return;
 		}
 		const qnt = args[1].value;
@@ -39,27 +35,26 @@ export default <Command>{
 
 		let final = {
 			type: "rich",
-			color: Server.botcolor,
+			color: Common.SERVER.botColor,
 			author: { name: msg.member?.displayName, icon_url: msg.member?.user?.avatarURL() ?? undefined },
 			footer: { text: msg.client.user?.username, icon_url: msg.client.user?.avatarURL() ?? undefined },
 			title: "MegaSorteio!",
-			description: `Para participar, reaja com ✅ nessa mensagem!`,
+			description: `Para participar, reaja com ${Common.EMOJIS.yes} nessa mensagem!`,
 			fields: [
 				...optional(role !== undefined, { name: "IMPORTANTE", value: `Apenas membros com o cargo ${role} podem participar!`, inline: true }),
 				{ name: "Prêmio", value: `${qnt} ${premio}`, inline: true },
 				{ name: "Organizador(a)", value: msg.author.toString(), inline: true },
-				{ name: "Duração", value: formatTime(duration), inline: true },
+				{ name: "Duração", value: Common.formatTime(duration), inline: true },
 			],
 		};
 
-		msg.channel.send("MegaSorteio!", { embed: final })
-		.then((mess) => {
-			mess.react('✅');
+		msg.channel.send({ content: "MegaSorteio!", embeds: [final] }).then((mess) => {
+			mess.react(Common.EMOJIS.yes);
 
 			Giveaway.createGiveaway(mess.id, duration, qnt, premio, role?.id, mess.channel.id);
 
 			return;
-		}).catch(discordErrorHandler);
+		}).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["[cargo] <tempo> <quantidade> <prêmio...>"],
 	permissions: Permission.MOD,

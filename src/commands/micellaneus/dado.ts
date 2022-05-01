@@ -1,6 +1,7 @@
-import { Command, Arguments, Permission, Time, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
 import { mute } from "../../moderation";
+import * as Common from "../../common";
 
 const DICE_REGEX = /(\d*)d(\d+)/;
 
@@ -18,13 +19,13 @@ function roll(count: number, sides: number): number | string {
 const RITUAL = ["prim$", "di$", "trim$", "quadri$", "m$n", "quarteri$", "ept$", "$to", "$ene", "d$c", "entec$", "mid$"];
 
 export default <Command>{
-	async run(msg: Message, _: Arguments, args: string[]) {
+	async run(msg: Message, _: Argument[], args: string[]) {
 		let expr = args.slice(1).join(' ').trim();
 
 		if (expr.length === 0)
-			return msg.channel.send(`Voce rolou um d6 e conseguiu ${roll(1, 6)}`).catch(discordErrorHandler);
+			return msg.channel.send(`Voce rolou um d6 e conseguiu ${roll(1, 6)}`).catch(Common.discordErrorHandler);
 		if (expr === "em casa")
-			return msg.channel.send(`<:renda:551130874750566401>`).catch(discordErrorHandler);
+			return msg.channel.send(`<:renda:551130874750566401>`).catch(Common.discordErrorHandler);
 
 		// @NOTE(luigi): disabled
 		// if (args[1] === "mortis") {
@@ -45,14 +46,16 @@ export default <Command>{
 		// 	return msg.channel.send(`Voce escolheu o dado da morte, para rolar seu destino digite \`!!dado mortis ${cmd}\``).catch(discordErrorHandler);
 		// }
 
-		const match = DICE_REGEX.exec(expr)
+		const match = DICE_REGEX.exec(expr);
 		if (match) {
 			let count = parseInt(match[1]);
 			count = isNaN(count) ? 1 : count;
+
 			let faces = parseInt(match[2]);
-			return msg.channel.send(`Voce rolou um ${match[0]} e conseguiu ${roll(count, faces)}`).catch(discordErrorHandler);
+			msg.channel.send(`Voce rolou um ${match[0]} e conseguiu ${roll(count, faces)}`).catch(Common.discordErrorHandler);
+		} else {
+			msg.channel.send(`Não entendi essa expressão`).catch(Common.discordErrorHandler);
 		}
-		return msg.channel.send(`Não entendi essa expressão`).catch(discordErrorHandler);
 	},
 	syntaxes: ["[numero = 6]", "<dice notation>"],
 	permissions: Permission.SHITPOST,

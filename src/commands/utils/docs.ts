@@ -1,7 +1,8 @@
-import { Command, Arguments, Server, Permission, defaultEmbed, notNull, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission } from "../index";
 import { Message, GuildMember } from "discord.js";
 import * as stringSimilarity from 'string-similarity';
 import fs from 'fs';
+import * as Common from "../../common";
 
 type Table = string[][];
 
@@ -89,7 +90,7 @@ function tableToText(table: Table): string {
 }
 
 function sendPage(msg: Message, locale: LocaleStrings, page: DefinitionPage, redirected?: string) {
-	let embed = defaultEmbed(<any>msg.member);
+	let embed = Common.defaultEmbed(Common.notNull(msg.member));
 	let truncated = false;
 
 	function addField(name: string, data: any) {
@@ -100,33 +101,42 @@ function sendPage(msg: Message, locale: LocaleStrings, page: DefinitionPage, red
 			truncated = true;
 		}
 
-		embed.addField(name, str);
+		embed.fields.push({ name, value: str });
 	}
 
-	try {
-		embed.title = page.name
-		embed.description = page.description;
-		embed.url = page.url;
-		if (redirected) embed.title += ` - ${locale.redirected} (${redirected})`;
-		if (page.constants) addField(locale.constants, tableToText(page.constants));
-		if (page.imageUrl) embed.image = { url: page.imageUrl };
-		for (const note of page.notes) addField(locale.note + ":", note);
-		if (page.syntax) addField(locale.syntax, `\`${page.syntax}\``);
-		if (page.params && page.params.length > 0) addField(locale.params, tableToText(page.params));
-		if (page.returns) addField(locale.returns, page.returns);
-		if (page.returnConstants) addField(locale.constants, tableToText(page.returnConstants));
-		if (page.example) addField(locale.example, page.example);
-	} catch (e) {
-		msg.reply(`Aqui está o link. Infelizmente essa página é muito grande para o discord aguentar 😔\n${page.url}`).catch(discordErrorHandler);
-		return;
+	
+	embed.title = page.name
+	embed.description = page.description;
+	embed.url = page.url;
+	if (redirected)
+		embed.title += ` - ${locale.redirected} (${redirected})`;
+	if (page.constants)
+		addField(locale.constants, tableToText(page.constants));
+	if (page.imageUrl)
+		embed.image = { url: page.imageUrl };
+	for (const note of page.notes)
+		addField(locale.note + ":", note);
+	if (page.syntax)
+		addField(locale.syntax, `\`${page.syntax}\``);
+	if (page.params && page.params.length > 0)
+		addField(locale.params, tableToText(page.params));
+	if (page.returns)
+		addField(locale.returns, page.returns);
+	if (page.returnConstants)
+		addField(locale.constants, tableToText(page.returnConstants));
+	if (page.example)
+		addField(locale.example, page.example);
+
+	if (!Common.validateEmbed(embed)) {
+		msg.reply(`Aqui está o link. Infelizmente essa página é muito grande para o discord aguentar 😔\n${page.url}`).catch(Common.discordErrorHandler);
 	}
 
 	let m = !truncated ? undefined : "OBS: essa página era muito grande para eu conseguir enviá-la por completo 😔";
-	msg.channel.send(m, embed).catch(discordErrorHandler);
+	msg.channel.send({ content: m, embeds: [embed] }).catch(Common.discordErrorHandler);
 }
 
 export default <Command> {
-	async run(msg: Message, args: Arguments, raw: string[]) {
+	async run(msg: Message, args: Argument[], raw: string[]) {
 		let docs = docsEnglish;
 
 		if (["docsbr", "gmdocsbr"].includes(raw[0])) {
@@ -134,7 +144,7 @@ export default <Command> {
 		}
 
 		if (raw.length < 2) {
-			msg.reply(docs.mainPageUrl).catch(discordErrorHandler);
+			msg.reply(docs.mainPageUrl).catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -150,7 +160,7 @@ export default <Command> {
 		} else {
 			const funcs = closest(docs, query);
 
-			let embed = defaultEmbed(<any>msg.member);
+			let embed = Common.defaultEmbed(<any>msg.member);
 			embed.description = `Não foi possível encontrar a página de \`${query}\`. Você quis dizer algumas das seguintes dessas?\n`;
 
 			for (const fn of funcs) {
@@ -160,7 +170,7 @@ export default <Command> {
 					embed.description += " (Redirected)";
 			}
 
-			const finalmsg = await msg.channel.send(embed).catch(discordErrorHandler);
+			const finalmsg = await msg.channel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
 			if (!finalmsg)
 				return;
 
@@ -175,13 +185,12 @@ export default <Command> {
 				}
 			})();
 
-			let pageIndexToSend = await finalmsg.awaitReactions(
-										((reaction, user) => numbers.includes(reaction.emoji.name) && user.id === msg.author.id),
-										{ max: 1, time: 60000, errors: ['time'] })
-				.then(collection => {
-					return numbers.indexOf(collection.first()?.emoji?.name ?? "");
-				})
-				.catch(() => -1);
+			let pageIndexToSend = await finalmsg.awaitReactions({
+				max: 1, time: 60000, errors: ['time'],
+				filter: ((reaction: any, user: any) => numbers.includes(reaction.emoji.name) && user.id === msg.author.id),
+			}).then(collection => {
+				return numbers.indexOf(collection.first()?.emoji?.name ?? "");
+			}).catch(() => -1);
 
 			if (pageIndexToSend !== -1) {
 				page = docs.pages[funcs[pageIndexToSend].name];

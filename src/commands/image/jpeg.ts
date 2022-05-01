@@ -1,32 +1,34 @@
-import { Command, Arguments, Permission, defaultErrorHandler, ArgumentKind, discordErrorHandler, imageFrom, processImage, imageAsAttachment } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
 import Jimp from "jimp";
+import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
-		let img: string | Jimp | undefined = imageFrom(msg, args);
+	async run(msg: Message, args: Argument[], raw: string[]) {
+		let img: string | Jimp | undefined = Common.imageFrom(msg, args);
 
 		if (!img) {
-			msg.reply("manda uma imagem po").catch(discordErrorHandler);
+			msg.reply("manda uma imagem po").catch(Common.discordErrorHandler);
 			return;
 		}
 
-		processImage(img, (image: Jimp) => {
+		Common.processImage(img, (image: Jimp) => {
 			image.quality(4)
 				.getBuffer(Jimp.MIME_JPEG, (err, buffer) => {
 					if (err) {
-						defaultErrorHandler(err);
+						Common.error(err);
 						msg.reply("deu ruim");
 						return;
 					}
 
-					msg.channel.send(`${msg.author} olha`, imageAsAttachment(buffer, "jpg"))
-						.catch(discordErrorHandler);
+					msg.channel.send({
+						content: `${msg.author} olha`,
+						...Common.imageAsAttachment(buffer, "jpg")
+					}).catch(Common.discordErrorHandler);
 				});
 		}).catch(err => {
-			defaultErrorHandler(err);
-			msg.reply("tem certeza que isso é uma imagem?")
-				.catch(discordErrorHandler);
+			Common.error(err);
+			msg.reply("tem certeza que isso é uma imagem?").catch(Common.discordErrorHandler);
 		});
 	},
 	aliases: ["jpeg", "jpg"],

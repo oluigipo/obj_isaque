@@ -1,5 +1,6 @@
-import { Command, Arguments, Server, Permission, ArgumentKind, discordErrorHandler } from "../../defs";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
 import { Message } from "discord.js";
+import * as Common from "../../common";
 
 // Variáveis que serão usadas só nesse comando
 const playlists: any = {
@@ -12,19 +13,16 @@ const playlists: any = {
 	"space-shooter": "https://www.youtube.com/watch?v=iRPrja28xw0&list=PLKTRv0drNjJ94fSGpbw2bLX7IU8fdzB22"
 };
 
-type __index = "primeiro-jogo" | "rpg" | "plataforma" | "dialogo" | "animacao" | "tiro";
-
 // Comando
 export default <Command>{
-	async run(msg: Message, args: Arguments) {
+	async run(msg: Message, args: Argument[]) {
 		let link = "https://www.youtube.com/channel/UCHJPSW9FgSoXGVFV489XXag";
 
 		if (args.length > 1 && args[1].kind === ArgumentKind.STRING) {
 			link = playlists[args[1].value] ?? link;
 		}
 
-		msg.channel.send(`${msg.author} ${link}`)
-			.catch(discordErrorHandler);
+		msg.channel.send(`${msg.author} ${link}`).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["", "<nome da playlist>"],
 	permissions: Permission.NONE,

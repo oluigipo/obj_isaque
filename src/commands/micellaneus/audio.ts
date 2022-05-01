@@ -1,5 +1,7 @@
-import { Command, Arguments, Permission, discordErrorHandler, Time, Emojis, ArgumentKind, defaultErrorHandler } from "../../defs";
-import { Message } from "discord.js";
+import { Command, Argument, Permission, ArgumentKind } from "../index";
+import { Message, VoiceChannel } from "discord.js";
+import * as Common from "../../common";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus  } from "@discordjs/voice";
 
 const audios = {
 	ola: "ola-pessoal",
@@ -10,15 +12,16 @@ const audios = {
 
 type Key = keyof typeof audios;
 const keys = <Key[]>Object.keys(audios);
+let alreadyPlaying = false;
 
 export default <Command>{
-	async run(msg: Message, args: Arguments, raw: string[]) {
-		if (!msg.member || !msg.member.voice.channel || msg.client.voice?.connections.size) {
-			msg.react(Emojis.no);
+	async run(msg: Message, args: Argument[], raw: string[]) {
+		if (!msg.member || !msg.member.voice.channel || alreadyPlaying || msg.member.voice.channel.type === "GUILD_STAGE_VOICE") {
+			msg.react(Common.EMOJIS.no);
 			return;
 		}
 
-		msg.react(Emojis.yes);
+		msg.react(Common.EMOJIS.yes);
 		let key = keys[Math.floor(Math.random() * keys.length)];
 		let audio = audios[key];
 
@@ -26,13 +29,27 @@ export default <Command>{
 			audio = audios[<Key>args[1].value] ?? audio;
 		}
 
-		msg.member.voice.channel.join().then(connection => {
-			const dispatcher = connection.play(`assets/${audio}.ogg`);
+		// NOTE(ljre): We can't have more than one audio playing at the same time anyway.
+		alreadyPlaying = true;
 
-			const action = () => setTimeout(() => connection.disconnect(), Time.second);
-			dispatcher.on("finish", action);
-			dispatcher.on("error", err => (defaultErrorHandler(err), action()));
-		}).catch(discordErrorHandler);
+		const audioResource = createAudioResource(`assets/${audio}.ogg`);
+		const audioPlayer = createAudioPlayer();
+
+		audioPlayer.play(audioResource);
+
+		const connection = joinVoiceChannel({
+			channelId: msg.member?.voice.channel.id,
+			guildId: msg.member?.guild.id,
+			adapterCreator: Common.notNull(msg.guild).voiceAdapterCreator,
+		});
+
+		connection.subscribe(audioPlayer);
+
+		audioPlayer.on(AudioPlayerStatus.Idle, () => {
+			audioPlayer.stop();
+			connection.destroy();
+			alreadyPlaying = false;
+		});
 	},
 	aliases: ["audio", "efeito_especial_muito_louco"],
 	syntaxes: ["[audio = random]"],

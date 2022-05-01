@@ -1,6 +1,6 @@
-import { collections, readCollection, writeCollection } from "./database";
-import { defaultErrorHandler, Response, Time, Channels, Server } from "./defs";
-import { Message, Guild, GuildMemberRoleManager, Client } from "discord.js";
+import * as Database from "./database";
+import * as Common from "./common";
+import * as Discord from "discord.js";
 
 export enum Medal {
 	NONE = 0,
@@ -29,8 +29,18 @@ export interface Event {
 	prize: number | string;
 };
 
-let users: User[] = [];
+export interface EventResult {
+	[key: string]: "SUCCESS" | "NOT REGISTERED" | "NO MONEY";
+};
+
+export interface EventWinner {
+	user: string;
+	points: number;
+	prize: string | number;
+};
+
 export let event: Event | undefined;
+let users: User[] = [];
 let stagedUpdate: NodeJS.Timeout | undefined;
 
 const emptyUser = (id: string): User => ({
@@ -56,26 +66,46 @@ export const Medals: { emoji: string, name: string }[] = [
 	{ emoji: '<:capitao_none:582605020340682773>', name: "Terminou o Curso" }
 ];
 
-const Levels = ["748343273852108915", "748342968099930204", "748341527264362516"];
-const LevelMul = [4, 2, 1.5];
+const levels = ["748343273852108915", "748342968099930204", "748341527264362516"];
+const levelMul = [4, 2, 1.5];
 
-export const prayColldown = Time.hour * 22;
+export const prayColldown = Common.TIME.hour * 22;
 
-let client: Client;
-
-/**
- * Initializes everything.
- */
-export async function init(c: Client) {
-	client = c;
+// NOTE(ljre): Events
+export async function init() {
 	await loadDB();
+
+	return true;
 }
 
-/**
- * Loads the database.
- */
+export async function done() {
+	if (stagedUpdate !== undefined) {
+		clearTimeout(stagedUpdate);
+		await updateDB();
+	}
+}
+
+export function message(msg: Discord.Message) {
+	if (msg.guild?.id !== Common.SERVER.id || Common.CHANNELS.shitpost.includes(<string>msg.channel?.id))
+		return;
+
+	const index = users.findIndex(u => u.id === msg.author.id);
+	if (index === -1) {
+		return;
+	}
+
+	if (++users[index].messages >= 100) {
+		users[index].messages = 0;
+		users[index].money += 50 * multiplierOf(msg.member?.roles);
+
+		if (stagedUpdate === undefined)
+			stagedUpdate = setTimeout(updateDB, Common.TIME.minute * 5);
+	}
+}
+
+// NOTE(ljre): Functions
 async function loadDB() {
-	const objs = await readCollection("balance");
+	const objs = await Database.readCollection("balance");
 
 	users = objs.users;
 	event = objs.event;
@@ -83,39 +113,37 @@ async function loadDB() {
 		event = undefined;
 }
 
-/**
- * Updates the database. Try to not call this function frequently.
- */
 export async function updateDB() {
 	if (stagedUpdate !== undefined) {
 		clearTimeout(stagedUpdate);
 		stagedUpdate = undefined;
 	}
 
-	await writeCollection("balance", "users", users);
+	await Database.writeCollection("balance", "users", users);
 }
 
+// NOTE(ljre): API
 /**
  * @note This function DOESN'T update the database when it's called.
  * @param userid User's id
  */
-export function weakCreateUser(userid: string): Response {
+export function weakCreateUser(userid: string): Common.Result {
 	const index = users.findIndex(u => u.id === userid);
 	if (index !== -1)
-		return { success: false, error: "usuário/você já está registrado" };
+		return { ok: false, error: "usuário/você já está registrado" };
 
 	users.push(emptyUser(userid));
 
-	return { success: true, data: undefined };
+	return { ok: true, data: undefined };
 }
 
 /**
  * @note This function DOES update the database when it's called.
  * @param userid User's id
  */
-export function createUser(userid: string): Response {
+export function createUser(userid: string): Common.Result {
 	const result = weakCreateUser(userid);
-	if (result.success)
+	if (result.ok)
 		updateDB();
 	return result;
 }
@@ -124,11 +152,11 @@ export function createUser(userid: string): Response {
  * @returns An copy of the user.
  * @param userid User's id
  */
-export function userData(userid: string): Response<User> {
+export function userData(userid: string): Common.Result<User> {
 	const index = users.findIndex(u => u.id === userid);
 	if (index === -1)
-		return { success: false, error: "usuário/você não está registrado" };
-	return { success: true, data: { ...users[index] } };
+		return { ok: false, error: "usuário/você não está registrado" };
+	return { ok: true, data: { ...users[index] } };
 }
 
 /**
@@ -140,42 +168,42 @@ export function richest(page: number, qnt: number): User[] {
 	return users.sort((u1, u2) => u2.money - u1.money).slice(page * qnt, (page + 1) * qnt);
 }
 
-export function giveMedal(userid: string, medal: string): Response {
+export function giveMedal(userid: string, medal: string): Common.Result {
 	const index = users.findIndex(u => u.id === userid);
 	if (index === -1) {
-		return { success: false, error: "usuário/você não está registrado" };
+		return { ok: false, error: "usuário/você não está registrado" };
 	}
 
 	const user = users[index];
 	const m = medalTable[medal];
 
 	if (!m) {
-		return { success: false, error: "medalha não existe" };
+		return { ok: false, error: "medalha não existe" };
 	}
 
 	user.medals |= m;
 	updateDB();
 
-	return { success: true, data: void 0 };
+	return { ok: true, data: void 0 };
 }
 
-export function removeMedal(userid: string, medal: string): Response {
+export function removeMedal(userid: string, medal: string): Common.Result {
 	const index = users.findIndex(u => u.id === userid);
 	if (index === -1) {
-		return { success: false, error: "usuário/você não está registrado" };
+		return { ok: false, error: "usuário/você não está registrado" };
 	}
 
 	const user = users[index];
 	const m = medalTable[medal];
 
 	if (!m) {
-		return { success: false, error: "medalha não existe" };
+		return { ok: false, error: "medalha não existe" };
 	}
 
 	user.medals &= ~m;
 	updateDB();
 
-	return { success: true, data: void 0 };
+	return { ok: true, data: void 0 };
 }
 
 export function medals(m: Medal) {
@@ -197,95 +225,93 @@ export function medals(m: Medal) {
 // 	updateDB();
 // }
 
-export function changeDesc(userid: string, desc: string): Response {
+export function changeDesc(userid: string, desc: string): Common.Result {
 	const index = users.findIndex(u => u.id === userid);
 	if (index === -1) {
-		return { success: false, error: "usuário/você não está registrado" };
+		return { ok: false, error: "usuário/você não está registrado" };
 	}
 
 	users[index].description = desc;
 	updateDB();
-	return { success: true, data: void 0 };
+	return { ok: true, data: void 0 };
 }
 
-export function prize(usersids: string[], qnt: number, mult = true): Response<number>[] {
-	let success = <Response<number>[]>[];
+export function prize(usersids: string[], qnt: number, mult = true): Common.Result<number>[] {
+	let success = <Common.Result<number>[]>[];
 
 	for (let i = 0; i < usersids.length; i++) {
 		const userid = usersids[i];
 		const index = users.findIndex(u => u.id === userid);
 		if (index === -1) {
-			success[i] = { success: false, error: "usuário não está registrado" };
+			success[i] = { ok: false, error: "usuário não está registrado" };
 			continue;
 		}
 
-		success[i] = { success: true, data: (users[index].money += qnt * (mult ? multiplierOf(userid) : 1)) };
+		success[i] = { ok: true, data: (users[index].money += qnt * (mult ? multiplierOf(userid) : 1)) };
 	}
 
 	updateDB();
 	return success;
 }
 
-export function buy(userid: string, qnt: number, zero = false): Response<boolean> {
+export function buy(userid: string, qnt: number, zero = false): Common.Result<boolean> {
 	const index = users.findIndex(u => u.id === userid);
 	if (index === -1) {
-		return { success: false, error: "usuário/você não está registrado" };
+		return { ok: false, error: "usuário/você não está registrado" };
 	}
 
 	const user = users[index];
 	if (user.money < qnt) {
 		if (zero) user.money = 0;
-		return { success: true, data: false };
+		return { ok: true, data: false };
 	}
 
 	user.money -= qnt;
-	return { success: true, data: true };
+	return { ok: true, data: true };
 }
 
-export function multiplierOf(roles?: GuildMemberRoleManager | string): number {
+export function multiplierOf(roles?: Discord.GuildMemberRoleManager | string): number {
 	if (typeof roles === "string") {
-		roles = client.guilds.cache.get(Server.id)?.members.cache.get(roles)?.roles;
+		roles = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(roles)?.roles;
 	}
 
 	if (!roles)
 		return 1;
 
-	for (let i = 0; i < Levels.length; i++) {
-		if (roles.cache.has(Levels[i]))
-			return LevelMul[i];
+	for (let i = 0; i < levels.length; i++) {
+		if (roles.cache.has(levels[i]))
+			return levelMul[i];
 	}
 
 	return 1;
 }
 
-export function transfer(id1: string, id2: string, qnt: number): Response<undefined> {
+export function transfer(id1: string, id2: string, qnt: number): Common.Result<undefined> {
 	const index1 = users.findIndex(u => u.id === id1);
 	const index2 = users.findIndex(u => u.id === id2);
 
 	if (index1 === -1 || index2 === -1) {
-		return { success: false, error: "usuário/você não está registrado" };
+		return { ok: false, error: "usuário/você não está registrado" };
 	}
 
 	if (users[index1].money < qnt) {
-		return { success: false, error: "usuário/você não tem dinheiro o suficiente para a transferência" };
+		return { ok: false, error: "usuário/você não tem dinheiro o suficiente para a transferência" };
 	}
 
 	users[index1].money -= qnt;
 	users[index2].money += qnt;
 	updateDB();
 
-	return { success: true, data: void 0 };
+	return { ok: true, data: void 0 };
 }
 
-export const userCount = () => users.length;
+export function userCount() {
+	return users.length;
+}
 
-interface EventResult {
-	[key: string]: "SUCCESS" | "NOT REGISTERED" | "NO MONEY";
-};
-
-export function beginEvent(msg: string, cost: number, prize: number | string, users: string[]): Response<EventResult> {
+export function beginEvent(msg: string, cost: number, prize: number | string, users: string[]): Common.Result<EventResult> {
 	if (event) {
-		return { success: false, error: "Não posso rodar mais de um evento ao mesmo tempo" };
+		return { ok: false, error: "Não posso rodar mais de um evento ao mesmo tempo" };
 	}
 
 	const ev = <Event>{ msg, cost, users: {}, prize };
@@ -294,7 +320,7 @@ export function beginEvent(msg: string, cost: number, prize: number | string, us
 	for (const user of users) {
 		const r = buy(user, cost);
 
-		if (!r.success) {
+		if (!r.ok) {
 			result[user] = "NOT REGISTERED";
 			continue;
 		}
@@ -309,42 +335,36 @@ export function beginEvent(msg: string, cost: number, prize: number | string, us
 	}
 
 	event = ev;
-	writeCollection("balance", "event", event);
+	Database.writeCollection("balance", "event", event);
 	updateDB();
 
-	return { success: true, data: result };
+	return { ok: true, data: result };
 }
 
-export function eventPoint(user: string, qnt = 1): Response<number> {
+export function eventPoint(user: string, qnt = 1): Common.Result<number> {
 	if (!event) {
-		return { success: false, error: "Não existe um evento acontecendo no momento" };
+		return { ok: false, error: "Não existe um evento acontecendo no momento" };
 	}
 
 	const points = event.users[user];
 	if (points === void 0) {
-		return { success: false, error: "Esse usuário não está participando" };
+		return { ok: false, error: "Esse usuário não está participando" };
 	}
 
 	event.users[user] += qnt;
-	writeCollection("balance", "event", event);
+	Database.writeCollection("balance", "event", event);
 
-	return { success: true, data: event.users[user] };
+	return { ok: true, data: event.users[user] };
 }
 
-interface EventWinner {
-	user: string;
-	points: number;
-	prize: string | number;
-};
-
-export function finishEvent(): Response<EventWinner, string[]> {
+export function finishEvent(): Common.Result<EventWinner, string[]> {
 	if (!event) {
-		return { success: false, error: "Não existe um evento acontecendo no momento" };
+		return { ok: false, error: "Não existe um evento acontecendo no momento" };
 	}
 
 	const keys = Object.keys(event.users);
 	if (keys.length === 0) {
-		return { success: false, error: "Não tem nenhum participante nesse evento" };
+		return { ok: false, error: "Não tem nenhum participante nesse evento" };
 	}
 
 	let winners = <EventWinner[]>[];
@@ -357,7 +377,7 @@ export function finishEvent(): Response<EventWinner, string[]> {
 	winners = winners.filter(w => w.points >= winners[0].points);
 
 	if (winners.length > 1) {
-		return { success: false, error: "Empate!", extra: winners.reduce((acc, val) => (acc.push(val.user), acc), <string[]>[]) };
+		return { ok: false, error: "Empate!", extra: winners.reduce((acc, val) => (acc.push(val.user), acc), <string[]>[]) };
 	}
 
 	if (typeof event.prize === "number")
@@ -365,32 +385,7 @@ export function finishEvent(): Response<EventWinner, string[]> {
 
 	event = undefined;
 
-	writeCollection("balance", "event", event);
+	Database.writeCollection("balance", "event", event);
 
-	return { success: true, data: winners[0] };
-}
-
-export function onMessage(msg: Message) {
-	if (msg.guild?.id !== Server.id || Channels.shitpost.includes(<string>msg.channel?.id))
-		return;
-
-	const index = users.findIndex(u => u.id === msg.author.id);
-	if (index === -1) {
-		return;
-	}
-
-	if (++users[index].messages >= 100) {
-		users[index].messages = 0;
-		users[index].money += 50 * multiplierOf(msg.member?.roles);
-
-		if (stagedUpdate === undefined)
-			stagedUpdate = setTimeout(updateDB, Time.minute * 5);
-	}
-}
-
-export async function onExit() {
-	if (stagedUpdate !== undefined) {
-		clearTimeout(stagedUpdate);
-		await updateDB();
-	}
+	return { ok: true, data: winners[0] };
 }

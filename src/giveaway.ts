@@ -1,7 +1,10 @@
-import { Client, GuildMember, TextChannel, User } from "discord.js";
-import { defaultErrorHandler, discordErrorHandler, Emojis, Roles } from "./defs";
-import { collections, readCollection, writeCollection } from "./database";
+import Discord from "discord.js";
+import { REST } from "@discordjs/rest";
+import * as Common from "./common";
+import * as Commands from "./commands";
+import * as Database from "./database";
 
+// NOTE(ljre): Events
 export interface Giveaway {
 	ends: number;
 	qnt: number; // unsigned
@@ -11,18 +14,20 @@ export interface Giveaway {
 	channel?: string; // id
 }
 
-export let client: Client;
 export let giveaways: Giveaway[] = [];
 export let scheduled: NodeJS.Timeout | undefined;
 
-export async function init(_client: Client) {
-	client = _client;
-
+// NOTE(ljre): Events
+export async function init() {
 	await loadDB();
-
 	scheduleGiveaway();
 }
 
+export async function done() {
+	await updateDB();
+}
+
+// NOTE(ljre): Functions
 function scheduleGiveaway() {
 	if (giveaways.length > 0) {
 		if (scheduled)
@@ -41,30 +46,34 @@ function scheduleGiveaway() {
 }
 
 async function loadDB() {
-	giveaways = await readCollection("balance", "giveaways");
+	giveaways = await Database.readCollection("balance", "giveaways");
 }
 
 async function updateDB() {
-	writeCollection("balance", "giveaways", giveaways);
+	await Database.writeCollection("balance", "giveaways", giveaways);
 }
 
 async function execGiveaway(giveaway: Giveaway) {
-	const tmpChannel = await client.channels.fetch(giveaway.channel ?? "632359792010199104").catch(discordErrorHandler);
-	if (!tmpChannel || tmpChannel.type !== "text") return;
+	const tmpChannel = await Common.client.channels.fetch(giveaway.channel ?? "632359792010199104").catch(Common.discordErrorHandler);
+	if (!tmpChannel || Commands.validChannelTypes.includes(tmpChannel.type))
+		return;
 
-	const channel = <TextChannel>tmpChannel;
-	const message = await channel.messages.fetch(giveaway.msg).catch(discordErrorHandler);
-	if (!message) return;
+	const channel = <Discord.TextChannel>tmpChannel;
+	const message = await channel.messages.fetch(giveaway.msg).catch(Common.discordErrorHandler);
+	if (!message)
+		return;
 
-	const reaction = message.reactions.cache.get(Emojis.yes);
-	if (!reaction) return;
+	const reaction = message.reactions.cache.get(Common.EMOJIS.yes);
+	if (!reaction)
+		return;
 
-	const users = await reaction.users.fetch().catch(discordErrorHandler);
-	if (!users) return;
+	const users = await reaction.users.fetch().catch(Common.discordErrorHandler);
+	if (!users)
+		return;
 
-	let member: GuildMember | undefined;
+	let member: Discord.GuildMember | undefined;
 	const winners = users
-		.filter(user => !user.bot && (member = channel.members.get(user.id), member !== void 0 && member.roles.cache.has(giveaway.role ?? Roles.community)))
+		.filter(user => !user.bot && (member = channel.members.get(user.id), member !== void 0 && member.roles.cache.has(giveaway.role ?? Common.ROLES.community)))
 		.random(giveaway.qnt)
 		.filter(user => user !== undefined) // why tf does .random add padding undefined????
 		;
@@ -75,14 +84,15 @@ async function execGiveaway(giveaway: Giveaway) {
 		if (giveaway.qnt > winners.length)
 			text += `\n\nMas ainda sobrou ${giveaway.qnt - winners.length} prêmio(s)!`;
 
-		channel.send(text).catch(discordErrorHandler);
+		channel.send(text).catch(Common.discordErrorHandler);
 	} else {
-		channel.send("Poxa, ninguém ganhou :pensive:");
+		channel.send("Poxa, ninguém ganhou :pensive:").catch(Common.discordErrorHandler);
 	}
 
 	scheduleGiveaway();
 }
 
+// NOTE(ljre): API
 export function createGiveaway(msg: string, duration: number, qnt: number, prize: string, role?: string, channel?: string) {
 	giveaways.push({
 		msg, qnt, prize, role, channel,
