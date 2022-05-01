@@ -78,6 +78,10 @@ const messagePipeline = [
 	Commands.message,
 ];
 
+const interactionCreatePipeline = [
+	Commands.interactionCreate,
+];
+
 const memberJoinedPipeline = [
 	async (m: Discord.GuildMember) => isOurGuild(m.guild?.id),
 	Moderation.memberJoined,
@@ -118,6 +122,7 @@ async function runPipeline(name: string, pipeline: ((...args: any[]) => any)[], 
 // NOTE(ljre): Events
 client.once("ready", async () => await runPipeline("init", initPipeline));
 client.on("messageCreate", async (message) => await runPipeline("message", messagePipeline, message));
+client.on("interactionCreate", async (interaction) => await runPipeline("interaction", interactionCreatePipeline, interaction));
 client.on("inviteCreate", addInvite);
 client.on("messageReactionAdd", async (reaction, user) => await runPipeline("reactionAdd", reactionAddPipeline, reaction, user));
 client.on("messageReactionRemove", async (reaction, user) => await runPipeline("reactionRemove", reactionRemovePipeline, reaction, user));

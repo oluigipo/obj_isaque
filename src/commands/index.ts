@@ -21,6 +21,36 @@ export type Argument =
 	{ kind: ArgumentKind.USERID, value: string } |
 	{ kind: ArgumentKind.ROLE, value: Discord.Role };
 
+export interface Interaction {
+	run: (interaction: Discord.CommandInteraction) => Promise<void>,
+	options: InteractionOption[];
+}
+
+export interface InteractionOption {
+	type: InteractionOptionType;
+	name: string;
+	description: string;
+	required?: boolean;
+	choices?: InteractionChoice[];
+}
+
+export enum InteractionOptionType {
+	STRING = 3,
+	INTEGER = 4,
+	BOOLEAN = 5,
+	USER = 6,
+	CHANNEL = 7,
+	ROLE = 8,
+	MENTIONABLE = 9,
+	NUMBER = 10,
+	ATTACHMENT = 11,
+}
+
+export interface InteractionChoice {
+	name: string;
+	value: string | number;
+}
+
 export enum Permission { NONE, SHITPOST, MOD, DEV, RPG_MASTER }
 
 export interface Command {
@@ -31,9 +61,18 @@ export interface Command {
 	help: string;
 	examples: string[];
 	permissions: Permission;
+	
+	interaction?: Interaction;
 }
 
 export type ValidChannel = Discord.TextChannel | Discord.ThreadChannel | Discord.NewsChannel;
+
+export interface ApiSlashCommand {
+	name: string;
+	type: 1;
+	description: string;
+	options?: InteractionOption[];
+}
 
 export const validChannelTypes = [ "GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD", "GUILD_NEWS_THREAD", "GUILD_NEWS" ];
 
@@ -55,11 +94,34 @@ export const commands = {
 	utils: CmdUtils,
 };
 
-export const commandsArray = (Object.keys(commands) as any).map((key: any) => (commands as any)[key]).flat(1);
+export const commandsArray: Command[] = Object.values(commands).flat(1);
 
 // NOTE(ljre): Events
 export async function init(): Promise<boolean> {
 	Common.log("Setting up commands.");
+
+	try {
+		let commands: ApiSlashCommand[] = [];
+		
+		for (const cmd of commandsArray) {
+			if (!cmd.interaction)
+				continue;
+			
+			commands.push({
+				name: cmd.aliases[0],
+				type: 1,
+				description: cmd.description,
+				options: cmd.interaction.options,
+			});
+		}
+		
+		await Common.rest.put(
+			Routes.applicationGuildCommands(Common.notNull(Common.client.user?.id), Common.SERVER.id),
+			{ body: commands }
+		);
+	} catch (err) {
+		Common.error("failed to register slash commands: ", err);
+	}
 
 	return true;
 }
@@ -97,6 +159,27 @@ export async function message(message: Discord.Message): Promise<boolean> {
 	}
 
 	return false;
+}
+
+export async function interactionCreate(int_: Discord.Interaction) {
+	if (!int_.isCommand())
+		return true;
+	
+	const int = <Discord.CommandInteraction>int_;
+	const name = int.commandName;
+	const command = commandsArray.find(cmd => cmd.aliases.includes(name));
+	
+	if (command && command.interaction) {
+		try {
+			command.interaction.run(int);
+		} catch (err) {
+			Common.error(`failed to run command '${name}' in interaction: `, err);
+		}
+		
+		return false; // NOTE(ljre): Stop the pipeline. We already handled the interaction.
+	}
+	
+	return true;
 }
 
 // NOTE(ljre): Functions

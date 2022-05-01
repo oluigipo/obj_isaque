@@ -63,6 +63,7 @@ export const ROLES = {
 	gamemaster: "758468120787681340",
 	community: "770691692986368050",
 	rpgmaster: "918989968876130336",
+	rpgplayer: "918990131799658548",
 };
 
 export const CHANNELS = {
@@ -96,10 +97,10 @@ export function setupGlobals(client_: Discord.Client, rest_: REST, auth_: any) {
 	auth = auth_;
 }
 
-export function log(str: any) { console.log(`[log] `, str); }
-export function warning(str: any) { console.log(`[warning] `, str); }
-export function error(str: any) {
-	console.log(`[error] `, str);
+export function log(...args: any[]) { console.log(`[log] `, ...args); }
+export function warning(...args: any[]) { console.log(`[warning] `, ...args); }
+export function error(...args: any[]) {
+	console.log(`[error] `, ...args);
 	console.log(String(new Error().stack).split("\n").slice(1).join("\n"));
 }
 

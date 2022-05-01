@@ -4,18 +4,18 @@ import * as Common from "../../common";
 
 export default <Command>{
 	async run(msg: Discord.Message, args: Argument[]) {
-		msg.reply("oi").catch(Common.discordErrorHandler);
+		msg.channel.send("<@${Common.ROLES.rpgplayer}>").catch(Common.discordErrorHandler);
 	},
 	syntaxes: [""],
-	permissions: Permission.NONE,
-	aliases: ["cmd"],
-	description: "TODO: description",
-	help: "TODO: help",
+	permissions: Permission.RPG_MASTER,
+	aliases: ["ping-rp", "pingrp"],
+	description: "Marcar o cargo de jogadores do RPG.",
+	help: "Marcar o cargo de jogadores do RPG.",
 	examples: [],
 	
 	interaction: {
 		async run(int: Discord.CommandInteraction) {
-			int.reply("oi").catch(Common.discordErrorHandler);
+			int.channel?.send("<@${Common.ROLES.rpgplayer}>").catch(Common.discordErrorHandler);
 		},
 		options: [],
 	},
