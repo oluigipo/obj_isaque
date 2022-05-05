@@ -51,7 +51,7 @@ export interface InteractionChoice {
 	value: string | number;
 }
 
-export enum Permission { NONE, SHITPOST, MOD, DEV, RPG_MASTER }
+export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4, RPG_MASTER = 8 }
 
 export interface Command {
 	run: (msg: Discord.Message, args: Argument[], raw: string[]) => Promise<void>,
