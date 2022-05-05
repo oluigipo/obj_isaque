@@ -288,7 +288,7 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 				}
 
 				if (!isntId) {
-					arg.kind = ArgumentKind.USERID;
+					arg.kind = ArgumentKind.SNOWFLAKE;
 					arg.value = str;
 					continue;
 				}

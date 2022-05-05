@@ -18,7 +18,7 @@ export default <Command>{
 			return msg.reply("preciso de um número válido de quantidade").catch(Common.discordErrorHandler);
 		qnt = args[1].value;
 		
-		if (args[2].kind !== ArgumentKind.USERID)
+		if (args[2].kind !== ArgumentKind.SNOWFLAKE)
 			return msg.reply("preciso do ID da mensagem que vou pegar as reações").catch(Common.discordErrorHandler);
 		msgid = args[2].value;
 		
