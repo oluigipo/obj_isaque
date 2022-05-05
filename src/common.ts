@@ -369,12 +369,56 @@ export function allowedImage(image: Jimp) {
 	return image.getWidth() <= 800 && image.getHeight() <= 800;
 }
 
-export function validateEmbed(embed: any) {
-	if (embed.description.length > 4096)
-		return false;
-	if (embed.title.length > 256)
-		return false;
-	if (embed.fields.length > 25)
-		return false;
-	return true;
+export function validateEmbed(embed: any): Result {
+	if (typeof embed.description === "string" && embed.description.length > 4096)
+		return { ok: false, error: "description too long" };
+	if (typeof embed.title === "string" && embed.title.length > 256)
+		return { ok: false, error: "title too long" };
+	if (embed.footer && typeof embed.footer.text === "string" && embed.footer.text.length > 2048)
+		return { ok: false, error: "footer text too long" };
+	if (embed.author && typeof embed.author.text === "string" && embed.author.text.length > 256)
+		return { ok: false, error: "author name too long" };
+	if (Array.isArray(embed.fields) && embed.fields.length > 25)
+		return { ok: false, error: "too much fields" };
+	
+	for (let i = 0; i < embed.fields.length; ++i) {
+		const field = embed.fields[i];
+		if (!field)
+			return { ok: false, error: `field index ${i} is undefined` };
+		
+		if (typeof field.name === "string" && field.name.length > 256)
+			return { ok: false, error: `field index ${i} has name too long` };
+		if (typeof field.value === "string" && field.value.length > 1024)
+			return { ok: false, error: `field index ${i} has value too big` };
+	}
+	
+	return { ok: true, data: undefined };
+}
+
+export function fixEmbedIfNeeded(embed: any): any {
+	if (embed.description && typeof embed.description === "string")
+		embed.description = embed.description.slice(0, 4096);
+	if (embed.title && typeof embed.title === "string")
+		embed.title = embed.title.slice(0, 256);
+	if (embed.footer && embed.footer.text && typeof embed.footer.text === "string")
+		embed.footer.text = embed.footer.text.slice(0, 2048);
+	if (embed.author && embed.author.text && typeof embed.author.text === "string")
+		embed.author.text = embed.author.text.slice(0, 256);
+	if (embed.fields && Array.isArray(embed.fields)) {
+		embed.fields = embed.fields.slice(0, 25);
+		
+		for (const field of embed.fields) {
+			if (!field)
+				continue;
+			
+			if (typeof field.name === "string")
+				field.name = field.name.slice(0, 256);
+			if (typeof field.value === "string")
+				field.value = field.value.slice(0, 1024);
+		}
+		
+		embed.fields = embed.fields.filter((field: any) => field && field.name && field.value);
+	}
+	
+	return embed;
 }

@@ -67,10 +67,11 @@ const donePipeline = [
 	Moderation.done,
 	Database.done,
 	async () => Common.log("Logging out..."),
+	async () => process.exit(0),
 ];
 
 const messagePipeline = [
-	async (m: Discord.Message) => isOurGuild(m.guild?.id),
+//	async (m: Discord.Message) => isOurGuild(m.guild?.id),
 	shouldProcessMessage,
 	Moderation.message,
 	answerQuestion,
@@ -128,10 +129,13 @@ client.on("messageReactionAdd", async (reaction, user) => await runPipeline("rea
 client.on("messageReactionRemove", async (reaction, user) => await runPipeline("reactionRemove", reactionRemovePipeline, reaction, user));
 client.on("guildMemberRemove", async (member) => await runPipeline("memberLeft", memberLeftPipeline, member));
 client.on("guildMemberAdd", async (member) => {
-	const invite = checkForChangedInvite();
+	const invite = await checkForChangedInvite();
 	await runPipeline("memberJoined", memberJoinedPipeline, member, invite);
 });
+
 process.on("beforeExit", async () => await runPipeline("done", donePipeline));
+process.on("SIGINT", async () => await runPipeline("done", donePipeline));
+process.on("SIGTERM", async () => await runPipeline("done", donePipeline));
 
 client.login(auth.token);
 
@@ -248,7 +252,8 @@ async function joinedMessage(member: Discord.GuildMember, invite: string | undef
 	if (!joinChannel)
 		joinChannel = <Discord.TextChannel>await client.channels.fetch(Common.CHANNELS.joinLog).catch(Common.discordErrorHandler);
 
-	joinChannel.send(embed).catch(Common.discordErrorHandler);
+	//Common.log(embed);
+	joinChannel.send({ embeds: [Common.fixEmbedIfNeeded(embed)] }).catch(Common.discordErrorHandler);
 }
 
 async function leftMessage(member: Discord.GuildMember) {
@@ -261,10 +266,10 @@ async function leftMessage(member: Discord.GuildMember) {
 	if (member.user)
 		embed.fields.push({ name: "Username", value: member.user.tag, inline: true });
 	if (member.roles.cache.size > 0)
-		embed.fields.push({ name: "Roles", value: [...member.roles.cache].join(' ') });
+		embed.fields.push({ name: "Roles", value: [...member.roles.cache].map(([key, role]) => role.toString()).join(' ') });
 
 	if (!joinChannel)
 		joinChannel = <Discord.TextChannel>await client.channels.fetch(Common.CHANNELS.joinLog).catch(Common.discordErrorHandler);
 
-	joinChannel.send(embed).catch(Common.discordErrorHandler);
+	joinChannel.send({ embeds: [Common.fixEmbedIfNeeded(embed)] }).catch(Common.discordErrorHandler);
 }

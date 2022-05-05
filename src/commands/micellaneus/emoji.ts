@@ -96,7 +96,7 @@ export default <Command>{
 				ww.send({ content: `${e}`.repeat(qnt), avatarURL: image, username: name, threadId }).catch(Common.discordErrorHandler);;
 			}).catch(Common.discordErrorHandler);
 
-		msg.delete().catch(Common.discordErrorHandler);;
+		msg.delete().catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["<emoji> [qnt = 1]"],
 	permissions: Permission.NONE,

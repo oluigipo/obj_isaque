@@ -55,28 +55,27 @@ async function updateDB() {
 
 async function execGiveaway(giveaway: Giveaway) {
 	const tmpChannel = await Common.client.channels.fetch(giveaway.channel ?? "632359792010199104").catch(Common.discordErrorHandler);
-	if (!tmpChannel || Commands.validChannelTypes.includes(tmpChannel.type))
-		return;
+	if (!tmpChannel || !Commands.validChannelTypes.includes(tmpChannel.type))
+		return Common.error(`could not fetch channel when executing giveaway:`, giveaway);
 
 	const channel = <Discord.TextChannel>tmpChannel;
 	const message = await channel.messages.fetch(giveaway.msg).catch(Common.discordErrorHandler);
 	if (!message)
-		return;
+		return Common.error(`could not fetch message when executing giveaway:`, giveaway);
 
-	const reaction = message.reactions.cache.get(Common.EMOJIS.yes);
+	const reaction = message.reactions.resolve(Common.EMOJIS.yes);
 	if (!reaction)
-		return;
+		return Common.error(`could not fetch reaction when executing giveaway:`, giveaway);
 
 	const users = await reaction.users.fetch().catch(Common.discordErrorHandler);
 	if (!users)
-		return;
+		return Common.error(`could not fetch users when executing giveaway:`, giveaway);
 
 	let member: Discord.GuildMember | undefined;
 	const winners = users
-		.filter(user => !user.bot && (member = channel.members.get(user.id), member !== void 0 && member.roles.cache.has(giveaway.role ?? Common.ROLES.community)))
+		.filter(user => !user.bot && (member = channel.members.get(user.id), member !== void 0 && (!giveaway.role || member.roles.cache.has(giveaway.role))))
 		.random(giveaway.qnt)
-		.filter(user => user !== undefined) // why tf does .random add padding undefined????
-		;
+		.filter(user => user !== undefined); // why tf does .random add padding undefined????
 
 	if (winners.length > 0) {
 		let text = `O sorteio acabou! Os seguintes usuários ganharam \`${giveaway.prize}\`:\n${winners.reduce((acc, val) => acc + `\n${val}`, "")}`;

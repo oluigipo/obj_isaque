@@ -150,7 +150,7 @@ export async function message(msg: Discord.Message): Promise<boolean> {
 		if (cmd.aliases.includes(raw[0])) {
 			if (validatePermissions(msg.member, <any>msg.channel, cmd.permissions))
 				try {
-					Common.log(`executing command ${raw[0]}...`);
+					Common.log(`executing command ${Common.SERVER.prefix}${raw[0]}...`);
 					await cmd.run(msg, args, raw);
 				} catch (error) {
 					Common.error(`exception when running command '${raw[0]}': ${error}`);
@@ -173,15 +173,21 @@ export async function interactionCreate(int_: Discord.Interaction) {
 	
 	if (command && command.interaction) {
 		const member = await int_.guild?.members.fetch(int_.user.id);
-		if (!member)
+		if (!member) {
+			int.reply("unreachable code").catch(Common.discordErrorHandler);
 			return false;
+		}
 		
-		if (validatePermissions(member, <any>int_.channel, command.permissions))
+		if (validatePermissions(member, <any>int_.channel, command.permissions)) {
 			try {
+				Common.log(`executing command /${command.aliases[0]}...`);
 				command.interaction.run(int);
 			} catch (err) {
 				Common.error(`failed to run command '${name}' in interaction: `, err);
 			}
+		} else {
+			int.reply("cê não tem permissão pra usar esse comando aqui não").catch(Common.discordErrorHandler);
+		}
 		
 		return false; // NOTE(ljre): Stop the pipeline. We already handled the interaction.
 	}
@@ -216,10 +222,12 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 
 				const id = str.substr(0, 18);
 
-				if (msg.guild === null) continue;
+				if (msg.guild === null)
+					continue;
 				if (isRole) {
 					const role = msg.guild.roles.cache.get(id);
-					if (role === undefined) continue;
+					if (role === undefined)
+						continue;
 
 					arg.kind = ArgumentKind.ROLE;
 					arg.value = role;
@@ -239,10 +247,12 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 
 				const id = str.substr(0, 18);
 
-				if (msg.guild === null) continue;
+				if (msg.guild === null)
+					continue;
 				const channel = msg.guild.channels.cache.get(id);
 
-				if (channel === undefined) continue;
+				if (channel === undefined)
+					continue;
 				arg.kind = ArgumentKind.CHANNEL;
 				arg.value = channel;
 			} else if (str[0] === ':' || str.startsWith("a:")) {
@@ -250,7 +260,8 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 				const id = str.substr(last + 1, 18);
 
 				const emoji = Common.client.emojis.cache.get(id);
-				if (emoji === undefined) continue;
+				if (emoji === undefined)
+					continue;
 				arg.kind = ArgumentKind.EMOJI;
 				arg.value = emoji;
 			}
@@ -318,8 +329,6 @@ export function validatePermissions(member: Discord.GuildMember, channel: Discor
 
 	if (perms & Permission.RPG_MASTER && !member.roles.cache.has(Common.ROLES.rpgmaster))
 		return false;
-
-	// @NOTE(luigi): need more permissions?
 
 	return true;
 }

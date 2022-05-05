@@ -9,5 +9,6 @@ import megasorteio from "./megasorteio";
 import nonetube from "./nonetube";
 import number from "./number";
 import ping from "./ping";
+import reroll from "./reroll";
 
-export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping];
+export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping, reroll];
