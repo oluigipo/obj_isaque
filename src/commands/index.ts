@@ -8,7 +8,7 @@ import * as Common from "../common";
 export enum ArgumentKind {
 	STRING = "STRING", MEMBER = "MEMBER", CHANNEL = "CHANNEL",
 	NUMBER = "NUMBER", TIME = "TIME", EMOJI = "EMOJI",
-	USERID = "USERID", ROLE = "ROLE",
+	SNOWFLAKE = "SNOWFLAKE", USERID = "SNOWFLAKE", ROLE = "ROLE",
 }
 
 export type Argument =
@@ -18,7 +18,7 @@ export type Argument =
 	{ kind: ArgumentKind.NUMBER, value: number } |
 	{ kind: ArgumentKind.TIME, value: number } |
 	{ kind: ArgumentKind.EMOJI, value: Discord.Emoji } |
-	{ kind: ArgumentKind.USERID, value: string } |
+	{ kind: ArgumentKind.SNOWFLAKE, value: string } |
 	{ kind: ArgumentKind.ROLE, value: Discord.Role };
 
 export interface Interaction {
@@ -318,7 +318,7 @@ export function validatePermissions(member: Discord.GuildMember, channel: Discor
 	if (perms & Permission.DEV && Common.dev !== member.id)
 		return false;
 
-	if (member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) || member.roles.cache.has(Common.ROLES.mod))
+	if (member.permissions.has("ADMINISTRATOR") || member.roles.cache.has(Common.ROLES.mod))
 		return true;
 
 	if (perms & Permission.MOD)
