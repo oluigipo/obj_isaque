@@ -18,8 +18,10 @@ export default <Command>{
 
 		for (let i = 0; i < list.length; ++i) {
 			const mute = list[i];
-			final.addField(`Caso nº ${i + 1}`, `Usuário: <@${mute.user}>\nMutado dia: \`${mute.begins}\`\nDuração: \`${mute.duration}\`\nAcaba: \`${mute.ends}\``
-				+ (mute.reason ? `\nMotivo: \`${mute.reason}\`` : ""));
+			final.fields.push({
+				name: `Caso nº ${i + 1}`,
+				value: `Usuário: <@${mute.user}>\nMutado dia: \`${mute.begins}\`\nDuração: \`${mute.duration}\`\nAcaba: \`${mute.ends}\`` + (mute.reason ? `\nMotivo: \`${mute.reason}\`` : ""),
+			});
 		}
 
 		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
