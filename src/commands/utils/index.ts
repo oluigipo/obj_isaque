@@ -10,5 +10,6 @@ import nonetube from "./nonetube";
 import number from "./number";
 import ping from "./ping";
 import reroll from "./reroll";
+import faq from "./faq";
 
-export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping, reroll];
+export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping, reroll, faq];
