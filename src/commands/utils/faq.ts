@@ -21,23 +21,22 @@ export default <Command>{
 			msg.channel.send("FAQ inexistente !").catch(Common.discordErrorHandler);
 			return;
 		}
+		
 		let faqMsg = messages.at((messages.size-1)-(faqNum-1));
 		if(!faqMsg){
 			msg.channel.send("FAQ inexistente !").catch(Common.discordErrorHandler);
 			return;
 		}
-		let faqContent = faqMsg.content;
-		//remove faq number from text to make it cleaner
-		let lines = faqContent.split("\n");
-		lines.splice(0, 1);
-		faqContent = lines.join("\n");
+		
+		const pattern = /\**[Ff]aq ?\d+\**:?\**\s*/;
+		const faqContent = faqMsg.content.replace(pattern, "");
+		//Common.log(faqMsg.content);
 
 		let final = Common.defaultEmbed(Common.notNull(msg.member));
-		final.fields = [
-			{ name: `FAQ ${faqNum}`, value: faqContent, inline: true }
-		];
-		msg.channel.send({ embeds: [final] })
-		.catch(Common.discordErrorHandler);
+		final.title = `FAQ ${faqNum}`;
+		final.description = faqContent;
+		
+		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["[comando] <numero>"],
 	permissions: Permission.SHITPOST,
