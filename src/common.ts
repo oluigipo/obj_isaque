@@ -73,6 +73,7 @@ export const CHANNELS = {
 	steamReviews: "760502616898666527",
 	log: "589614780470525992",
 	joinLog: "742891288055119973",
+	faq: "599413245765484544"
 }
 
 export const dev = "373670846792990720"; // NOTE(ljre): My ID.
