@@ -29,17 +29,36 @@ export default <Command>{
 		}
 		
 		const pattern = /\**[Ff]aq ?\d+\**:?\**\s*/;
-		const faqContent = faqMsg.content.replace(pattern, "");
+		const faqContent = `**FAQ ${faqNum}**\n`+faqMsg.content.replace(pattern, "");
 		//Common.log(faqMsg.content);
 
-		let final = Common.defaultEmbed(Common.notNull(msg.member));
-		final.title = `FAQ ${faqNum}`;
-		final.description = faqContent;
-		
-		msg.channel.send({ embeds: [final] }).catch(Common.discordErrorHandler);
+		let toEmbed: string[] = [];
+		if(faqMsg.attachments){
+			faqMsg.attachments.forEach(embed => {
+				toEmbed.push(embed.url);
+			});
+		}
+
+		let final = {
+			content: faqContent,
+			files: []
+		}
+		if(toEmbed.length > 0){
+			toEmbed.forEach(embed =>{
+				final.files.push({
+					//ignore ts error due to a type missing on discord-api-types
+					// docs shows that string[] is a valid "files" type: https://discord.js.org/#/docs/discord.js/stable/class/TextChannel?scrollTo=send
+					
+					// @ts-ignore
+					attachment: embed
+				})
+			})
+		}
+		//let final = { embeds: [first] };
+		msg.channel.send(final).catch(Common.discordErrorHandler);
 	},
 	syntaxes: ["[comando] <numero>"],
-	permissions: Permission.SHITPOST,
+	permissions: Permission.NONE,
 	aliases: ["faq"],
 	description: "manda como embed o FAQ especificado",
 	help: "manda como embed o FAQ especificado (!!faq n)",
