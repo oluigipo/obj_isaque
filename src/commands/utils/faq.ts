@@ -5,7 +5,7 @@ import * as Common from "../../common";
 export default <Command>{
 	async run(msg: Message, _: Argument[], args: string[]) {
 		if (args.length < 2) {
-			msg.channel.send("mande o número do FAQ!").catch(Common.discordErrorHandler);
+			msg.channel.send("mande o nÃºmero do FAQ!").catch(Common.discordErrorHandler);
 			return;
 		}
 
@@ -29,11 +29,14 @@ export default <Command>{
 		}
 		
 		const pattern = /\**[Ff]aq ?\d+\**:?\**\s*/;
-		const faqContent = `**FAQ ${faqNum}**\n`+faqMsg.content.replace(pattern, "");
+		let faqContent = `**FAQ ${faqNum}**\n` + faqMsg.content.replace(pattern, "");
+		//@Isaque, @None
+		const allowedMentions = ['457020706857943051', '&598647793040621568'];
+		faqContent = Common.removeMentions(faqContent, <Discord.TextChannel>msg.channel, allowedMentions);
 		//Common.log(faqMsg.content);
 
 		let toEmbed: string[] = [];
-		if(faqMsg.attachments){
+		if (faqMsg.attachments) {
 			faqMsg.attachments.forEach(embed => {
 				toEmbed.push(embed.url);
 			});
@@ -42,17 +45,17 @@ export default <Command>{
 		let final = {
 			content: faqContent,
 			files: []
-		}
-		if(toEmbed.length > 0){
-			toEmbed.forEach(embed =>{
+		};
+		if (toEmbed.length > 0) {
+			toEmbed.forEach(embed => {
 				final.files.push({
 					//ignore ts error due to a type missing on discord-api-types
 					// docs shows that string[] is a valid "files" type: https://discord.js.org/#/docs/discord.js/stable/class/TextChannel?scrollTo=send
 					
 					// @ts-ignore
 					attachment: embed
-				})
-			})
+				});
+			});
 		}
 		//let final = { embeds: [first] };
 		msg.channel.send(final).catch(Common.discordErrorHandler);

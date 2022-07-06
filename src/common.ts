@@ -423,3 +423,75 @@ export function fixEmbedIfNeeded(embed: any): any {
 	
 	return embed;
 }
+
+export function removeMentions(str: string, channel: Discord.TextChannel, allowedList: string[] = []): string {
+	const pattern = /<@!?(&?[0-9]+)>/;
+	let result = str;
+	let skipIndex = 0; // ignore everything before this index
+	
+	let found: any;
+	while (found = result.slice(skipIndex).match(pattern), found !== null) {
+		const index = found.index;
+		const id = found[1];
+		
+		if (allowedList.includes(id)) {
+			skipIndex += index + found[0].length;
+			continue;
+		}
+		
+		const member = channel.guild.members.cache.get(id);
+		let replaceWith: string;
+		
+		if (member) {
+			replaceWith = member.displayName;
+		} else {
+			const user = channel.client.users.cache.get(id);
+			
+			if (user)
+				replaceWith = user.username;
+			else
+				replaceWith = "invalid-user";
+		}
+		
+		result = result.replace(found[0], '@' + replaceWith);
+	}
+	
+	return result;
+	
+	/*
+	
+	function _removeMention(str: string, channel: Discord.TextChannel){
+		return str.replace(/<@!?[0-9]+>/g, input => {
+			const id = input.replace(/<|!|>|@/g, '');
+			const member = channel.guild.members.cache.get(id);
+			if(member) {
+				return `@${member.displayName}`.replace(/@/g, '@\u200b');
+			} else {
+				const user = channel.client.users.cache.get(id);
+				return user?(`@${user.username}`.replace(/@/g, '@\u200b')):input;
+			}
+		})
+		.replace(/<@&[0-9]+>/g, input => {
+			const role = channel.guild.roles.cache.get(input.replace(/<|@|>|&/g, ''));
+			return role ? `@${role.name}` : input;
+		});
+	}
+	
+	if (allowedList) {
+		let msg = '';
+		const tokenized = msg.split(/<@([^>]*)>/g);
+		tokenized.forEach(token =>{
+			if(!allowedList.includes(token)){
+				msg += _removeMention(token, channel);
+			}
+			else{
+				msg += token;
+			}
+			console.log(msg);
+		});
+		return msg || str;
+	}
+	else{
+		return _removeMention(str, channel);
+	}*/
+}
