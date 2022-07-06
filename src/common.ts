@@ -433,25 +433,34 @@ export function removeMentions(str: string, channel: Discord.TextChannel, allowe
 	while (found = result.slice(skipIndex).match(pattern), found !== null) {
 		const index = found.index;
 		const id = found[1];
-		
 		if (allowedList.includes(id)) {
 			skipIndex += index + found[0].length;
 			continue;
 		}
 		
-		const member = channel.guild.members.cache.get(id);
 		let replaceWith: string;
 		
-		if (member) {
-			replaceWith = member.displayName;
-		} else {
-			const user = channel.client.users.cache.get(id);
+		if (id[0] === '&') {
+			const role = channel.guild.roles.cache.get(id.slice(1));
 			
-			if (user)
-				replaceWith = user.username;
+			if (role)
+				replaceWith = role.name;
 			else
-				replaceWith = "invalid-user";
-		}
+				replaceWith = "invalid-role";
+		} else {
+			const member = channel.guild.members.cache.get(id);
+			
+			if (member) {
+				replaceWith = member.displayName;
+			} else {
+				const user = channel.client.users.cache.get(id);
+				
+				if (user)
+					replaceWith = user.username;
+				else
+					replaceWith = "invalid-user";
+			}
+		} 
 		
 		result = result.replace(found[0], '@' + replaceWith);
 	}
