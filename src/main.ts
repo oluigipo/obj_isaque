@@ -6,6 +6,7 @@ import * as Common from "./common";
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 const client = new Discord.Client({
 	intents: [
+		Discord.GatewayIntentBits.MessageContent,
 		Discord.GatewayIntentBits.Guilds,
 		Discord.GatewayIntentBits.GuildMembers,
 		Discord.GatewayIntentBits.GuildBans,
