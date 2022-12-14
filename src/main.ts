@@ -1,28 +1,27 @@
 import * as fs from "fs";
 import Discord from "discord.js";
-import { REST } from "@discordjs/rest";
 import * as Common from "./common";
 
 // NOTE(ljre): Load essentials and setup globals
 const auth = JSON.parse(fs.readFileSync("auth.json", "utf8"));
 const client = new Discord.Client({
 	intents: [
-		Discord.Intents.FLAGS.GUILDS,
-		Discord.Intents.FLAGS.GUILD_MEMBERS,
-		Discord.Intents.FLAGS.GUILD_BANS,
-		Discord.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
-		Discord.Intents.FLAGS.GUILD_INTEGRATIONS,
-		Discord.Intents.FLAGS.GUILD_WEBHOOKS,
-		Discord.Intents.FLAGS.GUILD_INVITES,
-		Discord.Intents.FLAGS.GUILD_VOICE_STATES,
-		Discord.Intents.FLAGS.GUILD_PRESENCES,
-		Discord.Intents.FLAGS.GUILD_MESSAGES,
-		Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-		Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
-		Discord.Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
+		Discord.GatewayIntentBits.Guilds,
+		Discord.GatewayIntentBits.GuildMembers,
+		Discord.GatewayIntentBits.GuildBans,
+		Discord.GatewayIntentBits.GuildEmojisAndStickers,
+		Discord.GatewayIntentBits.GuildIntegrations,
+		Discord.GatewayIntentBits.GuildWebhooks,
+		Discord.GatewayIntentBits.GuildInvites,
+		Discord.GatewayIntentBits.GuildVoiceStates,
+		Discord.GatewayIntentBits.GuildPresences,
+		Discord.GatewayIntentBits.GuildMessages,
+		Discord.GatewayIntentBits.GuildMessageReactions,
+		Discord.GatewayIntentBits.GuildMessageTyping,
+		Discord.GatewayIntentBits.GuildScheduledEvents,
 	],
 });
-const rest = new REST({ version: '9' }).setToken(auth.token);
+const rest = new Discord.REST({ version: '10' }).setToken(auth.token);
 
 Common.setupGlobals(client, rest, auth);
 
@@ -53,7 +52,7 @@ const initPipeline = [
 	async () => {
 		invites = await fetchInvites() ?? {};
 
-		client.user?.setActivity("o curso do NoNe!", { type: 'WATCHING' });
+		client.user?.setActivity("o curso do NoNe!", { type: Discord.ActivityType.Watching });
 
 		Common.log("Online!");
 	},

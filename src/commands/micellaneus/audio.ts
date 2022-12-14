@@ -30,7 +30,7 @@ async function exec(member: Discord.GuildMember, key?: string) {
 	const connection = joinVoiceChannel({
 		channelId: member.voice.channel.id,
 		guildId: member.guild.id,
-		adapterCreator: member.guild.voiceAdapterCreator,
+		adapterCreator: <any>member.guild.voiceAdapterCreator,
 	});
 
 	connection.subscribe(audioPlayer);
@@ -44,7 +44,7 @@ async function exec(member: Discord.GuildMember, key?: string) {
 
 export default <Command>{
 	async run(msg: Discord.Message, args: Argument[], raw: string[]) {
-		if (!msg.member || !msg.member.voice.channel || alreadyPlaying || msg.member.voice.channel.type === "GUILD_STAGE_VOICE") {
+		if (!msg.member || !msg.member.voice.channel || alreadyPlaying || msg.member.voice.channel.type === Discord.ChannelType.GuildVoice) {
 			msg.react(Common.EMOJIS.no);
 			return;
 		}
@@ -69,7 +69,7 @@ export default <Command>{
 	interaction: {
 		async run(int: Discord.CommandInteraction) {
 			const member = await int.guild?.members.fetch(int.user.id);
-			if (!member || !member.voice.channel || alreadyPlaying || member.voice.channel.type === "GUILD_STAGE_VOICE") {
+			if (!member || !member.voice.channel || alreadyPlaying || member.voice.channel.type === Discord.ChannelType.GuildVoice) {
 				int.reply({ content: "entra num canal de voz aí pô", ephemeral: true }).catch(Common.discordErrorHandler);
 				return;
 			}

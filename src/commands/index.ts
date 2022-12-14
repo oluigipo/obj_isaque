@@ -1,7 +1,5 @@
 import * as fs from "fs";
 import Discord from "discord.js";
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
 import * as Common from "../common";
 
 // NOTE(ljre): Types and globals
@@ -74,7 +72,13 @@ export interface ApiSlashCommand {
 	options?: InteractionOption[];
 }
 
-export const validChannelTypes = [ "GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD", "GUILD_NEWS_THREAD", "GUILD_NEWS" ];
+export const validChannelTypes = [
+	Discord.ChannelType.GuildText,
+	Discord.ChannelType.PublicThread,
+	Discord.ChannelType.PrivateThread,
+	Discord.ChannelType.GuildNewsThread,
+	Discord.ChannelType.GuildNews,
+];
 
 const timeout = <{ [key: string]: number }>{};
 
@@ -116,7 +120,7 @@ export async function init(): Promise<boolean> {
 		}
 		
 		await Common.rest.put(
-			Routes.applicationGuildCommands(Common.notNull(Common.client.user?.id), Common.SERVER.id),
+			Discord.Routes.applicationGuildCommands(Common.notNull(Common.client.user?.id), Common.SERVER.id),
 			{ body: commands }
 		);
 	} catch (err) {
@@ -131,7 +135,7 @@ export async function done() {
 }
 
 export async function message(msg: Discord.Message): Promise<boolean> {
-	if (!msg.member || !msg.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) && (timeout[msg.author.id] ?? 0) + Common.SERVER.timeout > Date.now()) {
+	if (!msg.member || !msg.member.permissions.has(Discord.PermissionsBitField.Flags.Administrator) && (timeout[msg.author.id] ?? 0) + Common.SERVER.timeout > Date.now()) {
 		msg.react(Common.EMOJIS.no).catch(Common.discordErrorHandler);
 		return false;
 	}
@@ -318,7 +322,7 @@ export function validatePermissions(member: Discord.GuildMember, channel: Discor
 	if (perms & Permission.DEV && Common.dev !== member.id)
 		return false;
 
-	if (member.permissions.has("ADMINISTRATOR") || member.roles.cache.has(Common.ROLES.mod))
+	if (member.permissions.has(Discord.PermissionsBitField.Flags.Administrator) || member.roles.cache.has(Common.ROLES.mod))
 		return true;
 
 	if (perms & Permission.MOD)

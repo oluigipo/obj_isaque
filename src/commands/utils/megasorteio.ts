@@ -1,5 +1,5 @@
 import { Command, Argument, Permission, ArgumentKind } from "../index";
-import { Message, User, MessageReaction, Role } from "discord.js";
+import { Message, User, MessageReaction, Role, APIEmbed, EmbedType } from "discord.js";
 import * as Giveaway from "../../giveaway";
 import * as Common from "../../common";
 
@@ -33,10 +33,10 @@ export default <Command>{
 		
 		const optional = (cond: boolean, x: any) => cond ? [x] : [];
 
-		let final = {
-			type: "rich",
+		let final: APIEmbed = {
+			type: EmbedType.Rich,
 			color: Common.SERVER.botColor,
-			author: { name: msg.member?.displayName, icon_url: msg.member?.user?.avatarURL() ?? undefined },
+			author: msg.member ? { name: msg.member.displayName, icon_url: msg.member.user?.avatarURL() ?? undefined } : undefined,
 			footer: { text: msg.client.user?.username, icon_url: msg.client.user?.avatarURL() ?? undefined },
 			title: "MegaSorteio!",
 			description: `Para participar, reaja com ${Common.EMOJIS.yes} nessa mensagem!`,

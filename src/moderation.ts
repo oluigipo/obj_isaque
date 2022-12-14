@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-import { REST } from "@discordjs/rest";
 import * as Common from "./common";
 import * as Database from "./database";
 

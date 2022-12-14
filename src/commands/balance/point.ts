@@ -5,7 +5,7 @@ import * as Common from "../../common";
 
 export default <Command>{
 	async run(msg: Discord.Message, args: Argument[], raw: string[]) {
-		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR))
+		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(Discord.PermissionsBitField.Flags.Administrator))
 			return;
 
 		if (args.length < 2) {

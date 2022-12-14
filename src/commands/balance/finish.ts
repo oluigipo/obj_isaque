@@ -1,11 +1,11 @@
 import { Command, Argument, Permission } from "../index";
-import { Message, Permissions } from "discord.js";
+import { Message, PermissionsBitField } from "discord.js";
 import * as Balance from "../../balance";
 import * as Common from "../../common";
 
 export default <Command>{
 	async run(msg: Message, args: Argument[], raw: string[]) {
-		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(Permissions.FLAGS.ADMINISTRATOR))
+		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(PermissionsBitField.Flags.Administrator))
 			return;
 
 		const result = Balance.finishEvent();

@@ -1,5 +1,5 @@
 import { Command, Argument, Permission } from "../index";
-import { Message, MessageAttachment } from "discord.js";
+import { Message } from "discord.js";
 import * as Common from "../../common";
 
 const secrets: string[] = [];

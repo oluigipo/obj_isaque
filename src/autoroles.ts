@@ -30,7 +30,7 @@ export async function init() {
 	for (const ch of channelsToFetch) {
 		const channel = await Common.client.channels.fetch(ch);
 
-		if (channel && channel.type === "GUILD_TEXT")
+		if (channel && channel.type === Discord.ChannelType.GuildText)
 			await channel.messages.fetch({ limit: 50 });
 	}
 }

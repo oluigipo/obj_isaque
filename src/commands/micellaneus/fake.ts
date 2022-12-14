@@ -4,7 +4,7 @@ import * as Common from "../../common";
 
 export default <Command>{
 	async run(msg: Discord.Message, args: Argument[], raw: string[]) {
-		if (!(msg.member?.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) || msg.author.id === "327576484396924929" /*id do gabe*/))
+		if (!(msg.member?.permissions.has(Discord.PermissionsBitField.Flags.Administrator)))
 			return;
 
 		if (msg.guild?.id === Common.SERVER.id)

@@ -56,7 +56,7 @@ export default <Command>{
 
 		const e = e_;
 
-		if (e.animated && !msg.member.permissions.has("ADMINISTRATOR")) {
+		if (e.animated && !msg.member.permissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
 			const r = Balance.buy(msg.author.id, 10);
 
 			if (!r.ok || !r.data) {
@@ -74,7 +74,7 @@ export default <Command>{
 		// NOTE(ljre): Send It.
 		let webhook: Discord.Webhook;
 		let threadId: string | undefined;
-		let channel: Discord.TextChannel | Discord.NewsChannel;
+		let channel: Discord.TextChannel | Discord.NewsChannel | Discord.ForumChannel;
 
 		if (msg.channel.isThread()) {
 			threadId = msg.channel.id;
@@ -87,7 +87,7 @@ export default <Command>{
 			.then(async w => {
 				let ww = w.first();
 				if (!ww)
-					ww = <Discord.Webhook>await channel.createWebhook("emoji").catch(Common.discordErrorHandler);
+					ww = <Discord.Webhook>await channel.createWebhook({ name: "emoji" }).catch(Common.discordErrorHandler);
 
 				let text = `${e.toString()}`.repeat(qnt);
 				if (text.length > 2000)

@@ -1,5 +1,4 @@
 import * as Discord from "discord.js";
-import { REST } from "@discordjs/rest";
 import https from "https";
 import Jimp from "jimp";
 
@@ -85,12 +84,12 @@ export let auth: {
 	invite: string;
 };
 
-export let rest: REST;
+export let rest: Discord.REST;
 export let client: Discord.Client;
 export let apiTimeout: number = 0;
 
 // NOTE(ljre): API
-export function setupGlobals(client_: Discord.Client, rest_: REST, auth_: any) {
+export function setupGlobals(client_: Discord.Client, rest_: Discord.REST, auth_: any) {
 	// NOTE(ljre): Needed since we can't assign to exported globals from other modules.
 
 	client = client_;
@@ -261,7 +260,7 @@ export function defaultEmbed(member: Discord.GuildMember | Discord.User): any {
 	}
 	
 	return {
-		type: "rich",
+		type: Discord.EmbedType.Rich,
 		color: SERVER.botColor,
 		author: { name, icon_url: avatar ?? undefined },
 		footer: { text: client.user?.username, icon_url: client.user?.avatarURL() ?? undefined },
@@ -362,7 +361,7 @@ export function processImage(img: string | Jimp, callback: (image: Jimp) => any)
 		}).then(callback);
 }
 
-export function imageAsAttachment(buffer: Buffer, format: string): Discord.MessageOptions {
+export function imageAsAttachment(buffer: Buffer, format: string): Discord.BaseMessageOptions {
 	return { files: [{ attachment: buffer, name: `image.${format}` }] };
 }
 

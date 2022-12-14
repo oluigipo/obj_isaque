@@ -1,5 +1,5 @@
 import { Command, Argument, Permission, validatePermissions, commands } from "../index";
-import { Message, MessageEmbed, TextChannel } from "discord.js";
+import { Message, TextChannel, APIEmbed } from "discord.js";
 import * as Common from "../../common";
 
 function permissions(perm: Permission): string {
@@ -111,7 +111,7 @@ function helpGeneral(msg: Message) {
 
 export default <Command>{
 	async run(msg: Message, args: Argument[], raw: string[]) {
-		let result: MessageEmbed | undefined;
+		let result: APIEmbed | undefined;
 
 		if (args.length > 1 && args[1].kind === "STRING") {
 			result = helpCommand(msg, args[1].value);

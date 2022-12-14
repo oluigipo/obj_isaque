@@ -1,5 +1,5 @@
 import { Command, Argument, Permission, ArgumentKind } from "../index";
-import { Message, MessageEmbed } from "discord.js";
+import { Message } from "discord.js";
 import * as Common from "../../common";
 
 function makeRGB(r: number, g: number, b: number): number {

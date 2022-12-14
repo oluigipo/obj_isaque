@@ -1,5 +1,5 @@
 import { Command, Argument, Permission, ArgumentKind } from "../index";
-import { CollectorFilter, Message, TextChannel } from "discord.js";
+import { CollectorFilter, Message, TextChannel, ChannelType } from "discord.js";
 import * as Balance from "../../balance";
 import * as Common from "../../common";
 
@@ -69,7 +69,7 @@ export default <Command>{
 					message.channel.send("Evento iniciado!");
 
 					let channel = <TextChannel>msg.guild?.channels.cache.get("671327942420201492");
-					if (!channel || channel.type !== "GUILD_TEXT")
+					if (!channel || channel.type !== ChannelType.GuildText)
 						return;
 
 					const keys = Object.keys(result.data);
