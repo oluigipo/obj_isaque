@@ -202,6 +202,14 @@ export async function interactionCreate(int_: Discord.Interaction) {
 // NOTE(ljre): Functions
 function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 	const result = <Argument[]>[];
+	
+	function numberSubstring(str: string): string {
+		const match = str.match(/^[0-9]{18}[0-9]*/);
+		if (!match || match.length < 1)
+			return "";
+		
+		return match[0];
+	}
 
 	for (let str of raw) {
 		let arg = <Argument>{};
@@ -224,7 +232,7 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 					str = str.substr((str[1] === '!') ? 2 : 1);
 				}
 
-				const id = str.substr(0, 18);
+				const id = numberSubstring(str);
 
 				if (msg.guild === null)
 					continue;
@@ -249,7 +257,7 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 			} else if (str[0] === '#') {
 				str = str.substr(1);
 
-				const id = str.substr(0, 18);
+				const id = numberSubstring(str);
 
 				if (msg.guild === null)
 					continue;
@@ -261,7 +269,7 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 				arg.value = channel;
 			} else if (str[0] === ':' || str.startsWith("a:")) {
 				const last = str.indexOf(':', 2);
-				const id = str.substr(last + 1, 18);
+				const id = numberSubstring(str.slice(last + 1));
 
 				const emoji = Common.client.emojis.cache.get(id);
 				if (emoji === undefined)
@@ -279,7 +287,7 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 		if (code >= '0'.charCodeAt(0) && code <= '9'.charCodeAt(0)) {
 
 			// 18 chars, check if it's an ID
-			if (str.length == 18) {
+			if (str.length >= 18) {
 				let isntId = false;
 
 				for (let i = 1; i < str.length; ++i) {

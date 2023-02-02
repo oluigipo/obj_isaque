@@ -151,7 +151,7 @@ class Expr {
 const NUMBER_RE = /^[0-9]+(\.[0-9]+)?/;
 const STRING_RE = /^"[^"]*"/;
 const SYMBOL_RE = /^[a-zA-Z_@#\$.:?+\-\*/\\%><&\^~|=!][a-zA-Z0-9_@#\$.:?+\-\*/\\%><&\^~|=!]*/;
-const MENTION_RE = /^<@&?!?\d{18}>/;
+const MENTION_RE = /^<@&?!?\d{18}\d*>/;
 
 
 const native_scope: Map<string, (vm: LispVM, arr: Expr[]) => Expr> = new Map([

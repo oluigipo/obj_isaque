@@ -8,9 +8,9 @@ Jimp.read("https://media.discordapp.net/attachments/723581427391791104/761242780
 	.then(i => dino_drake = i)
 	.catch(Common.error);
 
-const emoji_re = /<a?:[\w_]+:(\d{18})>/;
-const user_re = /^<@!?(\d{18})>$/;
-const userid_re = /^(\d{18})$/;
+const emoji_re = /<a?:[\w_]+:(\d{18}\d*)>/;
+const user_re = /^<@!?(\d{18}\d*)>$/;
+const userid_re = /^(\d{18}\d*)$/;
 
 async function resolve_image(this: any, arg: string): Promise<Jimp> {
 	let match;

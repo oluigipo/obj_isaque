@@ -27,7 +27,7 @@ Quando um comando possui o field `.interaction`, ele será automaticamente regis
 * O tipo de `value` depende do valor de `kind`;
 * O primeiro argumento sempre será uma `STRING`, que é o alias usado para chamar o comando;
 * `NUMBER` sempre será **unsigned**;
-* `USERID` sempre será uma string de 18 dígitos;
+* `USERID` sempre será uma string de pelo menos 18 dígitos;
 * `TIME` sempre será em **ms** (milliseconds);
 * Referência de cada tipo para `value` dependendo de `kind`:
 
