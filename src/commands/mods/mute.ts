@@ -36,6 +36,12 @@ export default <Command>{
 
 		const reason = reasonList?.join(' ');
 
+		if (toMute.length === 0) {
+			msg.reply("você precisa marcar o maluco").catch(Common.discordErrorHandler);
+			return;
+		}
+
+		let failed = 0;
 		for (const e of toMute) {
 			const member = e.member;
 			// @NOTE(luigi): we don't need to update the db every iteration of the loop
@@ -43,10 +49,11 @@ export default <Command>{
 
 			if (!result.ok) {
 				finalmsg += `Algo deu errado ao mutar ${member}. \`${result.error}\`\n`;
+				failed++;
 				continue;
 			}
 
-			finalmsg += `Sinta o peso do mute ${member}! Mutado `;
+			finalmsg += `Sinta o peso do mute ${member}! Mutado(a) `;
 			if (e.duration === -1)
 				finalmsg += `até alguém quiser desmutar.`;
 			else
@@ -58,17 +65,19 @@ export default <Command>{
 			finalmsg += '\n';
 		}
 
-		if (finalmsg === "")
-			finalmsg = "mutar quem?";
-		else {
-			// update the db if someone was muted
-			Moderation.updateDb();
-			if (finalmsg.length >= 2000)
-				finalmsg = `caraca, mutou tanta gente que passou do limite de 2000 caracteres do discord ${Common.EMOJIS.surrender.repeat(3)}`
-		}
+		if (finalmsg.length > 1800)
+			finalmsg = finalmsg.substr(0, 1800);
+		if (failed > 0)
+			msg.reply("deu pau na hora de mutar, hein").catch(Common.discordErrorHandler);
 
-		let embed = Common.emptyEmbed();
-		embed.description = finalmsg;
+		// update the db if someone was muted
+		Moderation.updateDb();
+
+		let embed = Common.defaultEmbed(Common.notNull(msg.author));
+		embed.description = `[Ir para a mensagem](${msg.url})\n${finalmsg}`;
+		delete embed.footer;
+		delete embed.color;
+		
 		Moderation.logChannel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
 		msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 	},

@@ -147,6 +147,10 @@ function isOurGuild(str: string | null | undefined) {
 async function shouldProcessMessage(message: Discord.Message): Promise<boolean> {
 	if (message.author.bot || !Commands.validChannelTypes.includes(message.channel.type) || message.content.length < 1)
 		return false;
+	if (message.channel.id === Common.CHANNELS.musicConcert && message.type === Discord.MessageType.ThreadStarterMessage) {
+		message.delete().catch(Common.discordErrorHandler);
+		return false;
+	}
 
 	return true;
 }

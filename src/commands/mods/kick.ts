@@ -12,26 +12,36 @@ export default <Command>{
 		args.shift(); // consume command
 
 		let final = `${msg.author}\n`;
+		let failed = 0;
+		let total = 0;
 		for (const arg of args) {
 			if (arg.kind === ArgumentKind.MEMBER) {
 				const result = Moderation.kick(arg.value);
+				total++;
 
 				if (!result.ok) {
 					final += `não deu pra kickar o(a) ${arg.value}. ${result.error}\n`;
+					failed++;
 					continue;
 				}
 
-				final += `KICKADO (ban para criança) ${arg.value}!\n`;
+				final += `KICKADA (ban para criança) ${arg.value}!\n`;
 			}
 		}
 
-		if (final === "")
-			final = "você precisa marcar o maluco";
-		else if (final.length > 2000)
-			final = `eita, você kickou tanta gente que passou do limite de 2000 chars do discord ${Common.EMOJIS.surrender.repeat(3)}`;
+		if (total === 0)
+			msg.reply("você precisa marcar o malucio").catch(Common.discordErrorHandler);
+		else if (failed !== 0)
+			msg.reply("deu pau na hora de kickar, hein").catch(Common.discordErrorHandler);
 
-		let embed = Common.emptyEmbed();
-		embed.description = final;
+		if (final.length > 1800)
+			final = final.substr(0, 1800);
+
+		let embed = Common.defaultEmbed(Common.notNull(msg.author));
+		embed.description = `[Ir para a mensagem](${msg.url})\n${final}`;
+		delete embed.footer;
+		delete embed.color;
+		
 		Moderation.logChannel.send({ embeds: [embed] }).catch(Common.discordErrorHandler);
 		msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);
 	},
