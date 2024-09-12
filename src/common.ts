@@ -1,5 +1,5 @@
 import * as Discord from "discord.js";
-import https from "https";
+import https from "node:https";
 import Jimp from "jimp";
 
 // NOTE(ljre): Types and globals
