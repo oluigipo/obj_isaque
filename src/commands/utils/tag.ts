@@ -59,7 +59,7 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
 
     allScored.sort((a, b) => b.score - a.score);
     allScored = allScored.slice(0, 50);
-    allScored = allScored.filter(item => item.score > 0.5);
+    allScored = allScored.filter(item => item.score > 0.35);
     const sortedTags = allScored.map(item => item.tag);
     const embed = listOfTagsAsEmbed(msg, sortedTags, `Resultados da pesquisa por: ${term}`);
 
