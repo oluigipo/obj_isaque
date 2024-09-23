@@ -3,6 +3,8 @@ import * as Common from "./common";
 
 // NOTE(ljre): Types and globals
 export interface Tag extends Document {
+	createdAt: number;
+	deletedAt: number | null | undefined;
 	name: string;
 	value: string;
 	createdBy: string; // snowflake
@@ -40,6 +42,7 @@ export async function init(): Promise<boolean> {
 	collections.tags = dbo.collection<Tag>("tags", {});
 
 	collections.tags.createIndex({ name: 1 }, { unique: true });
+	collections.tags.createIndex({ deletedAt: 1, name: 1 });
 
 	return success;
 }

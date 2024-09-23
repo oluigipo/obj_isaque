@@ -32,8 +32,8 @@ type Invites = { [key: string]: Invite };
 let invites: Invites;
 
 // NOTE(ljre): Pipelines
-import * as Commands from "./commands";
 import * as Database from "./database";
+import * as Commands from "./commands";
 import * as Moderation from "./moderation";
 import * as Giveaway from "./giveaway";
 import * as Balance from "./balance";

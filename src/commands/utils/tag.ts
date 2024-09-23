@@ -1,4 +1,4 @@
-import { Command, Argument, Permission, InteractionOptionType, ArgumentKind } from "../index";
+import { Command, Argument, Permission, InteractionOptionType, ArgumentKind, validatePermissions } from "../index";
 import Discord from "discord.js";
 import * as Common from "../../common";
 import * as Database from "../../database";
@@ -6,14 +6,38 @@ import * as StringSimilarity from 'string-similarity';
 
 const maxNameLength = 128;
 
-const Tags = Database.collections.tags;
+let Tags = Database.collections.tags;
 const reservedWords = [
     "create",
     "category",
     "categories",
     "search",
     "delete",
+    "info",
+    "remove",
 ];
+
+function listOfTagsAsEmbed(msg: Discord.Message<true>, tags: Database.Tag[], title?: string): any {
+    const embed = Common.defaultEmbed(Common.notNull(msg.member));
+    if (title)
+        embed.title = title;
+    let currentField = "";
+    let firstIter = true;
+    for (const tagWithScore of tags) {
+        if (currentField.length + tagWithScore.name.length > 1024) {
+            embed.fields.push({ name: "", value: currentField });
+            currentField = "";
+            firstIter = true;
+        }
+
+        if (!firstIter)
+            currentField += ", ";
+        firstIter = false;
+        currentField += tagWithScore.name;
+    }
+    embed.fields.push({ name: "", value: currentField });
+    return embed;
+}
 
 async function searchTag(msg: Discord.Message<true>, term: string) {
     term = term.toLowerCase();
@@ -23,7 +47,7 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
         return msg.reply("nn achei nada");
     }
 
-    const allScored = all.map(tag => {
+    let allScored = all.map(tag => {
         let score = StringSimilarity.compareTwoStrings(tag.name, term);
         for (const cat of tag.categories) {
             const catScore = StringSimilarity.compareTwoStrings(cat, term) / 10;
@@ -34,20 +58,9 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
     });
 
     allScored.sort((a, b) => b.score - a.score);
-
-    const embed = Common.defaultEmbed(Common.notNull(msg.member));
-    embed.title = `Resultados da pesquisa por: ${term}`;
-    let currentField = "";
-    for (const tagWithScore of allScored) {
-        if (currentField.length + tagWithScore.tag.name.length > 1024) {
-            embed.fields.push(currentField);
-            currentField = "";
-        }
-
-        currentField += ", ";
-        currentField += tagWithScore.tag.name;
-    }
-    embed.fields.push(currentField);
+    allScored = allScored.slice(0, 50);
+    const sortedTags = allScored.map(item => item.tag);
+    const embed = listOfTagsAsEmbed(msg, sortedTags, `Resultados da pesquisa por: ${term}`);
 
     return msg.reply({ embeds: [embed] });
 }
@@ -77,12 +90,25 @@ function tagnameFromArg(arg: Argument | undefined): [string, boolean] {
 
 export default <Command>{
 	async run(msg: Discord.Message<true>, args: Argument[], raw: string[]) {
+        Tags = Database.collections.tags;
+        const defaultsToSearch = String(args[0].value) === "tags";
+        if (defaultsToSearch && args.length < 2) {
+            const allTags = await Tags.find({}, { projection: { _id: 0, name: 1 } }).toArray();
+            for (let i = 0; i < Math.min(allTags.length, 50); ++i) {
+                const index = ~~(Math.random() * allTags.length);
+                const tmp = allTags[i];
+                allTags[i] = allTags[index];
+                allTags[index] = tmp;
+            }
+            await msg.reply({ embeds: [listOfTagsAsEmbed(msg, allTags.slice(0, 50))] });
+            return;
+        }
+
 		if (args.length < 2) {
             await msg.reply("oq vc quer");
             return;
         }
 
-        const defaultsToSearch = String(args[0].value) === "tags";
         const commandArgument = args[1];
         if (!["string", "number"].includes(typeof commandArgument.value)) {
             await msg.reply("diz o nome certo");
@@ -119,6 +145,8 @@ export default <Command>{
                 let result;
                 try {
                     result = await Tags.insertOne({
+                        createdAt: Date.now(),
+                        deletedAt: null,
                         name,
                         value,
                         createdBy: msg.author.id,
@@ -142,26 +170,41 @@ export default <Command>{
                     break;
                 }
                 const categories: string[] = [];
+                const categoriesToRemove: string[] = [];
                 for (const arg of args.slice(3)) {
                     const [catName, ok] = tagnameFromArg(arg);
                     if (!ok)
                         continue;
-                    if (catName.length > maxNameLength) {
+                    
+                    if (catName.startsWith("-"))
+                        categoriesToRemove.push(catName.slice(1));
+                    else if (catName.length > maxNameLength) {
                         await msg.reply("nome mt longo");
                         break outerSwitch;
-                    }
-                    categories.push(catName);
+                    } else
+                        categories.push(catName);
                 }
 
                 let result;
                 try {
-                    result = await Tags.updateOne({ name: tagName }, { $addToSet: { categories: { $each: categories } } });
+                    result = await Tags.updateOne({ name: tagName }, {
+                        $addToSet: { categories: { $each: categories } },
+                    });
+                    if (result.matchedCount === 1 && categoriesToRemove.length > 0) {
+                        result = await Tags.updateOne({ name: tagName }, {
+                            $pullAll: { categories: categoriesToRemove },
+                        });
+                    }
                 } catch (err) {
                     console.error(err);
                 }
 
                 if (result && result.modifiedCount === 1) {
                     await msg.reply("atualizado");
+                } else if (result && result.matchedCount === 0) {
+                    await msg.reply("nn achei essa tag");
+                } else if (result && categoriesToRemove.length > 0) {
+                    await msg.reply("nenhuma dessas categorias q vc quis remover estavam nessa tag");
                 } else {
                     await msg.reply("deu pau");
                 }
@@ -174,7 +217,12 @@ export default <Command>{
                     await searchTag(msg, name);
                 }
             } break;
+            case "remove":
             case "delete": {
+                if (!validatePermissions(Common.notNull(msg.member), <Discord.TextChannel>msg.channel, Permission.MOD)) {
+                    await msg.reply("só adm pode deletar tag");
+                    break;
+                }
                 const [name, ok] = tagnameFromArg(args[2]);
                 if (!ok) {
                     await msg.reply("deletar oq?");
@@ -194,6 +242,33 @@ export default <Command>{
                     await msg.reply("deu pau");
                 }
             } break;
+            case "info": {
+                const [name, nameOk] = tagnameFromArg(args[2]);
+                if (!nameOk) {
+                    await msg.reply("diz o nome e o valor");
+                    break;
+                }
+                let result;
+                try {
+                    result = await Tags.findOne({ name });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (!result) {
+                    await msg.reply("nn conheço essa tag");
+                    break;
+                }
+                const embed = Common.defaultEmbed(Common.notNull(msg.member));
+                embed.title = name;
+                embed.fields = [
+                    { name: "Categorias", value: result.categories.join(",") || "(nenhuma)", inline: true },
+                    { name: "Criada por", value: `<@${result.createdBy}>`, inline: true },
+                    { name: "Criada em", value: new Date(result.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }), inline: true },
+                    { name: "Conteúdo", value: result.value },
+                ];
+                await msg.reply({ embeds: [embed] });
+            } break;
             default:
                 if (defaultsToSearch)
                     await searchTag(msg, command);
@@ -202,12 +277,21 @@ export default <Command>{
                 break;
         }
 	},
-	syntaxes: ["tag <nome>"],
+	syntaxes: [
+        "tag <nome>",
+        "tag create <nome> <...conteúdo>",
+        "tag search <...nome ou categorias>",
+        "tag category <nome> [categoria] [-categoria]",
+        "tag categories <nome> [categoria] [-categoria]",
+        "tag info <nome>",
+        "tag delete <nome>",
+        "tag remove <nome>",
+    ],
 	permissions: Permission.NONE,
 	aliases: ["tag", "t", "tags"],
 	description: "mexe com tags",
-	help: "mexe com tags",
-	examples: ["zero"],
+	help: "mexe com tags.\nSe o nome da categoria começar com `-`, eu vou remover ela ao invés de adicionar.\nA pesquisa funciona por nome e categoria.",
+	examples: ["zero", "category dankicu danki dankicode meme"],
 	
 	interaction: {
 		async run(int: Discord.CommandInteraction) {

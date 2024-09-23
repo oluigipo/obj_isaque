@@ -11,5 +11,6 @@ import number from "./number";
 import ping from "./ping";
 import reroll from "./reroll";
 import faq from "./faq";
+import tag from "./tag";
 
-export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping, reroll, faq];
+export default [eval, calc, color, curso, docs, github, help, megasorteio, nonetube, number, ping, reroll, faq, tag];
