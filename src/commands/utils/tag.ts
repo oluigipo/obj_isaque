@@ -50,7 +50,7 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
     let allScored = all.map(tag => {
         let score = StringSimilarity.compareTwoStrings(tag.name, term);
         for (const cat of tag.categories) {
-            const catScore = StringSimilarity.compareTwoStrings(cat, term) / 10;
+            const catScore = StringSimilarity.compareTwoStrings(cat, term) * 0.75;
             if (catScore > score)
                 score = catScore;
         }
@@ -59,6 +59,7 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
 
     allScored.sort((a, b) => b.score - a.score);
     allScored = allScored.slice(0, 50);
+    allScored = allScored.filter(item => item.score > 0.5);
     const sortedTags = allScored.map(item => item.tag);
     const embed = listOfTagsAsEmbed(msg, sortedTags, `Resultados da pesquisa por: ${term}`);
 
@@ -278,14 +279,14 @@ export default <Command>{
         }
 	},
 	syntaxes: [
-        "tag <nome>",
-        "tag create <nome> <...conteúdo>",
-        "tag search <...nome ou categorias>",
-        "tag category <nome> [categoria] [-categoria]",
-        "tag categories <nome> [categoria] [-categoria]",
-        "tag info <nome>",
-        "tag delete <nome>",
-        "tag remove <nome>",
+        "<nome>",
+        "create <nome> <...conteúdo>",
+        "search <...nome ou categorias>",
+        "category <nome> [categoria] [-categoria]",
+        "categories <nome> [categoria] [-categoria]",
+        "info <nome>",
+        "delete <nome>",
+        "remove <nome>",
     ],
 	permissions: Permission.NONE,
 	aliases: ["tag", "t", "tags"],
