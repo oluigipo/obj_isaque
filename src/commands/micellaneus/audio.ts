@@ -43,7 +43,7 @@ async function exec(member: Discord.GuildMember, key?: string) {
 }
 
 export default <Command>{
-	async run(msg: Discord.Message, args: Argument[], raw: string[]) {
+	async run(msg: Discord.Message<true>, args: Argument[], raw: string[]) {
 		if (!msg.member || !msg.member.voice.channel || alreadyPlaying || msg.member.voice.channel.type === Discord.ChannelType.GuildVoice) {
 			msg.react(Common.EMOJIS.no);
 			return;

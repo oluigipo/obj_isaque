@@ -9,7 +9,7 @@ interface Players {
 interface Game {
 	players: Players;
 	played: number[];
-	message: Message;
+	message: Message<true>;
 }
 
 const maxNumber = 50;
@@ -90,7 +90,7 @@ function checkWin(played: number[], table: number[][]): boolean {
 }
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length > 1) { // iniciando um bingo
 			if (!validatePermissions(Common.notNull(msg.member), <TextChannel>msg.channel, Permission.MOD))
 				return msg.reply("você não tem permissão para iniciar um bingo").catch(Common.discordErrorHandler);

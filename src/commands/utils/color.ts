@@ -116,7 +116,7 @@ function _format(s: string): string {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		if (!msg.member) {
 			return;
 		}

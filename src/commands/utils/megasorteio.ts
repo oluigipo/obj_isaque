@@ -4,7 +4,7 @@ import * as Giveaway from "../../giveaway";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[]) {
+	async run(msg: Message<true>, args: Argument[]) {
 		if (args.length < 4) {
 			msg.reply(`Informações insuficientes! \`${Common.SERVER.prefix}megasorteio <tempo> <quantidade> <prêmio>\``).catch(Common.discordErrorHandler);
 			return;

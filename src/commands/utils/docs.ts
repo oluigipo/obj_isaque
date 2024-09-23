@@ -89,7 +89,7 @@ function tableToText(table: Table): string {
 	return result.trim();
 }
 
-function sendPage(msg: Message, locale: LocaleStrings, page: DefinitionPage, redirected?: string) {
+function sendPage(msg: Message<true>, locale: LocaleStrings, page: DefinitionPage, redirected?: string) {
 	let embed = Common.defaultEmbed(Common.notNull(msg.member));
 	let truncated = false;
 
@@ -136,7 +136,7 @@ function sendPage(msg: Message, locale: LocaleStrings, page: DefinitionPage, red
 }
 
 export default <Command> {
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		let docs = docsEnglish;
 
 		if (["docsbr", "gmdocsbr"].includes(raw[0])) {

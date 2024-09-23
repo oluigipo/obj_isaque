@@ -3,7 +3,7 @@ import Discord, { Message } from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		if (args.length < 2) {
 			msg.channel.send("mande o nÃºmero do FAQ!").catch(Common.discordErrorHandler);
 			return;
@@ -44,7 +44,7 @@ export default <Command>{
 
 		let final = {
 			content: faqContent,
-			files: []
+			files: <{attachment: string}[]>[]
 		};
 		if (toEmbed.length > 0) {
 			toEmbed.forEach(embed => {

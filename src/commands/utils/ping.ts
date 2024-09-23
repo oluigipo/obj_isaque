@@ -3,7 +3,7 @@ import Discord from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Discord.Message, args: Argument[]) {
+	async run(msg: Discord.Message<true>, args: Argument[]) {
 		const m = await msg.channel.send("...").catch(Common.discordErrorHandler);
 		if (!m)
 			return;

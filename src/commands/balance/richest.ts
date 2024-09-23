@@ -7,7 +7,7 @@ const usersPerPage = 5;
 const inline = false;
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		let page = 1;
 		if (args.length > 1 && args[1].kind === ArgumentKind.NUMBER && args[1].value >= 1) {
 			page = Math.floor(args[1].value);

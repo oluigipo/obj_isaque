@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[]) {
+	async run(msg: Message<true>, args: Argument[]) {
 		msg.channel.send(`ULO${'O'.repeat(Math.floor(Math.random() * 201))}N`)
 			.catch(Common.discordErrorHandler);
 	},

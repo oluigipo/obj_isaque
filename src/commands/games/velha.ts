@@ -108,7 +108,7 @@ function createSession(id1: string, id2: string) {
 }
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length < 2) {
 			msg.reply("vê o help").catch(Common.discordErrorHandler);
 			return;

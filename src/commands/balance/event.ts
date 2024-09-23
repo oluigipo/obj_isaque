@@ -4,7 +4,7 @@ import * as Balance from "../../balance";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length < 4) {
 			msg.reply("tá faltando argumento pro comando").catch(Common.discordErrorHandler);
 			return;

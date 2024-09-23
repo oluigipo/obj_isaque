@@ -4,7 +4,7 @@ import * as Balance from "../../balance";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Discord.Message, args: Argument[], raw: string[]) {
+	async run(msg: Discord.Message<true>, args: Argument[], raw: string[]) {
 		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(Discord.PermissionsBitField.Flags.Administrator))
 			return;
 

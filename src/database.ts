@@ -1,12 +1,20 @@
-import { MongoClient, Collection, MongoError } from "mongodb";
+import { MongoClient, Collection, MongoError, Document } from "mongodb";
 import * as Common from "./common";
 
 // NOTE(ljre): Types and globals
+export interface Tag extends Document {
+	name: string;
+	value: string;
+	createdBy: string; // snowflake
+	categories: string[];
+}
+
 export let db: MongoClient;
 export const dbname = "maindb";
 export const collections = {
 	"mutes": <Collection>{},
-	"balance": <Collection>{}
+	"balance": <Collection>{},
+	"tags": <Collection<Tag>>{},
 };
 
 type CollectionName = keyof typeof collections;
@@ -29,6 +37,9 @@ export async function init(): Promise<boolean> {
 
 	collections.mutes = dbo.collection("mutes", {});
 	collections.balance = dbo.collection("balance", {});
+	collections.tags = dbo.collection<Tag>("tags", {});
+
+	collections.tags.createIndex({ name: 1 }, { unique: true });
 
 	return success;
 }

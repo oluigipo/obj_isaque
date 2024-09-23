@@ -15,7 +15,7 @@ const playlists: any = {
 
 // Comando
 export default <Command>{
-	async run(msg: Message, args: Argument[]) {
+	async run(msg: Message<true>, args: Argument[]) {
 		let link = "https://www.youtube.com/channel/UCHJPSW9FgSoXGVFV489XXag";
 
 		if (args.length > 1 && args[1].kind === ArgumentKind.STRING) {

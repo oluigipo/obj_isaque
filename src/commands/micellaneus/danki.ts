@@ -78,7 +78,7 @@ function roll() {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		let curr: Item;
 
 		if (args.length < 2) {

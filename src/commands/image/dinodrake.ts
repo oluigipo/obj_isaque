@@ -26,7 +26,7 @@ async function resolve_image(this: any, arg: string): Promise<Jimp> {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], raw: string[]) {
+	async run(msg: Message<true>, _: Argument[], raw: string[]) {
 		if (raw.length < 3) {
 			msg.reply("Mande dois usuarios, emojis ou links para fazer o meme").catch(Common.discordErrorHandler);
 			return;

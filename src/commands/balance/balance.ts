@@ -4,7 +4,7 @@ import { Message, GuildMember, User } from "discord.js";
 import * as Balance from "../../balance";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		let user: User | GuildMember = msg.author;
 
 		if (args.length > 1 && args[1].kind === ArgumentKind.MEMBER)

@@ -1,11 +1,11 @@
 import { Command, Argument, Permission, ArgumentKind } from "../index";
-import Discord from "discord.js";
+import Discord, { WebhookType } from "discord.js";
 import * as Balance from "../../balance";
 import * as stringSimilarity from 'string-similarity';
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Discord.Message, _: Argument[], args: string[]) {
+	async run(msg: Discord.Message<true>, _: Argument[], args: string[]) {
 		if (!msg.guild || !msg.member) {
 			return;
 		}
@@ -74,7 +74,7 @@ export default <Command>{
 		// NOTE(ljre): Send It.
 		let webhook: Discord.Webhook;
 		let threadId: string | undefined;
-		let channel: Discord.TextChannel | Discord.NewsChannel | Discord.ForumChannel;
+		let channel: Discord.TextChannel | Discord.NewsChannel | Discord.ForumChannel | Discord.MediaChannel;
 
 		if (msg.channel.isThread()) {
 			threadId = msg.channel.id;
@@ -87,7 +87,7 @@ export default <Command>{
 			.then(async w => {
 				let ww = w.first();
 				if (!ww)
-					ww = <Discord.Webhook>await channel.createWebhook({ name: "emoji" }).catch(Common.discordErrorHandler);
+					ww = <Discord.Webhook<WebhookType.Incoming>>await channel.createWebhook({ name: "emoji" }).catch(Common.discordErrorHandler);
 
 				let text = `${e.toString()}`.repeat(qnt);
 				if (text.length > 2000)

@@ -4,7 +4,7 @@ import * as Moderation from "../../moderation";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[]) {
+	async run(msg: Message<true>, args: Argument[]) {
 		let list = Moderation.getMutes();
 		if (list.length === 0) {
 			msg.channel.send("não tem nenhum doido mutado").catch(Common.discordErrorHandler);

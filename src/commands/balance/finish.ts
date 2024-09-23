@@ -4,7 +4,7 @@ import * as Balance from "../../balance";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (!msg.member?.roles.cache.has(Common.ROLES.gamemaster) && !msg.member?.permissions.has(PermissionsBitField.Flags.Administrator))
 			return;
 

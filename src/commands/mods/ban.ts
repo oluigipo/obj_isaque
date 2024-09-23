@@ -4,7 +4,7 @@ import * as Moderation from "../../moderation";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length < 2) {
 			msg.channel.send("é pra banir quem?").catch(Common.discordErrorHandler);
 			return;

@@ -40,7 +40,7 @@ export async function done() {
 	await updateDb();
 }
 
-export async function message(message: Discord.Message) {
+export async function message(message: Discord.Message<true>) {
 	if (message.content.includes("@everyone") && !message.mentions.everyone && message.member) {
 		message.delete().catch(Common.discordErrorHandler);
 

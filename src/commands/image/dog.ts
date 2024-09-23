@@ -5,7 +5,7 @@ import * as Common from "../../common";
 const secrets: string[] = [];
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (Math.random() < 0.001 && secrets.length) {
 			const image = secrets[Math.floor(Math.random() * secrets.length)];
 

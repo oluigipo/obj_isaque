@@ -52,7 +52,7 @@ export interface InteractionChoice {
 export enum Permission { NONE = 0, SHITPOST = 1, MOD = 2, DEV = 4, RPG_MASTER = 8 }
 
 export interface Command {
-	run: (msg: Discord.Message, args: Argument[], raw: string[]) => Promise<void>,
+	run: (msg: Discord.Message<true>, args: Argument[], raw: string[]) => Promise<void>,
 	aliases: string[];
 	syntaxes: string[];
 	description: string;
@@ -76,8 +76,9 @@ export const validChannelTypes = [
 	Discord.ChannelType.GuildText,
 	Discord.ChannelType.PublicThread,
 	Discord.ChannelType.PrivateThread,
-	Discord.ChannelType.GuildNewsThread,
-	Discord.ChannelType.GuildNews,
+	Discord.ChannelType.GuildVoice,
+	Discord.ChannelType.GuildAnnouncement,
+	Discord.ChannelType.AnnouncementThread,
 ];
 
 const timeout = <{ [key: string]: number }>{};
@@ -134,7 +135,7 @@ export async function done() {
 	
 }
 
-export async function message(msg: Discord.Message): Promise<boolean> {
+export async function message(msg: Discord.Message<true>): Promise<boolean> {
 	if (!msg.member || !msg.member.permissions.has(Discord.PermissionsBitField.Flags.Administrator) && (timeout[msg.author.id] ?? 0) + Common.SERVER.timeout > Date.now()) {
 		msg.react(Common.EMOJIS.no).catch(Common.discordErrorHandler);
 		return false;

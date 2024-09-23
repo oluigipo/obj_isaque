@@ -4,7 +4,7 @@ import * as Giveaway from "../../giveaway";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Discord.Message, args: Argument[]) {
+	async run(msg: Discord.Message<true>, args: Argument[]) {
 		let role: Discord.Role | undefined;
 		let qnt = 1;
 		let msgid: string;

@@ -110,7 +110,7 @@ function helpGeneral(msg: Message) {
 }
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		let result: APIEmbed | undefined;
 
 		if (args.length > 1 && args[1].kind === "STRING") {

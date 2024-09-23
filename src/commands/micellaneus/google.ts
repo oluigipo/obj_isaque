@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		raw.shift();
 		let term = raw.join(" ");
 

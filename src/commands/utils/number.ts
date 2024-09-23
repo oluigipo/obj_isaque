@@ -7,7 +7,7 @@ function makeRGB(r: number, g: number, b: number): number {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		let final = Common.defaultEmbed(Common.notNull(msg.member));
 
 		let num: number, base: number;

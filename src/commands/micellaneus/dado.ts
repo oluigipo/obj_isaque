@@ -19,7 +19,7 @@ function roll(count: number, sides: number): number | string {
 const RITUAL = ["prim$", "di$", "trim$", "quadri$", "m$n", "quarteri$", "ept$", "$to", "$ene", "d$c", "entec$", "mid$"];
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		let expr = args.slice(1).join(' ').trim();
 
 		if (expr.length === 0)

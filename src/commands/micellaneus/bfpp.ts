@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		if (args.length < 2) {
 			msg.reply("e o código?").catch(Common.discordErrorHandler);
 			return;

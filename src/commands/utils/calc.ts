@@ -8,7 +8,7 @@ interface ExprResult {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		if (args.length < 2) {
 			msg.channel.send(`${msg.author} diz a conta aí, pô`).catch(Common.discordErrorHandler);
 			return;

@@ -4,7 +4,7 @@ import Jimp from "jimp";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		let img: string | Jimp | undefined = Common.imageFrom(msg, args);
 
 		if (!img) {

@@ -4,7 +4,7 @@ import * as Moderation from "../../moderation";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length > 1 && args[1].kind == ArgumentKind.STRING) {
 			Moderation.uncurseInvite(args[1].value);
 			msg.react(Common.EMOJIS.yes).catch(Common.discordErrorHandler);

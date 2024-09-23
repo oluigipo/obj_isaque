@@ -4,7 +4,7 @@ import * as Balance from "../../balance";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		if (args.length < 3) {
 			msg.reply("você precisa me dizer quanto dinheiro será cobrado e de quem cobrar").catch(Common.discordErrorHandler);
 			return;

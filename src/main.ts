@@ -155,7 +155,7 @@ async function shouldProcessMessage(message: Discord.Message): Promise<boolean> 
 	return true;
 }
 
-async function answerQuestion(message: Discord.Message) {
+async function answerQuestion(message: Discord.Message<true>) {
 	if (!message.content.startsWith(Common.SERVER.prefix) && message.mentions.members?.has(Common.notNull(client.user).id) && message.content.endsWith('?')) {
 		const respostas = [
 			"Sim",

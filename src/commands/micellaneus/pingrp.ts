@@ -3,7 +3,7 @@ import Discord from "discord.js";
 import * as Common from "../../common";
 
 export default <Command>{
-	async run(msg: Discord.Message, args: Argument[]) {
+	async run(msg: Discord.Message<true>, args: Argument[]) {
 		msg.channel.send(`<@&${Common.ROLES.rpgplayer}>`).catch(Common.discordErrorHandler);
 	},
 	syntaxes: [""],
@@ -15,6 +15,8 @@ export default <Command>{
 	
 	interaction: {
 		async run(int: Discord.CommandInteraction) {
+			if (int.channel?.type === Discord.ChannelType.GroupDM)
+				return;
 			int.channel?.send(`<@${Common.ROLES.rpgplayer}>`).catch(Common.discordErrorHandler);
 		},
 		options: [],

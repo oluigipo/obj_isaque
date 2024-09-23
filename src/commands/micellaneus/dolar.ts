@@ -39,7 +39,7 @@ const moedasCambio: any = {
 };
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], _: string[]) {
+	async run(msg: Message<true>, args: Argument[], _: string[]) {
 		let multiplier = 1;
 		let moeda = "USD";
 		args.shift(); // consume command

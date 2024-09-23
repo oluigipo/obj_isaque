@@ -6,7 +6,7 @@ import * as Giveaway from "../../giveaway";
 import { Message } from "discord.js";
 
 export default <Command>{
-	async run(msg: Message, args: Argument[], raw: string[]) {
+	async run(msg: Message<true>, args: Argument[], raw: string[]) {
 		const expr = raw.slice(1).join(' ');
 
 		// @NOTE(luigi): don't remove.

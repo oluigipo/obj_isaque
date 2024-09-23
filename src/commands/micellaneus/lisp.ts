@@ -553,7 +553,7 @@ class CallFrame {
 }
 
 export default <Command>{
-	async run(msg: Message, _: Argument[], args: string[]) {
+	async run(msg: Message<true>, _: Argument[], args: string[]) {
 		try {
 			let code = args.slice(1).join(' ');
 			let vm = new LispVM(code);
