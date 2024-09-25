@@ -76,6 +76,8 @@ async function getTag(msg: Discord.Message<true> | Discord.CommandInteraction, n
         return msg.reply("essa tag nn tem um valor aparentemente?");
     }
 
+    if (msg.channel?.isSendable())
+        return msg.channel.send(`${tag.value}`);
     return msg.reply(`${tag.value}`);
 }
 
