@@ -75,6 +75,7 @@ const messagePipeline = [
 	shouldProcessMessage,
 	Moderation.message,
 	answerQuestion,
+	reactToDynoTagCommandBeingUsed,
 	Balance.message,
 	Commands.message,
 ];
@@ -276,4 +277,13 @@ async function leftMessage(member: Discord.GuildMember) {
 		joinChannel = <Discord.TextChannel>await client.channels.fetch(Common.CHANNELS.joinLog).catch(Common.discordErrorHandler);
 
 	joinChannel.send({ embeds: [Common.fixEmbedIfNeeded(embed)] }).catch(Common.discordErrorHandler);
+}
+
+async function reactToDynoTagCommandBeingUsed(message: Discord.Message<true>) {
+	if (message.content.startsWith("?tag ")) {
+		await message.react("😭").catch(Common.discordErrorHandler);
+		return false;
+	}
+
+	return true;
 }

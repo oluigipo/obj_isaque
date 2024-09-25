@@ -13,6 +13,10 @@ let rendaImage: Jimp;
 Jimp.read("https://cdn.discordapp.com/emojis/551130874750566401.png")
 	.then(image => rendaImage = image.resize(rendaSize, rendaSize))
 	.catch(Common.discordErrorHandler);
+let disgustImage: Jimp;
+Jimp.read("https://cdn.discordapp.com/emojis/946947339682185317.webp")
+	.then(image => disgustImage = image.resize(rendaSize, rendaSize))
+	.catch(Common.discordErrorHandler);
 
 let defaultFontWhite: any;
 let defaultFontBlack: any;
@@ -26,6 +30,10 @@ export default <Command>{
 			msg.reply("o que ele deve dizer?").catch(Common.discordErrorHandler);
 			return;
 		}
+
+		let imageToUse = rendaImage;
+		if (raw[0] === "disgust")
+			imageToUse = disgustImage;
 
 		const text = raw.slice(1).join(' ');
 		if (text.length > maxLength) {
@@ -46,7 +54,7 @@ export default <Command>{
 				return;
 			}
 
-			image.blit(rendaImage, thisSize - rendaSize, thisSize - rendaSize)
+			image.blit(imageToUse, thisSize - rendaSize, thisSize - rendaSize)
 				.print(defaultFontBlack, 7, 7, text, thisSize - margin, thisSize - margin)
 				.print(defaultFontWhite, 5, 5, text, thisSize - margin, thisSize - margin)
 				.getBuffer(image.getMIME(), (err, buffer) => {
@@ -66,7 +74,7 @@ export default <Command>{
 			Common.error(err);
 		});
 	},
-	aliases: ["renda"],
+	aliases: ["renda", "disgust"],
 	syntaxes: ["[texto]"],
 	description: "O que o renda vai dizer?",
 	help: `Manda uma imagem do renda dizendo o texto fornecido. O limite do texto é ${maxLength} caracteres`,
