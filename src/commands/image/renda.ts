@@ -14,7 +14,7 @@ Jimp.read("https://cdn.discordapp.com/emojis/551130874750566401.png")
 	.then(image => rendaImage = image.resize(rendaSize, rendaSize))
 	.catch(Common.discordErrorHandler);
 let disgustImage: Jimp;
-Jimp.read("https://cdn.discordapp.com/emojis/946947339682185317.webp")
+Jimp.read("assets/disgust.png")
 	.then(image => disgustImage = image.resize(rendaSize, rendaSize))
 	.catch(Common.discordErrorHandler);
 
