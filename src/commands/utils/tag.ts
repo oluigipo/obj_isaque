@@ -121,6 +121,10 @@ export default <Command>{
         const command = String(commandArgument.value);
         outerSwitch: switch (command) {
             case "create": {
+                if (args.length < 4) {
+                    await msg.reply("nn vou criar uma tag vazia");
+                    break;
+                }
                 const [name, nameOk] = tagnameFromArg(args[2]);
                 if (!nameOk) {
                     await msg.reply("diz o nome e o valor");
@@ -134,9 +138,13 @@ export default <Command>{
                     await msg.reply("nome reservado");
                     break;
                 }
-                const value = raw.slice(3).join(" ");
+                const value = msg.content.slice(args[3].offset);
                 if (!value) {
                     await msg.reply("diz o valor tbm");
+                    break;
+                }
+                if (value.length > 2000) {
+                    await msg.reply("isso ai tem mais de 2000 caracteres, nn consigo mandar msg tão grande");
                     break;
                 }
                 const existent = await Tags.findOne({ name });

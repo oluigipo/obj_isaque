@@ -10,14 +10,14 @@ export enum ArgumentKind {
 }
 
 export type Argument =
-	{ kind: ArgumentKind.STRING, value: string } |
-	{ kind: ArgumentKind.MEMBER, value: Discord.GuildMember } |
-	{ kind: ArgumentKind.CHANNEL, value: Discord.GuildChannel | Discord.ThreadChannel } |
-	{ kind: ArgumentKind.NUMBER, value: number } |
-	{ kind: ArgumentKind.TIME, value: number } |
-	{ kind: ArgumentKind.EMOJI, value: Discord.Emoji } |
-	{ kind: ArgumentKind.SNOWFLAKE, value: string } |
-	{ kind: ArgumentKind.ROLE, value: Discord.Role };
+	{ kind: ArgumentKind.STRING, value: string, offset: number } |
+	{ kind: ArgumentKind.MEMBER, value: Discord.GuildMember, offset: number } |
+	{ kind: ArgumentKind.CHANNEL, value: Discord.GuildChannel | Discord.ThreadChannel, offset: number } |
+	{ kind: ArgumentKind.NUMBER, value: number, offset: number } |
+	{ kind: ArgumentKind.TIME, value: number, offset: number } |
+	{ kind: ArgumentKind.EMOJI, value: Discord.Emoji, offset: number } |
+	{ kind: ArgumentKind.SNOWFLAKE, value: string, offset: number } |
+	{ kind: ArgumentKind.ROLE, value: Discord.Role, offset: number };
 
 export interface Interaction {
 	run: (interaction: Discord.CommandInteraction) => Promise<void>,
@@ -145,18 +145,26 @@ export async function message(msg: Discord.Message<true>): Promise<boolean> {
 		return true;
 
 	const text = msg.content.slice(Common.SERVER.prefix.length);
-	const raw = text.split(" ").filter(v => v.length > 0);
+	let offset = Common.SERVER.prefix.length;
+	const raw = text
+		.split(" ")
+		.map(v => {
+			let thisOffset = offset;
+			offset += v.length + 1;
+			return { str: v, offset: thisOffset };
+		})
+		.filter(v => v.str.length > 0);
 	const args = parseArgs(raw, msg);
 
 	if (args.length < 1 || args[0].kind !== "STRING")
 		return true;
 
 	for (const cmd of commandsArray) {
-		if (cmd.aliases.includes(raw[0])) {
+		if (cmd.aliases.includes(raw[0].str)) {
 			if (validatePermissions(msg.member, <any>msg.channel, cmd.permissions))
 				try {
 					Common.log(`executing command ${Common.SERVER.prefix}${raw[0]}...`);
-					await cmd.run(msg, args, raw);
+					await cmd.run(msg, args, raw.map(v => v.str));
 				} catch (error) {
 					Common.error(`exception when running command '${raw[0]}': ${error}`);
 				}
@@ -201,7 +209,7 @@ export async function interactionCreate(int_: Discord.Interaction) {
 }
 
 // NOTE(ljre): Functions
-function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
+function parseArgs(raw: {str: string, offset: number}[], msg: Discord.Message): Argument[] {
 	const result = <Argument[]>[];
 	
 	function numberSubstring(str: string): string {
@@ -212,12 +220,15 @@ function parseArgs(raw: string[], msg: Discord.Message): Argument[] {
 		return match[0];
 	}
 
-	for (let str of raw) {
-		let arg = <Argument>{};
+	for (let rawarg of raw) {
+		let { str, offset } = rawarg;
 
 		// if everything below fails, it's a string
-		arg.kind = ArgumentKind.STRING;
-		arg.value = str;
+		let arg = <Argument> {
+			kind: ArgumentKind.STRING,
+			value: str,
+			offset,
+		};
 
 		result.push(arg);
 
