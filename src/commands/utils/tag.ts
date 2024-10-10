@@ -283,8 +283,14 @@ export default <Command>{
             default:
                 if (defaultsToSearch)
                     await searchTag(msg, command);
-                else
-                    await getTag(msg, command);
+                else {
+                    const [name, ok] = tagnameFromArg(args[1]);
+                    if (!ok) {
+                        await msg.reply("uma tag nn pode ter esse nome");
+                    } else {
+                        await getTag(msg, name);
+                    }
+                }
                 break;
         }
 	},
