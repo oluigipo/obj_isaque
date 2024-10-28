@@ -19,14 +19,14 @@ const reservedWords = [
     "rename",
 ];
 
-function listOfTagsAsEmbed(msg: Discord.Message<true>, tags: Database.Tag[], title?: string): any {
+function listOfStringsAsEmbed(msg: Discord.Message<true>, strs: string[], title?: string): any {
     const embed = Common.defaultEmbed(Common.notNull(msg.member));
     if (title)
         embed.title = title;
     let currentField = "";
     let firstIter = true;
-    for (const tagWithScore of tags) {
-        if (currentField.length + tagWithScore.name.length > 1024) {
+    for (const str of strs) {
+        if (currentField.length + str.length > 1024) {
             embed.fields.push({ name: "", value: currentField });
             currentField = "";
             firstIter = true;
@@ -35,7 +35,7 @@ function listOfTagsAsEmbed(msg: Discord.Message<true>, tags: Database.Tag[], tit
         if (!firstIter)
             currentField += ", ";
         firstIter = false;
-        currentField += tagWithScore.name;
+        currentField += str;
     }
     embed.fields.push({ name: "", value: currentField });
     return embed;
@@ -63,7 +63,7 @@ async function searchTag(msg: Discord.Message<true>, term: string) {
     allScored = allScored.slice(0, 50);
     allScored = allScored.filter(item => item.score > 0.35);
     const sortedTags = allScored.map(item => item.tag);
-    const embed = listOfTagsAsEmbed(msg, sortedTags, `Resultados da pesquisa por: ${term}`);
+    const embed = listOfStringsAsEmbed(msg, sortedTags.map(tag => tag.name), `Resultados da pesquisa por: ${term}`);
 
     return msg.reply({ embeds: [embed] });
 }
@@ -105,7 +105,7 @@ export default <Command>{
                 allTags[i] = allTags[index];
                 allTags[index] = tmp;
             }
-            await msg.reply({ embeds: [listOfTagsAsEmbed(msg, allTags.slice(0, 50))] });
+            await msg.reply({ embeds: [listOfStringsAsEmbed(msg, allTags.slice(0, 50).map(tag => tag.name))] });
             return;
         }
 
@@ -179,6 +179,19 @@ export default <Command>{
             case "categories": {
                 const [tagName, tagNameOk] = tagnameFromArg(args[2]);
                 if (!tagNameOk) {
+                    if (command === "categories" && args.length === 2) {
+                        // NOTE: show all registered categories
+                        const allTags = await Tags.find({}, { projection: { _id: 0, categories: 1 } }).toArray();
+                        const cats = new Set<string>();
+                        for (const tag of allTags) {
+                            for (const cat of tag.categories) {
+                                cats.add(cat);
+                            }
+                        }
+                        await msg.reply({ embeds: [listOfStringsAsEmbed(msg, [...cats.values()], "Categorias")] });
+                        break;
+                    }
+
                     await msg.reply("diz o nome da tag q vc quer botar categorias");
                     break;
                 }
