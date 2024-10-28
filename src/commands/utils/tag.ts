@@ -15,6 +15,8 @@ const reservedWords = [
     "delete",
     "info",
     "remove",
+    "edit",
+    "rename",
 ];
 
 function listOfTagsAsEmbed(msg: Discord.Message<true>, tags: Database.Tag[], title?: string): any {
@@ -256,7 +258,7 @@ export default <Command>{
             case "info": {
                 const [name, nameOk] = tagnameFromArg(args[2]);
                 if (!nameOk) {
-                    await msg.reply("diz o nome e o valor");
+                    await msg.reply("diz o nome e o conteúdo");
                     break;
                 }
                 let result;
@@ -279,6 +281,114 @@ export default <Command>{
                     { name: "Conteúdo", value: result.value },
                 ];
                 await msg.reply({ embeds: [embed] });
+            } break;
+            case "edit": {
+                const [name, nameOk] = tagnameFromArg(args[2]);
+                if (!nameOk) {
+                    await msg.reply("diz o nome e o conteúdo");
+                    break;
+                }
+                let result;
+                try {
+                    result = await Tags.findOne({ name });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (!result) {
+                    await msg.reply("nn conheço essa tag");
+                    break;
+                }
+
+                const value = msg.content.slice(args[3].offset);
+                if (!value) {
+                    await msg.reply("diz o valor tbm");
+                    break;
+                }
+                if (value.length > 2000) {
+                    await msg.reply("isso ai tem mais de 2000 caracteres, nn consigo mandar msg tão grande");
+                    break;
+                }
+
+                let updateResult;
+                try {
+                    updateResult = await Tags.updateOne({ name }, { $set: { value } });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (updateResult && updateResult.modifiedCount) {
+                    await msg.reply(`tag chamada \`${name}\` editada`);
+                } else {
+                    await msg.reply(`deu pau na edição`);
+                }
+            } break;
+            case "rename": {
+                const [name, nameOk] = tagnameFromArg(args[2]);
+                if (!nameOk) {
+                    await msg.reply("diz o nome e o novo nome");
+                    break;
+                }
+                let result;
+                try {
+                    result = await Tags.findOne({ name });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (!result) {
+                    await msg.reply("nn conheço essa tag");
+                    break;
+                }
+
+                const [newName, newNameOk] = tagnameFromArg(args[3]);
+                if (!newNameOk) {
+                    await msg.reply("diz o novo nome tbm");
+                    break;
+                }
+                if (newName.length > maxNameLength) {
+                    await msg.reply("nome mt longo");
+                    break;
+                }
+                if (reservedWords.includes(newName)) {
+                    await msg.reply("nome reservado");
+                    break;
+                }
+
+                if (name === newName) {
+                    await msg.reply("mt comedia vc");
+                    break;
+                }
+
+                let exists;
+                let didError = false;
+                try {
+                    exists = !!(await Tags.findOne({ name: newName }));
+                } catch (err) {
+                    console.log(err);
+                    didError = true;
+                }
+
+                if (exists) {
+                    await msg.reply("já tem uma outra tag com esse nome");
+                    break;
+                } else if (didError) {
+                    await msg.reply("deu pau pra renomear");
+                    break;
+                }
+
+                let updateResult;
+                try {
+                    updateResult = await Tags.updateOne({ name }, { $set: { name: newName } });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (updateResult && updateResult.modifiedCount) {
+                    await msg.reply(`tag \`${name}\` renomeada pra \`${newName}\``);
+                } else {
+                    await msg.reply(`deu pau pra renomear`);
+                }
             } break;
             default:
                 if (defaultsToSearch)
@@ -303,6 +413,8 @@ export default <Command>{
         "info <nome>",
         "delete <nome>",
         "remove <nome>",
+        "edit <nome> <...conteúdo>",
+        "rename <nome> <novo nome>",
     ],
 	permissions: Permission.NONE,
 	aliases: ["tag", "t", "tags"],
