@@ -245,17 +245,26 @@ export default <Command>{
             } break;
             case "remove":
             case "delete": {
-                if (!validatePermissions(Common.notNull(msg.member), <Discord.TextChannel>msg.channel, Permission.MOD)) {
-                    await msg.reply("só adm pode deletar tag");
-                    break;
-                }
                 const [name, ok] = tagnameFromArg(args[2]);
                 if (!ok) {
                     await msg.reply("deletar oq?");
                     break;
                 }
-
+                
                 let result;
+                try {
+                    result = await Tags.findOne({ name });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                const isAdmin = validatePermissions(Common.notNull(msg.member), <Discord.TextChannel>msg.channel, Permission.MOD);
+                const ownsTag = result?.createdBy === msg.author.id;
+                if (!isAdmin && !ownsTag) {
+                    await msg.reply("só adm pode deletar tag dos outros");
+                    break;
+                }
+
                 try {
                     result = await Tags.deleteOne({ name });
                 } catch (err) {
