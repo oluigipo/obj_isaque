@@ -258,8 +258,13 @@ export default <Command>{
                     console.error(err);
                 }
 
+                if (!result) {
+                    await msg.reply("essa tag nem existe");
+                    break;
+                }
+
                 const isAdmin = validatePermissions(Common.notNull(msg.member), <Discord.TextChannel>msg.channel, Permission.MOD);
-                const ownsTag = result?.createdBy === msg.author.id;
+                const ownsTag = result.createdBy === msg.author.id;
                 if (!isAdmin && !ownsTag) {
                     await msg.reply("só adm pode deletar tag dos outros");
                     break;
