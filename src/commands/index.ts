@@ -79,6 +79,7 @@ export const validChannelTypes = [
 	Discord.ChannelType.GuildVoice,
 	Discord.ChannelType.GuildAnnouncement,
 	Discord.ChannelType.AnnouncementThread,
+	Discord.ChannelType.GuildStageVoice,
 ];
 
 const timeout = <{ [key: string]: number }>{};
