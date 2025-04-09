@@ -63,6 +63,7 @@ export const ROLES = {
 	community: "770691692986368050",
 	rpgmaster: "918989968876130336",
 	rpgplayer: "918990131799658548",
+	tagsban: "1359519172660564029",
 };
 
 export const CHANNELS = {

@@ -120,9 +120,17 @@ export default <Command>{
             return;
         }
 
+        let allowChanges = false;
+        if (msg.member && !msg.member.roles.cache.has(Common.ROLES.tagsban)) {
+            allowChanges = true;
+        }
+
         const command = String(commandArgument.value);
         outerSwitch: switch (command) {
             case "create": {
+                if (!allowChanges) {
+                    break; // breaks silently
+                }
                 if (args.length < 4) {
                     await msg.reply("nn vou criar uma tag vazia");
                     break;
@@ -195,6 +203,10 @@ export default <Command>{
                     await msg.reply("diz o nome da tag q vc quer botar categorias");
                     break;
                 }
+                
+                if (!allowChanges) {
+                    break; // breaks silently
+                }
                 const categories: string[] = [];
                 const categoriesToRemove: string[] = [];
                 for (const arg of args.slice(3)) {
@@ -245,6 +257,10 @@ export default <Command>{
             } break;
             case "remove":
             case "delete": {
+                if (!allowChanges) {
+                    break; // breaks silently
+                }
+
                 const [name, ok] = tagnameFromArg(args[2]);
                 if (!ok) {
                     await msg.reply("deletar oq?");
@@ -310,6 +326,10 @@ export default <Command>{
                 await msg.reply({ embeds: [embed] });
             } break;
             case "edit": {
+                if (!allowChanges) {
+                    break; // breaks silently
+                }
+
                 const [name, nameOk] = tagnameFromArg(args[2]);
                 if (!nameOk) {
                     await msg.reply("diz o nome e o conteúdo");
@@ -351,6 +371,10 @@ export default <Command>{
                 }
             } break;
             case "rename": {
+                if (!allowChanges) {
+                    break; // breaks silently
+                }
+
                 const [name, nameOk] = tagnameFromArg(args[2]);
                 if (!nameOk) {
                     await msg.reply("diz o nome e o novo nome");
