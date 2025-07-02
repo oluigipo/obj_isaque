@@ -65,7 +65,7 @@ export async function message(message: Discord.Message<true>) {
 				if (false) {
 					await member.ban({
 						reason: "provavelmente um bot spammando",
-						deleteMessageSeconds: 24 * Common.TIME.hour,
+						deleteMessageSeconds: 24 * Common.TIME.hour / Common.TIME.second,
 					});
 
 					const embed = Common.defaultEmbed(member);
@@ -266,7 +266,12 @@ export function kick(user: string | Discord.GuildMember): Common.Result<undefine
 	return { ok: true, data: undefined };
 }
 
-export function ban(user: string | Discord.GuildMember, reason?: string): Common.Result<undefined> {
+type BanOptions = {
+	deleteMessageSeconds?: number;
+	reason?: string;
+};
+
+export async function ban(user: string | Discord.GuildMember, options: BanOptions = {}): Promise<Common.Result<undefined>> {
 	if (typeof user === "string") {
 		const c = Common.client.guilds.cache.get(Common.SERVER.id)?.members.cache.get(user);
 		if (c === undefined) {
@@ -279,7 +284,7 @@ export function ban(user: string | Discord.GuildMember, reason?: string): Common
 	if (!user.bannable)
 		return { ok: false, error: "Não posso banir esse usuário" };
 
-	user.ban({ reason }).catch(Common.discordErrorHandler);
+	await user.ban(options).catch(Common.discordErrorHandler);
 
 	return { ok: true, data: undefined };
 }
