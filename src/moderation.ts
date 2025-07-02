@@ -1,6 +1,7 @@
 import Discord from "discord.js";
 import * as Common from "./common";
 import * as Database from "./database";
+import crypto from "crypto";
 
 // NOTE(ljre): Types and globals
 export interface Mute {
@@ -54,6 +55,42 @@ export async function message(message: Discord.Message<true>) {
 		}
 
 		return false;
+	}
+
+	if (isProbablyABotSpamming(message)) {
+		const member = Common.notNull(message.member);
+		if (member.bannable) {
+			try {
+				// NOTE(ljre): for now, just mute
+				if (false) {
+					await member.ban({
+						reason: "provavelmente um bot spammando",
+						deleteMessageSeconds: 24 * Common.TIME.hour,
+					});
+
+					const embed = Common.defaultEmbed(member);
+					embed.description = `provavelmente um bot spammando: ${member}`;
+					delete embed.footer;
+					delete embed.color;
+					await logChannel.send({ embeds: [embed] });
+				} else {
+					const result = mute(member.id, 1 * Common.TIME.day, "provavelmente um bot spammando", member);
+					
+					const embed = Common.defaultEmbed(member);
+					embed.description = `[Ir para a mensagem](${message.url})\nprovavelmente um bot spammando: ${member}`;
+					if (!result.ok) {
+						embed.description += `\nerro: ${result.error}`;
+					} else if (result.warning) {
+						embed.description += `\nwarning: ${result.warning}`;
+					}
+					delete embed.footer;
+					delete embed.color;
+					await logChannel.send({ embeds: [embed] });
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		}
 	}
 }
 
@@ -253,4 +290,51 @@ export function curseInvite(invite: string) {
 
 export function uncurseInvite(invite: string) {
 	cursedInvites = cursedInvites.filter(inv => inv !== invite);
+}
+
+type MessageWithHash = {
+	hash: string;
+	lastSent: number;
+	channelsSet: Set<string>,
+};
+
+const knownMessages: MessageWithHash[] = [];
+const knownMessagesByHash = new Map<string, MessageWithHash>();
+
+setInterval(() => {
+	const threshold = Date.now() - Common.TIME.minute;
+	for (let i = 0; i < knownMessages.length; ++i) {
+		const msg = knownMessages[i];
+
+		if (msg.lastSent < threshold) {
+			knownMessagesByHash.delete(msg.hash);
+			knownMessages.splice(i, 1);
+			i -= 1;
+		}
+	}
+}, 1 * Common.TIME.second);
+
+function isProbablyABotSpamming(message: Discord.Message<true>): boolean {
+	const hash = crypto.hash("sha1", message.author.id + message.content);
+	const now = Date.now();
+
+	let knownMessage = knownMessagesByHash.get(hash);
+	if (knownMessage) {
+		if (knownMessage.channelsSet.size > 2) {
+			return true;
+		}
+
+		knownMessage.channelsSet.add(message.channelId);
+		knownMessage.lastSent = now;
+	} else {
+		knownMessage = {
+			hash,
+			lastSent: now,
+			channelsSet: new Set([message.channelId]),
+		};
+		knownMessages.push(knownMessage);
+		knownMessagesByHash.set(hash, knownMessage);
+	}
+
+	return false;
 }

@@ -17,6 +17,7 @@ const reservedWords = [
     "remove",
     "edit",
     "rename",
+    "find",
 ];
 
 function listOfStringsAsEmbed(msg: Discord.Message<true>, strs: string[], title?: string): any {
@@ -41,7 +42,7 @@ function listOfStringsAsEmbed(msg: Discord.Message<true>, strs: string[], title?
     return embed;
 }
 
-async function searchTag(msg: Discord.Message<true>, term: string) {
+async function findTag(msg: Discord.Message<true>, term: string) {
     term = term.toLowerCase();
 
     const all = await Tags.find({}, {projection: { _id: 0, name: 1, categories: 1 }}).toArray();
@@ -247,12 +248,12 @@ export default <Command>{
                     await msg.reply("deu pau");
                 }
             } break;
-            case "search": {
+            case "find": {
                 const [name, ok] = tagnameFromArg(args[2]);
                 if (!ok) {
                     await msg.reply("pesquisar oq?");
                 } else {
-                    await searchTag(msg, name);
+                    await findTag(msg, name);
                 }
             } break;
             case "remove":
@@ -441,9 +442,65 @@ export default <Command>{
                     await msg.reply(`deu pau pra renomear`);
                 }
             } break;
+            case "search": {
+                if (args.length < 3) {
+                    await msg.reply("pesquisar oq?");
+                    break;
+                }
+
+                const search = msg.content.slice(args[2].offset);
+                let result;
+                try {
+                    result = await Tags.find({
+                        $text: {
+                            $search: search,
+                        },
+                    }, {
+                        projection: {
+                            _id: 0,
+                            name: 1,
+                            categories: 1,
+                            value: 1,
+                        },
+                        limit: 10,
+                    }).toArray();
+                } catch (err) {
+                    console.error(err);
+                }
+
+                if (!Array.isArray(result)) {
+                    await msg.reply("vish, deu pau");
+                    break;
+                }
+                if (result.length === 0) {
+                    await msg.reply("sem resultados");
+                    break;
+                }
+
+                const embed = Common.defaultEmbed(Common.notNull(msg.member));
+                for (const doc of result) {
+                    let value = "";
+                    if (Array.isArray(doc.categories) && doc.categories.length > 0) {
+                        value = `**Categories**: ${doc.categories.join(", ")}\n**Value**: `;
+                    }
+                    if (doc.value.length > 128) {
+                        value += doc.value.slice(0, 125);
+                        value += "...";
+                    } else {
+                        value += doc.value;
+                    }
+
+                    embed.fields.push({
+                        name: doc.name,
+                        value,
+                    });
+                }
+
+                await msg.channel.send({ embeds: [embed] });
+            } break;
             default:
                 if (defaultsToSearch)
-                    await searchTag(msg, command);
+                    await findTag(msg, command);
                 else {
                     const [name, ok] = tagnameFromArg(args[1]);
                     if (!ok) {
@@ -466,12 +523,13 @@ export default <Command>{
         "remove <nome>",
         "edit <nome> <...conteúdo>",
         "rename <nome> <novo nome>",
+        "find <...texto>",
     ],
 	permissions: Permission.NONE,
 	aliases: ["tag", "t", "tags"],
 	description: "mexe com tags",
-	help: "mexe com tags.\nSe o nome da categoria começar com `-`, eu vou remover ela ao invés de adicionar.\nA pesquisa funciona por nome e categoria.",
-	examples: ["zero", "category dankicu danki dankicode meme"],
+	help: "mexe com tags.\nSe o nome da categoria começar com `-`, eu vou remover ela ao invés de adicionar.\nA pesquisa padrão funciona por nome e categoria.\nA pesquisa usando `search` funciona por nome, categorias, **e** conteúdo!",
+	examples: ["zero", "category dankicu danki dankicode meme", "find programo"],
 	
 	interaction: {
 		async run(int: Discord.CommandInteraction) {

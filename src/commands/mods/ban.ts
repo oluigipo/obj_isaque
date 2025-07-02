@@ -49,7 +49,7 @@ export default <Command>{
 			msg.reply("deu pau na hora de banir, hein").catch(Common.discordErrorHandler);
 
 		let embed = Common.defaultEmbed(Common.notNull(msg.author));
-		embed.description = `[Ir para a mensagem](${msg.url})$\n${final}`;
+		embed.description = `[Ir para a mensagem](${msg.url})\n${final}`;
 		delete embed.footer;
 		delete embed.color;
 
